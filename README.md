@@ -142,9 +142,9 @@ This project was developed as part of the research activities of [INESC-ID](http
 ---
 
 ## Authors / Credits
-**Author:** Ricardo de Jesus Vicente Tavares
-**Advisors:** Hugo Gabriel Valente Morais, Amâncio Lucas de Sousa Pereira
-**Institution:** INESC-ID & Instituto Superior Técnico, University of Lisbon  
+**Author:** Ricardo de Jesus Vicente Tavares  
+**Advisors:** Hugo Gabriel Valente Morais, Amâncio Lucas de Sousa Pereira  
+**Institution:** INESC-ID & Instituto Superior Técnico, University of Lisbon 
 **Email:** ricardo.j.vicente@tecnico.ulisboa.pt
 
 Core frameworks:
