@@ -1,0 +1,79 @@
+import argparse
+from create_samples import *
+from create_train_test_sets import *
+from random_forest import *
+from create_preprocess_inference_set import *
+from inference import *
+
+
+def run(args):
+    # ------------------------------------------------------
+    # Block 1:Create Samples
+    # ------------------------------------------------------
+    if args.create_samples or args.create_samples_with_plot:
+        create_samples(
+            plot_samples=args.create_samples_with_plot,
+        )
+
+    # ------------------------------------------------------
+    # Block 2:Create Train and Test Sets
+    # ------------------------------------------------------
+    if args.create_train_test:
+        create_train_test_sets()
+
+    # ------------------------------------------------------
+    # Block 3: Run the Random Forest Model
+    # ------------------------------------------------------
+    if args.random_forest_run:
+        random_forest()
+
+    # ------------------------------------------------------
+    # Block 4: Create and Preprocess the Inference Test Set
+    # ------------------------------------------------------
+    if (args.create_inference_set
+            or args.create_inference_set_smooth):
+        create_preprocess_inference_set(
+            smoothing=args.create_inference_set_smooth,
+        )
+
+    # ------------------------------------------------------
+    # Block 5: Perform Inference on Real Data
+    # ------------------------------------------------------
+    if args.inference_run:
+        inference()
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Run the full ML workflow.")
+
+    # ------------------------------------------------------
+    # Block 1: Create Samples
+    # ------------------------------------------------------
+    parser.add_argument('--create_samples', action='store_true', help="Create sample dataset")
+    parser.add_argument('--create_samples_with_plot', action='store_true', help="Plot sample data")
+
+    # ------------------------------------------------------
+    # Block 2: Create Train and Test Sets
+    # ------------------------------------------------------
+    parser.add_argument('--create_train_test', action='store_true', help="Create train/test sets")
+
+    # ------------------------------------------------------
+    # Block 3: Run the Random Forest Model
+    # ------------------------------------------------------
+    parser.add_argument('--random_forest_run', action='store_true', help="Run Random Forest model")
+
+    # ------------------------------------------------------
+    # Block 4: Create and Preprocess the Inference Test Set
+    # ------------------------------------------------------
+    parser.add_argument('--create_inference_set', action='store_true',
+                        help="Create and preprocess inference test set")
+    parser.add_argument('--create_inference_set_smooth', action='store_true',
+                        help="Apply smoothing to inference test set")
+
+    # ------------------------------------------------------
+    # Block 5: Perform Inference on Real Data
+    # ------------------------------------------------------
+    parser.add_argument('--inference_run', action='store_true', help="Perform inference on real data")
+
+    args = parser.parse_args()
+    run(args)
