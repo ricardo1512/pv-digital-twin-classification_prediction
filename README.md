@@ -112,7 +112,7 @@ python main.py --create_samples --create_train_test --random_forest_run --create
 ├── Samples_2023/                        # Training samples
 ├── Samples_2024/                        # Testing samples
 └── Weather/                             # Meteorological input data
-    └──edit_weather_data.py            # Edits row weather data for simulations
+    └──edit_weather_data.py              # Edits row weather data for simulations
 ```
 
 ---
