@@ -10,7 +10,7 @@ from create_samples_6_diode import *
 # ==============================================================
 # Dataset Generation
 # ==============================================================
-def create_samples(plot_samples=False):
+def create_single_samples(plot_samples=False):
     """
         Generate synthetic PV fault samples for multiple scenarios in parallel.
 

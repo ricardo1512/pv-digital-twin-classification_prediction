@@ -8,15 +8,15 @@ from inference import *
 
 def run(args):
     # ------------------------------------------------------
-    # Block 1:Create Samples
+    # Block 1: Create Samples
     # ------------------------------------------------------
     if args.create_samples or args.create_samples_with_plot:
-        create_samples(
+        create_single_samples(
             plot_samples=args.create_samples_with_plot,
         )
 
     # ------------------------------------------------------
-    # Block 2:Create Train and Test Sets
+    # Block 2: Create Train and Test Sets
     # ------------------------------------------------------
     if args.create_train_test:
         create_train_test_sets()
@@ -25,22 +25,30 @@ def run(args):
     # Block 3: Run the Random Forest Model
     # ------------------------------------------------------
     if args.random_forest_run:
-        random_forest()
-
+        random_forest(
+            all_year=args.all_year, 
+            winter=args.winter,
+        )
+        
     # ------------------------------------------------------
     # Block 4: Create and Preprocess the Inference Test Set
     # ------------------------------------------------------
     if (args.create_inference_set
-            or args.create_inference_set_smooth):
+        or args.create_inference_set_smooth):
         create_preprocess_inference_set(
             smoothing=args.create_inference_set_smooth,
+            all_year=args.all_year, 
+            winter=args.winter,
         )
 
     # ------------------------------------------------------
     # Block 5: Perform Inference on Real Data
     # ------------------------------------------------------
     if args.inference_run:
-        inference()
+        inference(
+            all_year=args.all_year, 
+            winter=args.winter,
+        )
 
 
 if __name__ == '__main__':
@@ -65,10 +73,10 @@ if __name__ == '__main__':
     # ------------------------------------------------------
     # Block 4: Create and Preprocess the Inference Test Set
     # ------------------------------------------------------
-    parser.add_argument('--create_inference_set', action='store_true',
-                        help="Create and preprocess inference test set")
-    parser.add_argument('--create_inference_set_smooth', action='store_true',
-                        help="Apply smoothing to inference test set")
+    parser.add_argument('--all_year', action='store_true', help="Select all months")
+    parser.add_argument('--winter', action='store_true', help="Select winter months")
+    parser.add_argument('--create_inference_set', action='store_true', help="Create and preprocess inference test set")
+    parser.add_argument('--create_inference_set_smooth', action='store_true', help="Apply smoothing to inference test set")
 
     # ------------------------------------------------------
     # Block 5: Perform Inference on Real Data

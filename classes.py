@@ -145,7 +145,7 @@ class DigitalTwin:
         # Initialize output DataFrame for storing simulation results
         output = pd.DataFrame(index=self.df.index)
 
-        # Set inverter_state to fault_nr to indicate "no fault"/ "fault"/ "anomaly" condition
+        # Set inverter_state to fault_nr to indicate "normal" (0), "anomaly" (1, 2, 3) or "fault" (4, 5, 6) condition
         output['inverter_state'] = self.fault_nr
 
         # Compute DC current and voltage

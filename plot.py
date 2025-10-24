@@ -1,6 +1,7 @@
 import os
 import math
 import numpy as np
+import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -324,7 +325,7 @@ def plot_confusion_matrix_combined(season_name, image_folder, y_true, y_pred, se
     plt.tight_layout()
 
     # Build the filename and save the figure
-    output_path = os.path.join(image_folder, f'confusion_matrix_{set_name.lower()}_{season_name.lower()}.png')
+    output_path = os.path.join(image_folder, f"confusion_matrix_{set_name.lower()}_{season_name.lower().replace(' ', '_')}.png")
     plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='black')
 
     # Close the figure to free memory
@@ -386,7 +387,7 @@ def plot_feature_importance(feature_importance, season_name, image_folder, top_n
     plt.tight_layout()
 
     # Save figure in high resolution
-    output_path = os.path.join(image_folder, f"feature_importance_{season_name.lower()}.png")
+    output_path = os.path.join(image_folder, f"feature_importance_{season_name.lower().replace(' ', '_')}.png")
     plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='black')
 
     # Close the figure to free memory
@@ -474,7 +475,7 @@ def plot_class_accuracy(class_acc, classes, title, output_folder, filename):
     print(f"Class Accuracy plot saved to {output_path}")
 
 
-def plot_inference_fault_distribution(state_counts, output_inference_image):
+def plot_inference_fault_distribution(season_name, state_counts, output_inference_image):
     """
         Plot the distribution of predicted inverter states from the inference DataFrame.
         Ensures all classes appear on the X-axis, even if some have zero counts.
@@ -524,7 +525,7 @@ def plot_inference_fault_distribution(state_counts, output_inference_image):
     # Axis labels and title
     ax.set_xlabel('Predicted Fault', color='white')
     ax.set_ylabel('Number of Entries', color='white')
-    ax.set_title(f"Predicted Fault Distribution, {SEASON[0]}", color='white')
+    ax.set_title(f"Predicted Fault Distribution, {season_name}", color='white')
 
     # Customize tick labels color and rotation
     plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
@@ -544,3 +545,81 @@ def plot_inference_fault_distribution(state_counts, output_inference_image):
 
     # Print confirmation
     print(f"Inference Fault Distribution plot saved to {output_inference_image}\n")
+
+
+def plot_inference_fault_probabilities(input_file, season_name, output_folder):
+    """
+    Generate and save bar plots of predicted anomaly and fault probabilities for each inverter entry.
+
+    Each row in the input CSV is visualized as a separate bar chart, with probability
+    values for each anomaly or fault type.
+
+    Parameters:
+        - input_file (str): Path to the CSV file containing predicted probabilities.
+          Expected columns include: 'ID', 'date', 'predicted_fault', and one column
+          per fault type corresponding to LABELS_MAP keys.
+        - output_folder (str): Directory where the generated plots will be saved.
+    """
+
+    # Load predictions CSV into a DataFrame
+    df = pd.read_csv(input_file)
+
+    # Iterate through each row to create an individual plot per inverter entry
+    for _, row in df.iterrows():
+        # Set dark background style for consistency
+        plt.style.use('dark_background')
+        fig, ax = plt.subplots(figsize=(8, 5))
+        fig.patch.set_facecolor('black')
+        ax.set_facecolor('black')
+
+        # Extract labels and colors for the bar chart from LABELS_MAP
+        labels = [LABELS_MAP[c][0] for c in range(len(LABELS_MAP))]
+        colors = [LABELS_MAP[c][1] for c in range(len(LABELS_MAP))]
+
+        # Extract predicted probabilities for each anomaly and fault type and convert to percentage
+        probs = [row[f"{LABELS_MAP[c][0]}"] * 100 for c in range(len(LABELS_MAP))]
+        
+        # Plot the probabilities as a colored bar chart
+        bars = ax.bar(labels, probs, color=colors, edgecolor='white')
+
+        # Annotate each bar with its probability value
+        for bar, prob in zip(bars, probs):
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                prob + 2, # Position label slightly above the bar
+                f"{int(prob)}",
+                ha='center', va='bottom', color='white', fontsize=9
+            )
+
+        # Set axis labels and chart title
+        ax.set_xlabel('Fault Type', color='white')
+        ax.set_ylabel('Probability (%)', color='white')
+        
+        # Extract inverter location and number from ID for the title
+        id = row['ID'].split('_')
+        local = ' '.join(id[:-1])
+        number = id[-1] 
+        ax.set_title(f"Predicted Probabilities for Inverter {number}, {local}, {row['date']}", color='white')
+
+        # Fix Y-axis limits from 0% to 100%
+        ax.set_ylim(0, 100)
+
+        # Configure tick labels
+        plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
+        plt.yticks(color='white', fontsize=8)
+
+        # Add horizontal grid lines for easier probability comparison
+        ax.grid(True, color='gray', linestyle='--', linewidth=0.5, axis='y')
+
+        # Adjust layout to prevent clipping
+        plt.tight_layout()
+
+        # Save the figure to the specified output folder
+        save_path = os.path.join(output_folder, f"Classification_prob_{row['ID']}_{row['date']}_{season_name}.png")
+        plt.savefig(save_path, dpi=300, facecolor=fig.get_facecolor())
+        
+        # Close figure to free memory
+        plt.close()
+        
+        # Confirmation message
+        print(f"Saved Inference Probabilities plot for {row['ID']}, {row['date']}\n\tat {save_path}")

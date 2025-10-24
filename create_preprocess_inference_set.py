@@ -1,7 +1,7 @@
 import os
 from utils import *
 
-def create_preprocess_inference_set(smoothing=False):
+def create_preprocess_inference_set(smoothing=False, all_year=False, winter=False):
     """
         Preprocesses inverter CSV data for inference by extracting daily features.
 
@@ -16,15 +16,19 @@ def create_preprocess_inference_set(smoothing=False):
         8. Exports the processed DataFrame to the specified output path.
 
         Args:
-            output_path (str): File path to save the processed CSV.
             smoothing (bool, optional): Whether to apply moving average smoothing to numeric features. Defaults to False.
+            all_year (bool, optional): If True, includes data from all months.
+            winter (bool, optional): If True, filters the dataset for winter months only.
     """
 
+    # Determine the active season, its corresponding months, and a formatted name for file usage
+    season_name, _, season_name_file = determine_season(all_year, winter)
+    
     # Input folder
     input_folder = "Inverters"
     
     # Output file path
-    output_path = "Datasets/inference_test_set_before_classification.csv"
+    output_path = f"Datasets/inference_test_set_before_classification_{season_name_file}.csv"
 
     # Get all CSV files in the input folder
     csv_files = [
@@ -33,9 +37,9 @@ def create_preprocess_inference_set(smoothing=False):
 
     results = []
 
-    print("\n" + "=" * 40)
-    print("PREPROCESSING TEST SET FOR INFERENCE...")
-    print("=" * 40)
+    print("\n" + "=" * 60)
+    print(f"PREPROCESSING TEST SET FOR INFERENCE, TRAINING SEASON: {season_name.upper()} ...")
+    print("=" * 60)
 
     for file in csv_files:
         file_path = os.path.join(input_folder, file)

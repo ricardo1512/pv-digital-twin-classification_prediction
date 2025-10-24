@@ -1,11 +1,10 @@
+# ===================================================================
+# Global Configuration for PV System Anomaly and Fault Classification
+# ===================================================================
 
 # ==============================
-# Seasons and Location Settings
+# Location Settings
 # ==============================
-WINTER = ("Winter", [1, 2, 3, 10, 11, 12])  # Winter months
-SUMMER = ("Summer", [4, 5, 6, 7, 8, 9])     # Summer months
-
-SEASON = SUMMER                             # Currently selected season
 LOCAL = "Vila do Conde"                     # Location of the PV plant
 LATITUDE = 41.337579                        # Latitude of the LOCAL
 LONGITUDE = -8.689926                       # Longitude of the LOCAL
@@ -28,7 +27,7 @@ TEST_SET_FILE = "Datasets/testset_2024.csv"          # Test dataset
 # ==============================
 # Model and Outputs
 # ==============================
-MODEL_PATH = "Model/rf_best_model.joblib"    # Path to the trained model
+MODELS_FOLDER = "Models"                     # Folder to the trained models
 LABEL = 'inverter_state'                     # Target label for classification
 IMAGE_FOLDER = "Images"                      # Folder for saving images
 PLOT_FOLDER = "Plots"                        # Folder for saving plots
@@ -78,17 +77,17 @@ EXPORT_COLUMNS = [
 # ==============================
 CLASSIFICATION_HOUR_INIT = '04:00'  # Start hour for classification
 CLASSIFICATION_HOUR_END = '22:00'   # End hour for classification
-TOP_FEATURES = 20                            # Number of top features to consider
+TOP_FEATURES = 20                   # Number of top features to consider
 
 # ==============================
 # Labels Mapping for Visualization
 # ==============================
 LABELS_MAP = {
-    0: ('No Fault', '#00cc00'),      # green
+    0: ('Normal', '#00cc00'),      # green
     1: ('Soling', '#996600'),        # light brown
     2: ('Shading', '#ff9900'),       # orange
     3: ('Cracks', '#ffcc00'),        # yellow
-    4: ('Ground Fault', '#9966ff'), # lilac
-    5: ('Arc Fault', '#ff66ff'),    # dark pink
-    6: ('Diode Fault', '#ff99cc'),  # light pink
+    4: ('Ground Fault', '#9966ff'),  # lilac
+    5: ('Arc Fault', '#ff66ff'),     # dark pink
+    6: ('Diode Fault', '#ff99cc'),   # light pink
 }

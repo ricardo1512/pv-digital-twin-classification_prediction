@@ -2,6 +2,39 @@ import numpy as np
 import pandas as pd
 from globals import *
 
+def determine_season(all_year, winter):
+    """
+        Determines which season is active based on the provided flags.
+
+        Args:
+            all_year (bool, optional): If True, includes all months of the year.
+            winter (bool, optional): If True, includes only the winter months.
+
+        Returns:
+            tuple: A tuple containing:
+                - season_name (str): The name of the selected season ("All Year", "Winter", or "Summer").
+                - months (list[int]): The list of month numbers corresponding to the selected season.
+                - season_name_file (str): A lowercase, underscore-separated version of the season name,
+                  suitable for use in filenames.
+    """
+    
+    # Define months corresponding to each season
+    seasons = {
+        "All Year": list(range(1, 13)),   # All months
+        "Winter": [1, 2, 3, 10, 11, 12],  # Winter months
+        "Summer": [4, 5, 6, 7, 8, 9],     # Summer months
+    }
+    
+    # Determine which season flag is active (priority: all_year > winter > summer)
+    season_name = "All Year" if all_year else "Winter" if winter else "Summer"
+    # Retrieve the list of months corresponding to the chosen season
+    months = seasons[season_name]
+    # Format season name for use in file paths (e.g., "all_year", "winter", "summer")
+    season_name_file = season_name.lower().replace(' ', '_')
+    
+    return season_name, months, season_name_file
+
+
 def safe_std(arr):
     """
     Calculate the standard deviation safely.

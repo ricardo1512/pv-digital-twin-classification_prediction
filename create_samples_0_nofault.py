@@ -3,7 +3,7 @@ from plot import *
 from utils import *
 
 # ==============================================================
-# Digital Twin Simulation - No Fault Condition
+# Digital Twin Simulation - Normal Condition
 # ==============================================================
 def create_samples_0_nofault(files_year, plot_samples=False):
     """
