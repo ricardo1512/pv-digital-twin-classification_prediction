@@ -1,4 +1,3 @@
-import os
 import random
 from classes import *
 from plot import *
@@ -146,7 +145,8 @@ def create_samples_1_soiling(files_year, plot_samples=False):
     daily_groups = df_input.groupby(df_input['date'].dt.date)
 
     print(f"{fault_name.upper()}: Starting simulation...\n")
-    for date, group in daily_groups:
+    rand_plots = random.sample(range(len(daily_groups)), 5)
+    for i, (date, group) in enumerate(daily_groups):
         print(f"{fault_name.title():<8} | Running simulation for {date}...")
 
         # Prepare daily data
@@ -182,7 +182,7 @@ def create_samples_1_soiling(files_year, plot_samples=False):
         results_full = results_full.clip(lower=0).fillna(0)
 
         # Generate Daily Plots
-        if plot_samples:
+        if i in rand_plots and plot_samples:
             output_image = f"{date.year:04d}_{date.month:02d}_{date.day:02d}_{fault_name}_samples"
             plot_mppt(results_full, date, plot_folder, output_image)
             plot_currents(results_full, date, plot_folder, output_image)
