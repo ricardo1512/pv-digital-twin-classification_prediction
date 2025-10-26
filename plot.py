@@ -443,7 +443,7 @@ def plot_class_accuracy(class_acc, classes, title, output_folder, filename):
     ax.axhline(mean_acc, color='red', linestyle='--', linewidth=1.2, label=f"Mean accuracy = {mean_acc:.1f}%")
 
     # Set axis labels and title in white for dark theme
-    ax.set_xlabel('Class', color='white')
+    ax.set_xlabel('Label', color='white')
     ax.set_ylabel('Accuracy (%)', color='white')
     ax.set_title(title, color='white')
 
@@ -523,7 +523,7 @@ def plot_inference_fault_distribution(season_name, state_counts, output_inferenc
         )
 
     # Axis labels and title
-    ax.set_xlabel('Predicted Fault', color='white')
+    ax.set_xlabel('Label', color='white')
     ax.set_ylabel('Number of Entries', color='white')
     ax.set_title(f"Predicted Fault Distribution, {season_name}", color='white')
 

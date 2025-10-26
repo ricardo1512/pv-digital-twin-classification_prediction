@@ -40,10 +40,10 @@ def create_samples_0_nofault(files_year, plot_samples=False):
     # ==============================================================
     input_file, output_folder = files_year
 
-    fault_nr = 0
-    fault_name = LABELS_MAP[fault_nr][0].lower().replace(' ', '_')
-    output_file = f"{output_folder}/{fault_nr}_digital_twin_output_{fault_name}_samples.csv"
-    plot_folder = f"{PLOT_FOLDER}/Plots_{fault_nr}_{fault_name}_samples"
+    condition_nr = 0
+    condition_name = LABELS_MAP[condition_nr][0].lower().replace(' ', '_')
+    output_file = f"{output_folder}/{condition_nr}_digital_twin_output_{condition_name}_samples.csv"
+    plot_folder = f"{PLOT_FOLDER}/Plots_{condition_nr}_{condition_name}_samples"
 
     # ==============================================================
     # Load Input Weather Data
@@ -57,10 +57,10 @@ def create_samples_0_nofault(files_year, plot_samples=False):
     daily_features = []
     daily_groups = df_input.groupby(df_input['date'].dt.date)
 
-    print(f"{fault_name.upper()}: Starting simulation...\n")
+    print(f"{condition_name.upper()}: Starting simulation...\n")
     rand_plots = random.sample(range(len(daily_groups)), 5)
     for i, (date, group) in enumerate(daily_groups):
-        print(f"{fault_name.replace('_', ' ').title():<8} | Running simulation for {date}...\n")
+        print(f"{condition_name.replace('_', ' ').title():<8} | Running simulation for {date}...\n")
 
         # Prepare daily data
         group = group.copy().reset_index()
@@ -69,7 +69,7 @@ def create_samples_0_nofault(files_year, plot_samples=False):
         # Instantiate PV system components
         plant = PVPlant(module_data, inverter_data)
         inverter = InverterTwin(inverter_data)
-        twin = DigitalTwin(plant, inverter, group, fault_nr)
+        twin = DigitalTwin(plant, inverter, group, condition_nr)
 
         # Run daily simulation
         results = twin.run()
@@ -88,7 +88,7 @@ def create_samples_0_nofault(files_year, plot_samples=False):
 
         # Generate Daily Plots
         if i in rand_plots and plot_samples:
-            output_image = f"{date.year:04d}_{date.month:02d}_{date.day:02d}_{fault_name}_samples"
+            output_image = f"{date.year:04d}_{date.month:02d}_{date.day:02d}_{condition_name}_samples"
             plot_mppt(results_full, date, plot_folder, output_image)
             plot_currents(results_full, date, plot_folder, output_image)
             plot_voltages(results_full, date, plot_folder, output_image)

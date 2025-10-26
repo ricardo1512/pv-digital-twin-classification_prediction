@@ -83,12 +83,12 @@ class DigitalTwin:
             pvplant: PVPlant,
             inverter: InverterTwin,
             df: pd.DataFrame,
-            fault_nr: int,
+            condition_nr: int,
     ):
         self.pvplant = pvplant
         self.inverter = inverter
         self.df = df
-        self.fault_nr = fault_nr
+        self.condition_nr = condition_nr
 
         # Initialize ModelChain for pvlib simulation
         self.mc = ModelChain(
@@ -145,8 +145,8 @@ class DigitalTwin:
         # Initialize output DataFrame for storing simulation results
         output = pd.DataFrame(index=self.df.index)
 
-        # Set inverter_state to fault_nr to indicate "normal" (0), "anomaly" (1, 2, 3) or "fault" (4, 5, 6) condition
-        output['inverter_state'] = self.fault_nr
+        # Set inverter_state to condition_nr to indicate "normal" (0), "anomaly" (1, 2, 3) or "fault" (4, 5, 6) condition
+        output['inverter_state'] = self.condition_nr
 
         # Compute DC current and voltage
         output['pv1_i'] = dc['i_mp']
