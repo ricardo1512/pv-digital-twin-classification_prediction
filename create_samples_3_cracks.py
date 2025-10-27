@@ -125,7 +125,7 @@ def create_samples_3_cracks(files_year, plot_samples=False):
             output['a_i'] = output['active_power'] * 1000 / (400 * np.sqrt(3))
             output = output.assign(b_i=output['a_i'], c_i=output['a_i'])
 
-            # Compute AC Voltages per phase and line
+            # Compute AC Voltages per phase and line (balanced assumption)
             output.loc[:, ['a_u', 'b_u', 'c_u']] = 230
             output.loc[:, ['ab_u', 'bc_u', 'ca_u']] = 400
 
