@@ -7,7 +7,7 @@ from utils import *
 # ==============================================================
 # Digital Twin Simulation - Crack Fault Condition
 # ==============================================================
-def create_samples_3_crack(files_year, plot_samples=False):
+def create_samples_3_cracks(files_year, plot_samples=False):
     """
         Runs the digital twin simulation for a photovoltaic system under crack/micro-crack degradation.
 
@@ -75,22 +75,22 @@ def create_samples_3_crack(files_year, plot_samples=False):
         def __init__(
                 self,
                 pvplant,
-                inverter_,
+                inverter,
                 df,
-                condition_nr_,
-                current_degradation_,
-                voltage_degradation_,
-                power_degradation_,
+                condition_nr,
+                current_degradation,
+                voltage_degradation,
+                power_degradation,
         ):
             super().__init__(
                 pvplant,
-                inverter_,
+                inverter,
                 df,
-                condition_nr_,
+                condition_nr,
             )
-            self.current_degradation = current_degradation_
-            self.voltage_degradation = voltage_degradation_
-            self.power_degradation = power_degradation_
+            self.current_degradation = current_degradation
+            self.voltage_degradation = voltage_degradation
+            self.power_degradation = power_degradation
 
         def run(self):
             # Run PVLib ModelChain Simulation

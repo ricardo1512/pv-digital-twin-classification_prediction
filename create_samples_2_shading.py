@@ -63,16 +63,16 @@ def create_samples_2_shading(files_year, plot_samples=False):
         def __init__(
                 self,
                 pvplant,
-                inverter_,
+                inverter,
                 df,
-                condition_nr_,
+                condition_nr,
                 shad_factor=0.05,
         ):
             super().__init__(
                 pvplant,
-                inverter_,
+                inverter,
                 df,
-                condition_nr_,
+                condition_nr,
             )
             self.shading_factor = shad_factor
 

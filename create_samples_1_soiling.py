@@ -65,16 +65,16 @@ def create_samples_1_soiling(files_year, plot_samples=False):
         def __init__(
                 self,
                 pvplant,
-                inverter_,
+                inverter,
                 df,
-                condition_nr_,
+                condition_nr,
                 daily_soiling_loss,
         ):
             super().__init__(
                 pvplant,
-                inverter_,
+                inverter,
                 df,
-                condition_nr_,
+                condition_nr,
             )
             self.daily_soiling_loss = daily_soiling_loss
 

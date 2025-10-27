@@ -2,7 +2,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from create_samples_0_nofault import *
 from create_samples_1_soiling import *
 from create_samples_2_shading import *
-from create_samples_3_crack import *
+from create_samples_3_cracks import *
 from create_samples_4_ground import *
 from create_samples_5_arc import *
 from create_samples_6_diode import *
@@ -42,7 +42,7 @@ def create_single_samples(plot_samples=False):
             create_samples_0_nofault,
             create_samples_1_soiling,
             create_samples_2_shading,
-            create_samples_3_crack,
+            create_samples_3_cracks,
             create_samples_4_ground,
             create_samples_5_arc,
             create_samples_6_diode,

@@ -66,17 +66,17 @@ def create_samples_6_diode(files_year, plot_samples=False):
         def __init__(
                 self,
                 pvplant,
-                inverter_,
+                inverter,
                 df,
-                condition_nr_,
+                condition_nr,
                 voltage_loss,
                 nr_bypassed_modules,
         ):
             super().__init__(
                 pvplant,
-                inverter_,
+                inverter,
                 df,
-                condition_nr_,
+                condition_nr,
             )
             self.voltage_loss = voltage_loss
             self.nr_bypassed_modules = nr_bypassed_modules

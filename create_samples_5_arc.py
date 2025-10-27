@@ -65,22 +65,22 @@ def create_samples_5_arc(files_year, plot_samples=False):
         def __init__(
                 self,
                 pvplant,
-                inverter_,
+                inverter,
                 df,
-                condition_nr_,
-                arc_start_,
-                voltage_rise_,
-                current_drop_,
+                condition_nr,
+                arc_start,
+                voltage_rise,
+                current_drop,
         ):
             super().__init__(
                 pvplant,
-                inverter_,
+                inverter,
                 df,
-                condition_nr_,
+                condition_nr,
             )
-            self.arc_start = arc_start_
-            self.voltage_rise = voltage_rise_
-            self.current_drop = current_drop_
+            self.arc_start = arc_start
+            self.voltage_rise = voltage_rise
+            self.current_drop = current_drop
 
         def run(self):
             # Run PVLib ModelChain Simulation

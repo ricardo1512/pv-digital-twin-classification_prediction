@@ -79,9 +79,9 @@ CLASSIFICATION_HOUR_INIT = '04:00'  # Start hour for classification
 CLASSIFICATION_HOUR_END = '22:00'   # End hour for classification
 TOP_FEATURES = 20                   # Number of top features to consider
 
-# ==============================
+# ================================
 # Labels Mapping for Visualization
-# ==============================
+# ================================
 LABELS_MAP = {
     0: ('Normal', '#00cc00'),      # green
     1: ('Soling', '#996600'),        # light brown

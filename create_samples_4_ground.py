@@ -76,17 +76,17 @@ def create_samples_4_ground(files_year, plot_samples=False):
         def __init__(
                 self,
                 pvplant,
-                inverter_,
+                inverter,
                 df,
-                condition_nr_,
+                condition_nr,
                 volt_degradation,
                 curr_degradation,
         ):
             super().__init__(
                 pvplant,
-                inverter_,
+                inverter,
                 df,
-                condition_nr_,
+                condition_nr,
             )
             self.current_degradation = curr_degradation
             self.voltage_degradation = volt_degradation

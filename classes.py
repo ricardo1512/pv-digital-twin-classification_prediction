@@ -25,13 +25,13 @@ class PVPlant:
     """
     def __init__(
             self,
-            module_data_,
-            inverter_data_,
+            module_data,
+            inverter_data,
             strings_per_inverter=1,
             modules_per_string=MODULES_PER_STRING
     ):
-        self.module_data = module_data_
-        self.inverter_data = inverter_data_
+        self.module_data = module_data
+        self.inverter_data = inverter_data
         self.strings_per_inverter = strings_per_inverter
         self.modules_per_string = modules_per_string
         self.surface_tilt = 30
@@ -57,8 +57,8 @@ class InverterTwin:
     """
     Represents the inverter model for converting DC to AC power.
     """
-    def __init__(self, inverter_data_):
-        self.inverter_data = inverter_data_
+    def __init__(self, inverter_data):
+        self.inverter_data = inverter_data
 
     def compute_ac(self, dc_power, dc_voltage):
         # Calculate AC power from DC using pvlib’s Sandia inverter model
@@ -75,7 +75,9 @@ class InverterTwin:
 # ==============================================================
 class DigitalTwin:
     """
-    Simulates the PV system operation over time, including soiling losses.
+    Represents a PV system digital twin that simulates DC-to-AC conversion,
+    electrical outputs, efficiency, phase currents/voltages, and inverter temperature
+    using meteorological data.
     """
 
     def __init__(
@@ -137,6 +139,10 @@ class DigitalTwin:
         }, index=self.df.index)
 
     def run(self):
+        """
+        Simulate the PV system operation for the given meteorological data.
+        """
+        
         # Run PVLib ModelChain Simulation
         self.mc.run_model(self.weather)
         dc = self.mc.results.dc
