@@ -1,8 +1,9 @@
+import os
 import joblib
 from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, accuracy_score
-from plot import *
+from plot_training import *
 from utils import *
 
 # ==============================================================
@@ -30,7 +31,8 @@ def random_forest(all_year=False, winter=False):
                 - Feature importance (top N features)
             9. Computes additional cross-validation metrics (accuracy, precision, recall, f1)
                 and saves raw and summary CSV files.
-            10. Prints a final performance summary including CV, validation, and test accuracies.
+            10. Generates Precision–Recall (AUC) and FP–TP curves for validation and test sets.
+            11. Prints a final performance summary including CV, validation, and test accuracies.
 
         Args:
             all_year (bool, optional): If True, includes data from all months.
@@ -55,6 +57,8 @@ def random_forest(all_year=False, winter=False):
                 - Confusion matrices
                 - Class-wise accuracy bars
                 - Feature importance
+                - Precision vs Recall curves
+                - FP vs TP curves
             - Printed performance summary to console (CV, validation, and test accuracies).
     """
 
@@ -63,6 +67,30 @@ def random_forest(all_year=False, winter=False):
     # ==========================================================
     # Determine the active season, its corresponding months, and a formatted name for file usage
     season_name, months, season_name_file = determine_season(all_year, winter)
+    
+    # OUTPUT FILES
+    # Model
+    model_path = f"{MODELS_FOLDER}rf_best_model_{season_name_file}.joblib"
+    # Confusion Matrices
+    cm_validation_image_path = f"{IMAGE_FOLDER}/confusion_matrix_validation_{season_name_file}.png"
+    cm_test_image_path = f"{IMAGE_FOLDER}/confusion_matrix_test_{season_name_file}.png"
+    # Several Metrics
+    val_report_path = f"{REPORT_FOLDER}/validation_classification_report_{season_name_file}.csv"
+    test_report_path = f"{REPORT_FOLDER}/test_classification_report_{season_name_file}.csv"
+    combined_acc_path = f"{REPORT_FOLDER}/class_accuracies_{season_name_file}.csv"
+    val_class_acc_image_path = f"{IMAGE_FOLDER}/val_class_accuracy_{season_name_file}.png"
+    test_class_acc_image_path = f"{IMAGE_FOLDER}/test_class_accuracy_{season_name_file}.png"
+    # Top Features
+    top_features_file_path = f"{REPORT_FOLDER}/top_{TOP_FEATURES}_features_{season_name_file}.csv"
+    top_features_image_path = f"{IMAGE_FOLDER}/feature_importance_{TOP_FEATURES}_{season_name_file}.png"
+    # Metrics Reports
+    cv_metrics_path = f"{REPORT_FOLDER}/cross_validation_raw_scores_{season_name_file}.csv"
+    summary_metrics_path = f"{REPORT_FOLDER}/cross_validation_summary_{season_name_file}.csv"
+    # AUC and FP-TP Plots
+    auc_val_image_path = f"{IMAGE_FOLDER}/auc_val_precision_vs_recall_{season_name_file}.png"
+    auc_test_image_path = f"{IMAGE_FOLDER}/auc_test_precision_vs_recall_{season_name_file}.png"
+    ft_tp_val_image_path = f"{IMAGE_FOLDER}/fp_tp_curve_val_{season_name_file}.png"
+    ft_tp_test_image_path = f"{IMAGE_FOLDER}/fp_tp_curve_test_{season_name_file}.png"
 
     print("\n" + "=" * 60)
     print(f"RUNNING RANDOM FOREST CLASSIFIER, TRAINING SEASON: {season_name.upper()} ...")
@@ -152,13 +180,10 @@ def random_forest(all_year=False, winter=False):
     print("\nTraining Random Forest classifier...")
     rf_classifier.fit(X_train, y_train)
 
-    # Save trained model for reuse
-    model_path = os.path.join(
-        MODELS_FOLDER,
-        f"rf_best_model_{season_name_file}.joblib"
-    )
+    # Save the trained model
     joblib.dump(rf_classifier, model_path)
     print(f"\nModel saved to {model_path}")
+    
     # ==========================================================
     # Model Evaluation on Validation and Test Sets
     # ==========================================================
@@ -178,19 +203,22 @@ def random_forest(all_year=False, winter=False):
     # ==========================================================
     # Confusion Matrix Plots
     # ==========================================================
-    val_cm, val_cm_pct = plot_confusion_matrix_combined(
+    # Plot and save validation confusion matrix
+    val_cm, _ = plot_confusion_matrix_combined(
+        "Validation",
         season_name,
-        IMAGE_FOLDER,
         y_val,
         y_val_pred,
-        'Validation',
+        cm_validation_image_path,
     )
-    test_cm, test_cm_pct = plot_confusion_matrix_combined(
+    
+    # Plot and save test confusion matrix
+    test_cm, _ = plot_confusion_matrix_combined(
+        "Test",
         season_name,
-        IMAGE_FOLDER,
         y_test,
         y_test_pred,
-        'Test',
+        cm_test_image_path,
     )
 
     # ==========================================================
@@ -202,15 +230,15 @@ def random_forest(all_year=False, winter=False):
     # Validation report
     val_report = classification_report(y_val, y_val_pred, target_names=class_names, digits=4, output_dict=True)
     val_report_df = pd.DataFrame(val_report).transpose()
-    val_report_df.to_csv(f"{REPORT_FOLDER}/validation_classification_report_{season_name_file}.csv", index=True)
+    val_report_df.to_csv(val_report_path, index=True)
 
     # Test report
     test_report = classification_report(y_test, y_test_pred, target_names=class_names, digits=4, output_dict=True)
     test_report_df = pd.DataFrame(test_report).transpose()
-    test_report_df.to_csv(f"{REPORT_FOLDER}/test_classification_report_{season_name_file}.csv", index=True)
+    test_report_df.to_csv(test_report_path, index=True)
 
-    print(f"\nValidation Set Classification Report saved to '{REPORT_FOLDER}/report_validation_classification_{season_name_file}.csv'")
-    print(f"Test Set Classification Report saved to '{REPORT_FOLDER}/report_test_classification_{season_name_file}.csv'")
+    print(f"\nValidation Set Classification Report saved to {val_report_path}")
+    print(f"Test Set Classification Report saved to {test_report_path}")
 
     # ==========================================================
     # Report and Plot Per-Class Accuracy
@@ -234,18 +262,17 @@ def random_forest(all_year=False, winter=False):
     combined_acc_df = pd.merge(val_acc_df, test_acc_df, on="Class")
 
     # Save to CSV
-    combined_acc_df.to_csv(f"{REPORT_FOLDER}/class_accuracies_{season_name_file}.csv", index=False)
-
-    print(f"\nPer-class accuracies saved to '{REPORT_FOLDER}/class_accuracies_{season_name_file}.csv'")
+    combined_acc_df.to_csv(combined_acc_path, index=False)
+    print(f"\nPer-class accuracies saved to {combined_acc_path}")
 
     # Plot class accuracy bars
-    plot_class_accuracy(val_class_acc, classes, f"Validation Accuracy per Class, {season_name.title()}", IMAGE_FOLDER,
-                        f"val_class_accuracy_{season_name_file}.png")
-    plot_class_accuracy(test_class_acc, classes, f"Test Accuracy per Class, {season_name.title()}", IMAGE_FOLDER,
-                        f"test_class_accuracy_{season_name_file}.png")
+    plot_class_accuracy(val_class_acc, classes,
+                        f"Validation Accuracy per Class, {season_name.title()}", val_class_acc_image_path)
+    plot_class_accuracy(test_class_acc, classes, 
+                        f"Test Accuracy per Class, {season_name.title()}", test_class_acc_image_path)
 
     # ==========================================================
-    # Feature Importance Plot
+    # Feature Importance Export and Plot
     # ==========================================================
     # Calculate feature importance
     feature_importance = pd.DataFrame({
@@ -254,11 +281,12 @@ def random_forest(all_year=False, winter=False):
     }).sort_values('importance', ascending=False)
 
     # Export to CSV
-    top_features = feature_importance.head(20)
-    top_features.to_csv(f"{REPORT_FOLDER}/top_{TOP_FEATURES}_features_{season_name_file}.csv", index=False)
-    print(f"\nTop {TOP_FEATURES} most important features saved to '{REPORT_FOLDER}/top_{TOP_FEATURES}_features_{season_name_file}.csv'")
-
-    plot_feature_importance(feature_importance, season_name, IMAGE_FOLDER, top_n=TOP_FEATURES)
+    top_features = feature_importance.head(TOP_FEATURES)
+    top_features.to_csv(top_features_file_path, index=False)
+    print(f"\nTop {TOP_FEATURES} most important features saved to {top_features_file_path}")
+    
+    # Plot feature importance  
+    plot_feature_importance(top_features, season_name, top_features_image_path)
 
     # ==========================================================
     # Additional Cross-Validation Metrics
@@ -282,11 +310,51 @@ def random_forest(all_year=False, winter=False):
     })
 
     # Save raw CV scores and summary to CSV
-    cv_df.to_csv(f"{REPORT_FOLDER}/cross_validation_raw_scores_{season_name_file}.csv", index=False)
-    summary_df.to_csv(f"{REPORT_FOLDER}/cross_validation_summary_{season_name_file}.csv", index=False)
+    cv_df.to_csv(cv_metrics_path, index=False)
+    summary_df.to_csv(summary_metrics_path, index=False)
 
-    print(f"Cross-validation raw scores saved to '{REPORT_FOLDER}/cross_validation_raw_scores_{season_name_file}.csv'")
-    print(f"Cross-validation summary saved to '{REPORT_FOLDER}/cross_validation_summary_{season_name_file}.csv'")
+    print(f"Cross-validation raw scores saved to {cv_metrics_path}")
+    print(f"Cross-validation summary saved to {summary_metrics_path}")
+
+    # ==========================================================
+    # Compute predicted probabilities for Precision vs Recall
+    # ==========================================================
+    y_val_proba = rf_classifier.predict_proba(X_val)
+    y_test_proba = rf_classifier.predict_proba(X_test)
+
+    # Plot Precision vs Recall curves for validation set
+    plot_auc_recall_vs_precision(
+        y_val,
+        y_val_proba,
+        class_names,
+        auc_val_image_path
+    )
+
+    # Plot Precision vs Recall curves for test set
+    plot_auc_recall_vs_precision(
+        y_test,
+        y_test_proba,
+        class_names,
+        auc_test_image_path
+    )
+    
+    # ==========================================================
+    # Compute predicted probabilities for FP vs TP plots
+    # ==========================================================
+    # Plot FP vs TP curves for validation and test sets
+    plot_fp_tp_curve(
+        y_val,
+        y_val_proba,
+        class_names,
+        ft_tp_val_image_path
+    )
+
+    plot_fp_tp_curve(
+        y_test,
+        y_test_proba,
+        class_names,
+        ft_tp_test_image_path
+    )
 
     # ==========================================================
     # Final Performance Summary

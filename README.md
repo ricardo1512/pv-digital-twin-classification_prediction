@@ -74,7 +74,9 @@ Each function receives specific inputs and generates standardized outputs used i
 ### 1. `create_samples()`
 
 **Inputs:**
-- Meteorological data (`Weather/*.csv`)
+- Meteorological data
+  - `Weather/[LOCAL]_weather_2023.csv`
+  - `Weather/[LOCAL]_weather_2024.csv`
 
 **Outputs:**
 - Simulated sample data stored in `Samples_2023/` and `Samples_2024/`
@@ -101,40 +103,54 @@ Each function receives specific inputs and generates standardized outputs used i
 
 **Outputs:**
 - Trained Random Forest model saved in `Models/rf_best_model_*.joblib`
-- Classification reports and accuracy metrics in `Reports/`
-  - `class_accuracies_*.csv`
-  - `cross_validation_raw_scores_*.csv`
-  - `cross_validation_summary_*.csv`
+- Classification reports and accuracy metrics in `Reports/`:
   - `validation_classification_report_*.csv`
   - `test_classification_report_*.csv`
-- Feature importance plots in `Images/`
+  - `class_accuracies_*.csv`
+  - `top_*_features_*.csv`
+  - `cross_validation_raw_scores_*.csv`
+  - `cross_validation_summary_*.csv`
+
+- Plots in `Images/`:
+  - `confusion_matrix_validation_*.png`
+  - `confusion_matrix_test_*.png`
   - `val_class_accuracy_*.png`
   - `test_class_accuracy_*.png`
   - `feature_importance_*.png`
-  - `confusion_matrix_validation_*.png`
-  - `confusion_matrix_test_*.png`
+  - `auc_val_precision_vs_recall_*.png`
+  - `auc_test_precision_vs_recall_*.png`
+  - `fp_tp_curve_validation_*.png`
+  - `fp_tp_curve_test_*.png`
 
 
 ### 4. `create_inference_set()`
 
 **Inputs:**
-- Real inverter measurements (`Inverters/*.csv`)
+- Real inverter measurements: `Inverters/*.csv`
 
 **Outputs:**
-- Preprocessed inference dataset (`Datasets/inference_test_set_before_classification_*.csv`)
+- Preprocessed inference dataset: `Datasets/inference_test_set_before_classification_*.csv`
 
 ### 5. `inference()`
 
 **Inputs:**
-- Trained model (`Models/rf_best_model_*.joblib`)
-- Inference dataset (`Datasets/inference_test_set_before_classification_*.csv`)
+- Trained model: `Models/rf_best_model_*.joblib`
+- Inference dataset: `Datasets/inference_test_set_before_classification_*.csv`
 
-**Outputs:**
-- Classified anomaly and fault class for each data record (`Datasets/inference_test_set_with_classification_*.csv`)
-- Classified anomaly and fault class probabilities for each data record (`Datasets/inference_test_set_prob_with_classification_*.csv`)
-- Classification report (`Reports/inference_results_*.csv`)
-- Plot illustrating model classification (`Images/inference_classification_distribution.png`)
-- Plots illustrating class probabilities for each anomaly and fault (`Plots/PLots_inference_probabilities_*/Classification_prob_*.png`)
+**Outputs:**:
+- Classified data in `Datasets`: 
+  - `inference_test_set_with_classification_*.csv`
+- Results in `Reports`:
+  - `inference_results_*.csv`
+  - `inference_test_set_with_prob_classification_*.csv`
+  - `inference_adjusted_probabilities_report_*.csv`
+
+- Plots in `Images/`:
+  - `inference_classification_distribution_*.png`
+
+- Singular plots in:
+  - `Plots/Probabilities/Plots_inference_probabilities_*/`
+  - `Plots/Probabilities_scaled/Plots_inference_probabilities_*/`
 
 
 ---
@@ -166,21 +182,24 @@ python main.py --create_samples --create_train_test --random_forest_run --create
 📦 PV_Digital_Twin_Classification
 ├── main.py                              # CLI entry point (argparse workflow)
 ├── classes.py                           # Core system and inverter models
-├── create_samples_*.py                  # Normal, anomaly and fault-specific simulation modules
-├── create_samples.py                    # Parallel orchestration of all scenarios
-├── create_train_test_sets.py            # Aggregates simulation data
-├── random_forest.py                     # ML model training and evaluation
+├── create_day_samples_*.py              # Normal, anomaly and fault-specific simulation modules
+├── create_day_samples.py                # Parallel orchestration of all scenarios
 ├── create_preprocess_inference_set.py   # Preprocesses inverter data
-├── inference.py                         # Anomaly and fault classification inference
-├── plot.py                              # Plotting utilities
-├── utils.py                             # Feature extraction and helpers
+├── create_train_test_sets.py            # Aggregates simulation data
 ├── globals.py                           # Global constants and paths
-├── Datasets/                            # Aggregated datasets for ML and inference sets
+├── inference.py                         # Anomaly and fault classification inference
+├── main.py                              # Argparse commands
+├── random_forest.py                     # ML model training and evaluation
+├── plot_day_samples.py                  # Plotting utilities for sample creation
+├── plot_inference.py                    # Plotting utilities for inference
+├── plot_training.py                     # Plotting utilities for training
+├── utils.py                             # Feature extraction and helpers
+├── Datasets/                            # Aggregated datasets for training and inference
 ├── Images/                              # Training and testing plots
 ├── Inverters/                           # Real inverter data for inference
-├── Model/                               # Trained Random Forest model
-├── Plots/                               # Sample generation plots
-├── Reports/                             # Model performance reports
+├── Models/                              # Trained Random Forest models
+├── Plots/                               # Sample plots
+├── Reports/                             # Performance reports
 ├── Samples_2023/                        # Training samples
 ├── Samples_2024/                        # Testing samples
 └── Weather/                             # Meteorological input data

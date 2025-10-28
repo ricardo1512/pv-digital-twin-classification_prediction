@@ -1,6 +1,6 @@
 import random
 from classes import *
-from plot import *
+from plot_day_samples import *
 from utils import *
 
 # =============================================================
