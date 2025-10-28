@@ -255,5 +255,5 @@ For technical issues or inquiries, please email the author.
 |----------|------|-------------|
 | 1.0.0 | 2025-10-23 | Initial release with full CLI workflow, 7 anomaly and fault modes, and Random Forest integration. |
 | 1.0.1 | 2025-10-24 | Function improvements: added computation and visualization of the probabilities that guide the model’s class decisions during training |
-
+| 1.0.2 | 2025-10-28 | Function improvements: added Precision/Recall and FP/TP plots for training analysis, and enhanced support for post-inference decision making. |
 ---
