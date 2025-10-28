@@ -280,3 +280,112 @@ def class_accuracy(cm):
 
     # Round accuracies to 1 decimal place
     return np.round(class_acc, 1)
+
+
+
+def adjust_and_scale_probabilities(proba_inference_df, delta=0.1, top=2):
+    """
+    Adjusts class probabilities based on confidence threshold and proximity window (delta),
+    preserving at most the two top-ranked classes.
+
+    Logic:
+        - If max probability >= 0.7 → set that class to 1.0 and others to 0.0.
+        - Else → select probabilities within (max - delta) <= p <= max,
+                  keep at most top 2, normalize them to sum to 1.0, others set to 0.
+    
+    Args:
+        proba_inference_df (pd.DataFrame): DataFrame with columns [ID, date, predicted_fault, class probabilities...].
+        delta (float): Window below max prob to include similar classes for scaling (default=0.05).
+
+    Returns:
+        pd.DataFrame: Adjusted probability DataFrame with [ID, date, predicted_fault, adjusted class probabilities...].
+    """
+
+    # Identify class probability columns
+    class_cols = [c for c in proba_inference_df.columns if c not in ['ID', 'date', 'predicted_fault']]
+    adjusted_df = proba_inference_df.copy()
+
+    # Process each row
+    for i, row in adjusted_df.iterrows():
+        probs = row[class_cols].values.astype(float)
+        max_p = probs.max()
+
+        adjusted = np.zeros_like(probs)
+
+        if max_p >= 0.7:
+            adjusted[np.argmax(probs)] = 1.0  # keep only the top class
+        else:
+            # Select classes within delta of the max
+            candidate_indices = np.where(probs >= (max_p - delta))[0]
+            candidate_probs = probs[candidate_indices]
+
+            # Sort candidates by probability (descending)
+            top_indices = candidate_indices[np.argsort(candidate_probs)[::-1]]
+
+            # Keep at most the top classes
+            top_indices = top_indices[:top]
+
+            # Normalize selected probabilities to sum 1.0
+            selected_probs = probs[top_indices]
+            if selected_probs.sum() > 0:
+                normalized = selected_probs / selected_probs.sum()
+                adjusted[top_indices] = normalized
+
+        # Update adjusted probabilities in DataFrame
+        adjusted_df.loc[i, class_cols] = adjusted
+
+    # Keep only metadata and adjusted probabilities
+    adjusted_df = adjusted_df[['ID', 'date', 'predicted_fault'] + class_cols]
+
+    return adjusted_df
+
+
+def generate_adjusted_probabilities_report(adjusted_df):
+    """
+    Generates a CSV report with counts of each unique combination of selected classes.
+    Each row may contribute a combination of 1 or more classes.
+    Combinations are grouped first by number of classes (1, 2, ...), then sorted by count descending.
+
+    Args:
+        adjusted_df (pd.DataFrame): Adjusted probability DataFrame with [ID, date, predicted_fault, class probabilities...].
+
+    Returns:
+        pd.DataFrame: Report DataFrame with columns ['Combination', 'Count'], sorted as described.
+    """
+
+    # Identify class columns
+    class_cols = [c for c in adjusted_df.columns if c not in ['ID', 'date', 'predicted_fault']]
+
+    # Dictionary to count combinations
+    combo_counts = {}
+
+    for _, row in adjusted_df.iterrows():
+        # Select classes with probability > 0
+        selected_classes = [c for c in class_cols if row[c] > 0]
+
+        if selected_classes:
+            # Sort to have consistent combination keys
+            combo_key = ' + '.join(sorted(selected_classes))
+            if combo_key in combo_counts:
+                combo_counts[combo_key] += 1
+            else:
+                combo_counts[combo_key] = 1
+
+    # Convert to DataFrame
+    report_df = pd.DataFrame({
+        'Combination': list(combo_counts.keys()),
+        'Count': list(combo_counts.values())
+    })
+
+    # Add temporary Size column to sort
+    report_df['Size'] = report_df['Combination'].apply(lambda x: len(x.split(' + ')))
+
+    # Sort first by Size (ascending), then by Count (descending)
+    report_df = report_df.sort_values(by=['Size', 'Count'], ascending=[True, False]).reset_index(drop=True)
+
+    # Drop Size column to match original output
+    report_df = report_df[['Combination', 'Count']]
+
+    return report_df
+
+

@@ -1,5 +1,5 @@
 import argparse
-from create_samples import *
+from create_day_samples import *
 from create_train_test_sets import *
 from random_forest import *
 from create_preprocess_inference_set import *
@@ -11,7 +11,7 @@ def run(args):
     # Block 1: Create Samples
     # ------------------------------------------------------
     if args.create_samples or args.create_samples_with_plot:
-        create_single_samples(
+        create_day_samples(
             plot_samples=args.create_samples_with_plot,
         )
 

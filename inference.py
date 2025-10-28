@@ -39,14 +39,16 @@ def inference(all_year=False, winter=False):
     season_name, _, season_name_file = determine_season(all_year, winter)
     
     # Input file path
-    inference_test_file = f"Datasets/inference_test_set_before_classification_{season_name_file}.csv"
+    inference_test_file = f"{DATASETS_FOLDER}/inference_test_set_before_classification_{season_name_file}.csv"
     
     # Output file paths
-    output_inference_file = f"Datasets/inference_test_set_with_classification_{season_name_file}.csv"
-    output_inference_prob_file = f"Datasets/inference_test_set_prob_with_classification_{season_name_file}.csv"
-    output_inference_image = f"Images/inference_classification_distribution_{season_name_file}.png"
-    output_inference_prob_folder = f"Plots/PLots_inference_probabilities_{season_name_file}"
-    results_path = f"Reports/inference_results_{season_name_file}.csv"
+    output_results_path = f"{REPORT_FOLDER}/inference_results_{season_name_file}.csv"
+    output_inference_file = f"{DATASETS_FOLDER}/inference_test_set_with_classification_{season_name_file}.csv"
+    output_inference_prob_file = f"{DATASETS_FOLDER}/inference_test_set_prob_with_classification_{season_name_file}.csv"
+    output_inference_image = f"{IMAGE_FOLDER}/inference_classification_distribution_{season_name_file}.png"
+    output_inference_prob_folder = f"{PLOT_FOLDER}/Probabilities/Plots_inference_probabilities_{season_name_file}"
+    output_inference_scaled_prob_folder = f"{PLOT_FOLDER}/Probabilities_scaled/Plots_inference_probabilities_scaled_{season_name_file}"
+    output_inference_scaled_prob_report = f"{REPORT_FOLDER}/inference_adjusted_probabilities_report_{season_name_file}.csv"
 
     print("\n" + "=" * 60)
     print(f"PERFORMING INFERENCE, TRAINING SEASON: {season_name.upper()} ...")
@@ -54,14 +56,15 @@ def inference(all_year=False, winter=False):
 
     # Define the path to the pre-trained Random Forest model
     rf_model_file = os.path.join(MODELS_FOLDER, f"rf_best_model_{season_name_file}.joblib")
-    rf_model_file_path = Path(inference_test_file)
     
     # Raise an exception if the model file does not exist
+    rf_model_file_path = Path(rf_model_file)
     if not os.path.exists(rf_model_file_path):
-        raise FileNotFoundError(
-            f"Random Forest model file not found: {rf_model_file}\n"
-            "Please train the model first for Summer (default), Winter (--winter) or All Year (--all_year)."
+        print(
+            f"\nRandom Forest model file not found: {rf_model_file}\n"
+            f"\tPlease train the model first for {season_name} (--{season_name_file}).\n"
         )
+        exit()
 
     # Load pre-trained Random Forest model
     rf_classifier = joblib.load(rf_model_file)
@@ -69,10 +72,11 @@ def inference(all_year=False, winter=False):
     # Raise an exception if the file does not exist, stopping the program
     inference_test_file_path = Path(inference_test_file)
     if not inference_test_file_path.exists():
-        raise FileNotFoundError(
-            f"Inference test file not found: {inference_test_file}\n"
-            "Please create the inference test set first for Summer (default), Winter (--winter) or All Year (--all_year)."
+        print(
+            f"\nInference test file not found: {inference_test_file}\n"
+            f"\tPlease create the inference test set first for {season_name} (--{season_name_file}).\n"
         )
+        exit()
         
     # Load input dataset
     df_inference = pd.read_csv(inference_test_file)
@@ -118,8 +122,8 @@ def inference(all_year=False, winter=False):
     print("\nNumber of entries per predicted fault:")
     print(state_counts_df)
 
-    state_counts_df.to_csv(results_path, index=False)
-    print(f"\nInference Report exported to: {results_path}")
+    state_counts_df.to_csv(output_results_path, index=False)
+    print(f"\nInference Report exported to: output_{output_results_path}")
 
     # Plot distribution
     plot_inference_fault_distribution(season_name, state_counts, output_inference_image)
@@ -147,6 +151,17 @@ def inference(all_year=False, winter=False):
     # Save the probabilities and metadata to a CSV file for further analysis
     proba_inference_df.to_csv(output_inference_prob_file, index=False)
     print(f"Class probabilities for inference dataset saved to {output_inference_prob_file}")
-    
     # Generate bar plots for each sample's fault probabilities
-    plot_inference_fault_probabilities(output_inference_prob_file, season_name, output_inference_prob_folder)
+    # plot_inference_fault_probabilities(proba_inference_df, season_name_file, output_inference_prob_folder) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    print(f"Class probabilities plots saved to {output_inference_prob_folder}")
+    
+    # Adjust and scale probabilities for decision making
+    adjusted_proba_df = adjust_and_scale_probabilities(proba_inference_df, delta=0.2, top=2)
+    # Create a report of adjusted probabilities
+    report_adjusted_proba_df = generate_adjusted_probabilities_report(adjusted_proba_df)
+    # Save the adjusted probabilities report to CSV
+    report_adjusted_proba_df.to_csv(output_inference_scaled_prob_report, index=False)
+    print(f"\nAdjusted probabilities report saved to: {output_inference_scaled_prob_report}")
+    # Generate bar plots for each sample's scaled fault probabilities    
+    # plot_inference_fault_probabilities(adjusted_proba_df, season_name_file, output_inference_scaled_prob_folder) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    print(f"Scaled class probabilities plots saved to {output_inference_scaled_prob_folder}")

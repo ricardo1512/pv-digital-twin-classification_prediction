@@ -547,7 +547,7 @@ def plot_inference_fault_distribution(season_name, state_counts, output_inferenc
     print(f"Inference Fault Distribution plot saved to {output_inference_image}\n")
 
 
-def plot_inference_fault_probabilities(input_file, season_name, output_folder):
+def plot_inference_fault_probabilities(df, season_name_file, output_folder):
     """
     Generate and save bar plots of predicted anomaly and fault probabilities for each inverter entry.
 
@@ -560,9 +560,6 @@ def plot_inference_fault_probabilities(input_file, season_name, output_folder):
           per fault type corresponding to LABELS_MAP keys.
         - output_folder (str): Directory where the generated plots will be saved.
     """
-
-    # Load predictions CSV into a DataFrame
-    df = pd.read_csv(input_file)
 
     # Iterate through each row to create an individual plot per inverter entry
     for _, row in df.iterrows():
@@ -615,7 +612,7 @@ def plot_inference_fault_probabilities(input_file, season_name, output_folder):
         plt.tight_layout()
 
         # Save the figure to the specified output folder
-        save_path = os.path.join(output_folder, f"Classification_prob_{row['ID']}_{row['date']}_{season_name}.png")
+        save_path = os.path.join(output_folder, f"Classification_prob_{row['ID']}_{row['date']}_{season_name_file}.png")
         plt.savefig(save_path, dpi=300, facecolor=fig.get_facecolor())
         
         # Close figure to free memory

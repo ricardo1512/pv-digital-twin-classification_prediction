@@ -1,0 +1,14 @@
+Combination               , Count
+Arc Fault                 ,    20
+Diode Fault               ,     4
+Shading                   ,     4
+Cracks                    ,     2
+Diode Fault + Normal      ,   107
+Cracks + Shading          ,    10
+Cracks + Diode Fault      ,     5
+Arc Fault + Diode Fault   ,     5
+Arc Fault + Normal        ,     2
+Shading + Soling          ,     2
+Diode Fault + Ground Fault,     1
+Arc Fault + Shading       ,     1
+Cracks + Normal           ,     1

@@ -15,23 +15,25 @@ LONGITUDE = -8.689926                       # Longitude of the LOCAL
 MODULES_PER_STRING = 10                      # Number of modules per string
 
 # ==============================
-# Data File Paths
+# Label and Folders
 # ==============================
-FILES_YEAR_2023 = (f"Weather/{LOCAL.replace(' ', '_')}_weather_2023.csv", "Samples_2023")  # Weather 2023
-FILES_YEAR_2024 = (f"Weather/{LOCAL.replace(' ', '_')}_weather_2024.csv", "Samples_2024")  # Weather 2024
-FOLDER_TRAIN_SAMPLES = "Samples_2023"                # Folder with training samples
-FOLDER_TEST_SAMPLES = "Samples_2024"                 # Folder with test samples
-TRAIN_VALID_SET_FILE = "Datasets/trainset_2023.csv"  # Training + validation dataset
-TEST_SET_FILE = "Datasets/testset_2024.csv"          # Test dataset
-
-# ==============================
-# Model and Outputs
-# ==============================
-MODELS_FOLDER = "Models"                     # Folder to the trained models
 LABEL = 'inverter_state'                     # Target label for classification
+WEATHER_FOLDER = "Weather"                   # Folder to the weather data
+DATASETS_FOLDER = "Datasets"                 # Folder to the datasets
+MODELS_FOLDER = "Models"                     # Folder to the trained models
 IMAGE_FOLDER = "Images"                      # Folder for saving images
 PLOT_FOLDER = "Plots"                        # Folder for saving plots
 REPORT_FOLDER = "Reports"                    # Folder for saving reports
+
+# ==============================
+# Data File Paths
+# ==============================
+FILES_YEAR_2023 = (f"{WEATHER_FOLDER}/{LOCAL.replace(' ', '_')}_weather_2023.csv", "Samples_2023")  # Weather 2023
+FILES_YEAR_2024 = (f"{WEATHER_FOLDER}/{LOCAL.replace(' ', '_')}_weather_2024.csv", "Samples_2024")  # Weather 2024
+FOLDER_TRAIN_SAMPLES = "Samples_2023"                # Folder with training samples
+FOLDER_TEST_SAMPLES = "Samples_2024"                 # Folder with test samples
+TRAIN_VALID_SET_FILE = f"{DATASETS_FOLDER}/trainset_2023.csv"  # Training + validation dataset
+TEST_SET_FILE = f"{DATASETS_FOLDER}/testset_2024.csv"          # Test dataset
 
 # ==============================
 # Meteorological Data Columns

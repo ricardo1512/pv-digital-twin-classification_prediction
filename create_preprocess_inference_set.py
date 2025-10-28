@@ -28,7 +28,7 @@ def create_preprocess_inference_set(smoothing=False, all_year=False, winter=Fals
     input_folder = "Inverters"
     
     # Output file path
-    output_path = f"Datasets/inference_test_set_before_classification_{season_name_file}.csv"
+    output_path = f"{DATASETS_FOLDER}/inference_test_set_before_classification_{season_name_file}.csv"
 
     # Get all CSV files in the input folder
     csv_files = [
