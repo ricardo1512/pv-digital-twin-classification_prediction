@@ -35,7 +35,7 @@ def create_day_samples(plot_samples=False):
     print("=" * 40)
 
     # Create samples for both training (2023) and testing (2024) datasets
-    for file_year in [FILES_YEAR_2023, FILES_YEAR_2024]:
+    for file_year in [FILES_YEAR_TRAIN, FILES_YEAR_TEST]:
 
     # List of sample creation functions (each simulates a specific fault scenario)
         funcs = [

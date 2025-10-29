@@ -40,11 +40,11 @@ def create_samples_2_shading(files_year, plot_samples=False):
     # ==============================================================
     # Initialization
     # ==============================================================
-    input_file, output_folder = files_year
+    input_file, output_folder, train_test = files_year
 
     condition_nr = 2
     condition_name = LABELS_MAP[condition_nr][0].lower().replace(' ', '_')
-    output_file = f"{output_folder}/{condition_nr}_digital_twin_output_{condition_name}_samples.csv"
+    output_file = f"{output_folder}/{condition_nr}_digital_twin_output_{train_test}_{condition_name}_samples.csv"
     plot_folder = f"{PLOT_FOLDER}/Day_samples/Plots_{condition_nr}_{condition_name}_samples"
 
     # =============================================================

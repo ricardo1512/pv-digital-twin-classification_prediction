@@ -32,39 +32,33 @@ def create_train_test_sets():
         have completed successfully to ensure all fault types are included in the datasets.
     """
 
-    # Folder and output path setup
-    folder_2023 = FOLDER_TRAIN_SAMPLES
-    folder_2024 = FOLDER_TEST_SAMPLES
-    output_file_2023 = TRAIN_VALID_SET_FILE
-    output_file_2024 = TEST_SET_FILE
-
     print("\n" + "=" * 40)
     print("CREATING TRAIN AND TEST SETS...")
     print("=" * 40)
 
     # Lists to store DataFrames for each year
-    dfs_2023, dfs_2024 = [], []
+    dfs_train, dfs_test = [], []
 
     # Load and store all CSV files for 2023 (training)
-    for filename in os.listdir(folder_2023):
+    for filename in os.listdir(FOLDER_TRAIN_SAMPLES):
         if filename.endswith(".csv"):
-            filepath = os.path.join(folder_2023, filename)
+            filepath = os.path.join(FOLDER_TRAIN_SAMPLES, filename)
             df = pd.read_csv(filepath)
-            dfs_2023.append(df)
+            dfs_train.append(df)
 
     # Load and store all CSV files for 2024 (testing)
-    for filename in os.listdir(folder_2024):
+    for filename in os.listdir(FOLDER_TEST_SAMPLES):
         if filename.endswith(".csv"):
-            filepath = os.path.join(folder_2024, filename)
+            filepath = os.path.join(FOLDER_TEST_SAMPLES, filename)
             df = pd.read_csv(filepath)
-            dfs_2024.append(df)
+            dfs_test.append(df)
 
     # Concatenate all DataFrames into single train/test datasets
-    combined_df_2023 = pd.concat(dfs_2023, ignore_index=True)
-    combined_df_2024 = pd.concat(dfs_2024, ignore_index=True)
+    combined_df_train = pd.concat(dfs_train, ignore_index=True)
+    combined_df_test = pd.concat(dfs_test, ignore_index=True)
 
     # Save the combined DataFrames to disk
-    combined_df_2023.to_csv(output_file_2023, index=False)
-    print(f"Combined Train CSV saved as {output_file_2023}")
-    combined_df_2024.to_csv(output_file_2024, index=False)
-    print(f"Combined Test CSV saved as {output_file_2024}")
+    combined_df_train.to_csv(TRAIN_VALID_SET_FILE, index=False)
+    print(f"Combined Train CSV saved as {TRAIN_VALID_SET_FILE}")
+    combined_df_test.to_csv(TEST_SET_FILE, index=False)
+    print(f"Combined Test CSV saved as {TEST_SET_FILE}")

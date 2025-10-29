@@ -28,10 +28,10 @@ REPORT_FOLDER = "Reports"                    # Folder for saving reports
 # ==============================
 # Data File Paths
 # ==============================
-FILES_YEAR_2023 = (f"{WEATHER_FOLDER}/{LOCAL.replace(' ', '_')}_weather_2023.csv", "Samples_2023")  # Weather 2023
-FILES_YEAR_2024 = (f"{WEATHER_FOLDER}/{LOCAL.replace(' ', '_')}_weather_2024.csv", "Samples_2024")  # Weather 2024
-FOLDER_TRAIN_SAMPLES = "Samples_2023"                # Folder with training samples
-FOLDER_TEST_SAMPLES = "Samples_2024"                 # Folder with test samples
+FOLDER_TRAIN_SAMPLES = "Day_samples_train"                # Folder with training samples
+FOLDER_TEST_SAMPLES = "Day_samples_test"                  # Folder with test samples
+FILES_YEAR_TRAIN = (f"{WEATHER_FOLDER}/{LOCAL.replace(' ', '_')}_weather_2023.csv", FOLDER_TRAIN_SAMPLES, "train")  # Weather 2023
+FILES_YEAR_TEST = (f"{WEATHER_FOLDER}/{LOCAL.replace(' ', '_')}_weather_2024.csv", FOLDER_TEST_SAMPLES, "train")  # Weather 2024
 TRAIN_VALID_SET_FILE = f"{DATASETS_FOLDER}/trainset_2023.csv"  # Training + validation dataset
 TEST_SET_FILE = f"{DATASETS_FOLDER}/testset_2024.csv"          # Test dataset
 
