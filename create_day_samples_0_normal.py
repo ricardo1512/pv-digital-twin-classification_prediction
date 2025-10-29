@@ -52,7 +52,7 @@ def create_samples_0_nofault(files_year, plot_samples=False):
     df_input['date'] = pd.to_datetime(df_input['date'])
 
     # ==============================================================
-    # Main Simulation Loop (Per Day)
+    # Main Simulation Loop (Per Day) 
     # ==============================================================
     daily_features = []
     daily_groups = df_input.groupby(df_input['date'].dt.date)
