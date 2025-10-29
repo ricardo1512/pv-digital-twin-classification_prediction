@@ -5,25 +5,19 @@ from globals import *
 
 # Default colors
 MPPT_PALETTE = {
-    'mppt_power': '#66ffff',              # Light cyan / pale cyan
-    'global_tilted_irradiance': '#ffff99',# Light yellow
-    'diffuse_radiation': 'orange',          # Orange
-    'temperature_2m': '#ff99bb',          # Light pink / soft pink
-    'wind_speed_10m': '#4d94ff',          # Medium blue / cornflower blue
+    'mppt_power': '#66ffff',               # Light cyan / pale cyan
+    'global_tilted_irradiance': '#ffff99', # Light yellow
+    'diffuse_radiation': '#ff6600',        # Orange
+    'temperature_2m': '#ff99bb',           # Light pink / soft pink
+    'wind_speed_10m': '#4d94ff',           # Medium blue / cornflower blue
 }
 
 CURR_VOLT_PALETTE = {
-    'pv1_i': '#ffff66',   # Light yellow
-    'a_i': '#ff6666',     # Light red / coral red
-    'b_i': '#66ff66',     # Light green / lime green
-    'c_i': '#66ccff',     # Light blue / sky blue
-    'pv1_u': '#ffff66',   # Light yellow
-    'a_u': '#ff6666',     # Light red / coral red
-    'b_u': '#66ff66',     # Light green / lime green
-    'c_u': '#66ccff',     # Light blue / sky blue
-    'ab_u': '#ff99cc',    # Pink / pastel pink
-    'bc_u': '#99ffcc',    # Mint green / pale green
-    'ca_u': '#ccccff',    # Lavender / light purple
+    'pv1_i': '#ff3300',   # Red
+    'a_i': '#3399ff',     # Blue
+    'pv1_u': '#ff6600',   # Orange
+    'a_u': '#3399ff',     # Blue
+    'ab_u': '#cc33ff',    # Pink
 }
 
 
@@ -128,7 +122,7 @@ def plot_mppt(df, date, output_folder, filename):
 
 def plot_currents(df, date, output_folder, filename):
     """
-        Plot combined inverter phase currents (a_i, b_i, c_i) and PV string current (pv1_i)
+        Plot PV string DC (pv1_i) and AC phase current (a_i)
         in the same dark-themed graph.
 
         Args:
@@ -155,7 +149,7 @@ def plot_currents(df, date, output_folder, filename):
     fig, ax = plt.subplots(figsize=(18, 6))
 
     # Plot each current with a predefined color and line width
-    for col in ['pv1_i', 'a_i', 'b_i', 'c_i']:
+    for col in ['pv1_i', 'a_i']:
         ax.plot(df.index, df[col], label=col, color=CURR_VOLT_PALETTE[col], linewidth=3)
 
     # Label axes and set tick colors to white for visibility
@@ -181,7 +175,7 @@ def plot_currents(df, date, output_folder, filename):
     plt.tight_layout()
 
     # Construct full output path and save figure with high resolution
-    output_path = os.path.join(output_folder, f"{filename}_phase_pv_currents.png")
+    output_path = os.path.join(output_folder, f"{filename}_pv_phase_currents.png")
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
 
     # Close figure to free memory
@@ -190,8 +184,8 @@ def plot_currents(df, date, output_folder, filename):
 
 def plot_voltages(df, date, output_folder, filename):
     """
-        Plot combined inverter voltages (a_u, b_u, c_u, ab_u, bc_u, ca_u)
-        and PV string voltage (pv1_u) in a dark-themed graph.
+        Plot PV string DC (pv1_u) and AC (a_u, ab_u) voltages
+        in the same dark-themed graph.
 
         Args:
             - df (pd.DataFrame): DataFrame containing voltage measurements with a datetime index.
@@ -217,7 +211,7 @@ def plot_voltages(df, date, output_folder, filename):
     fig, ax = plt.subplots(figsize=(18, 6))
 
     # Plot each voltage if it exists in the DataFrame
-    for col in ['pv1_u', 'a_u', 'b_u', 'c_u', 'ab_u', 'bc_u', 'ca_u']:
+    for col in ['pv1_u', 'a_u', 'ab_u']:
         ax.plot(df.index, df[col], label=col, color=CURR_VOLT_PALETTE[col], linewidth=3)
 
     # Axis labels and tick colors
@@ -241,7 +235,7 @@ def plot_voltages(df, date, output_folder, filename):
     plt.tight_layout()
 
     # Save figure
-    output_path = os.path.join(output_folder, f"{filename}_phase_pv_voltages.png")
+    output_path = os.path.join(output_folder, f"{filename}_pv_phase_voltages.png")
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
 
     # Close figure to free memory
