@@ -168,7 +168,7 @@ python main.py --create_samples --create_train_test --random_forest_run --create
 | Stage | Command |
 |--------|----------|
 | 1. Create synthetic samples | `python main.py --create_samples` |
-| 1. Create synthetic samples with plots | `python main.py --create_samples_with_plot` |
+| 1. Create synthetic samples with plots | `python main.py --create_samples_with_plots` |
 | 2. Generate train/test datasets | `python main.py --create_train_test` |
 | 3. Train and evaluate Random Forest | `python main.py --random_forest_run` |
 | 4. Create and preprocess inference dataset | `python main.py --create_inference_set` |
@@ -253,9 +253,4 @@ For technical issues or inquiries, please email the author.
 ## Version / Changelog
 | Version | Date | Description |
 |----------|------|-------------|
-| 1.0.0 | 2025-10-23 | Initial release with full CLI workflow, 7 anomaly and fault modes, and Random Forest integration. |
-| 1.0.1 | 2025-10-24 | Function improvements: added computation and visualization of the probabilities that guide the model’s class decisions during training |
-| 1.0.2 | 2025-10-28 | Function improvements: added Precision/Recall and FP/TP plots for training analysis, and enhanced support for post-inference decision making. |
----
-#   p v - d i g i t a l - t w i n - c l a s s i f i c a t i o n _ p r e d i c t i o n  
- 
+| 1.0.0 | 2025-10-29 | Initial release with full CLI workflow, 7 anomaly and fault modes, and Random Forest integration. |

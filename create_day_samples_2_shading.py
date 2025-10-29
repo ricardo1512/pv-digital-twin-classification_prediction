@@ -33,7 +33,7 @@ def create_samples_2_shading(files_year, plot_samples=False):
             7. Export results to CSV.
 
         Output:
-            CSV file named "2_digital_twin_output_shading_samples.csv" with daily aggregated featurescontaining
+            CSV file named "2_shading_samples.csv" with daily aggregated featurescontaining
             daily aggregated simulation results in the specified output folder.
     """
 
@@ -44,7 +44,7 @@ def create_samples_2_shading(files_year, plot_samples=False):
 
     condition_nr = 2
     condition_name = LABELS_MAP[condition_nr][0].lower().replace(' ', '_')
-    output_file = f"{output_folder}/{condition_nr}_digital_twin_output_{train_test}_{condition_name}_samples.csv"
+    output_file = f"{output_folder}/{condition_nr}_{train_test}_{condition_name}_samples.csv"
     plot_folder = f"{PLOT_FOLDER}/Day_samples/Plots_{condition_nr}_{condition_name}_samples"
 
     # =============================================================
@@ -89,6 +89,12 @@ def create_samples_2_shading(files_year, plot_samples=False):
 
             # Initialize output DataFrame for storing simulation results
             output = pd.DataFrame(index=self.df.index)
+                        
+            # Current, voltage, and power under normal (unaffected) conditions
+            output['pv1_i_clean'] = dc['i_mp']
+            output['pv1_u_clean'] = dc['v_mp']
+            output['mppt_power_clean'] = dc['p_mp'] / 1000  # W to kW
+            output['a_i_clean'] = ac / (400 * np.sqrt(3))
 
             # Set inverter_state to indicate anomaly condition
             output['inverter_state'] = self.condition_nr
@@ -155,7 +161,8 @@ def create_samples_2_shading(files_year, plot_samples=False):
         # Reindex and merge with meteorological data
         group['collectTime'] = pd.to_datetime(group['date'])
         group = group.set_index('collectTime')
-        results_full = results[EXPORT_COLUMNS].merge(
+        clean_features = ['pv1_i_clean', 'pv1_u_clean', 'mppt_power_clean', 'a_i_clean']
+        results_full = results[EXPORT_COLUMNS + clean_features].merge(
             group[METEOROLOGICAL_COLUMNS],
             left_index=True,
             right_index=True,
@@ -169,10 +176,14 @@ def create_samples_2_shading(files_year, plot_samples=False):
             output_image = f"{date.year:04d}_{date.month:02d}_{date.day:02d}_{condition_name}_samples"
             plot_mppt(results_full, date, plot_folder, output_image)
             plot_currents(results_full, date, plot_folder, output_image)
-            plot_voltages(results_full, date, plot_folder, output_image)
+            plot_voltage(results_full, date, plot_folder, output_image)
 
+        # Prepare end dataframe
+        selected_columns = [col for col in results_full.columns if col not in clean_features]
+        results_end = results_full[selected_columns]
+        
         # Compute and store in daily_features daily statistical features
-        compute_store_daily_comprehensive_features(results_full, date, daily_features)
+        compute_store_daily_comprehensive_features(results_end, date, daily_features)
 
     # ==============================================================
     # Export Final Aggregated Results

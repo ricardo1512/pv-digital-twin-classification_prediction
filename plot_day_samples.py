@@ -3,9 +3,15 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from globals import *
 
+# Time limits
+TIME_INIT = "06:00" 
+TIME_END = "20:00"
+
+
 # Default colors
 MPPT_PALETTE = {
     'mppt_power': '#66ffff',               # Light cyan / pale cyan
+    'mppt_power_clean': '#66ffff',               # Light cyan / pale cyan
     'global_tilted_irradiance': '#ffff99', # Light yellow
     'diffuse_radiation': '#ff6600',        # Orange
     'temperature_2m': '#ff99bb',           # Light pink / soft pink
@@ -14,16 +20,17 @@ MPPT_PALETTE = {
 
 CURR_VOLT_PALETTE = {
     'pv1_i': '#ff3300',   # Red
+    'pv1_i_clean': '#ff3300',   # Red
     'a_i': '#3399ff',     # Blue
+    'a_i_clean': '#3399ff',     # Blue
     'pv1_u': '#ff6600',   # Orange
-    'a_u': '#3399ff',     # Blue
-    'ab_u': '#cc33ff',    # Pink
+    'pv1_u_clean': '#ff6600',   # Orange
 }
 
 
 def plot_mppt(df, date, output_folder, filename):
     """
-        Plots MPPT power, irradiances (GTI & DHI), air temperature, and wind speed
+        Plots MPPT powers (reference and effective), irradiances (GTI & DHI), air temperature, and wind speed
         on the same graph using multiple Y-axes.
 
         Parameters:
@@ -34,15 +41,18 @@ def plot_mppt(df, date, output_folder, filename):
             
         Notes:
             - The plot uses a dark theme for better visibility.
-            - MPPT power is plotted on the primary Y-axis (left).
+            - MPPT powers is plotted on the primary Y-axis (left).
             - Global Tilted Irradiance (GTI) and Diffuse Horizontal Irradiance (DHI)
               are plotted on secondary and tertiary Y-axes respectively (right).
             - Air temperature and wind speed are plotted on quaternary and quinary Y-axes (right).
             - The figure is saved as a high-resolution PNG file in the specified folder.
     """
 
-    # Filter data between 07:00 and 19:00 (daytime)
-    df = df.between_time('07:00', '19:00')
+    # Filter data by time
+    df = df.between_time(TIME_INIT, TIME_END)
+    
+    # Check if the DataFrame contains the column for reference MPPT power measurements
+    mppt_clean = 'mppt_power_clean' in df.columns
 
     # Ensure output folder exists
     os.makedirs(output_folder, exist_ok=True)
@@ -54,10 +64,16 @@ def plot_mppt(df, date, output_folder, filename):
     # -------------------------
     # MPPT Power (primary axis)
     # -------------------------
-    ax1.plot(df.index, df['mppt_power'], color=MPPT_PALETTE['mppt_power'], label='MPPT Power (kW)', linewidth=3)
+    if mppt_clean:
+        line1, = ax1.plot(df.index, df['mppt_power_clean'], color=MPPT_PALETTE['mppt_power_clean'], label='Reference MPPT', linewidth=2, linestyle=':')
+    line2, = ax1.plot(df.index, df['mppt_power'], color=MPPT_PALETTE['mppt_power'], label='Effective MPPT', linewidth=3)
     ax1.set_xlabel("Time")
     ax1.set_ylabel("MPPT (kW)", color=MPPT_PALETTE['mppt_power'])
     ax1.tick_params(axis='y', labelcolor=MPPT_PALETTE['mppt_power'])
+    
+    # Create legend only for MPPT lines with white frame
+    if mppt_clean:
+        ax1.legend(handles=[line1, line2], fontsize=10, loc='upper left', facecolor='black', edgecolor='white')
 
     # -------------------------
     # Global Tilted Irradiance (secondary axis)
@@ -107,7 +123,7 @@ def plot_mppt(df, date, output_folder, filename):
     plt.setp(ax1.get_xticklabels(), rotation=0)
 
     # Title of the plot
-    plt.title(f"MPPT, DHI, GTI, Air Temperature & Wind Speed ({LOCAL}, {date})", fontsize=18, verticalalignment='bottom')
+    plt.title(f"MPPT, DHI, GTI, Air Temperature and Wind Speed, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom')
 
     # Enable grid for Y-axis
     plt.grid(True, axis='y', linestyle='--', alpha=0.6)
@@ -122,7 +138,7 @@ def plot_mppt(df, date, output_folder, filename):
 
 def plot_currents(df, date, output_folder, filename):
     """
-        Plot PV string DC (pv1_i) and AC phase current (a_i)
+        Plot PV string DC (pv1_i) and AC phase current (a_i), both reference and effective,
         in the same dark-themed graph.
 
         Args:
@@ -136,8 +152,11 @@ def plot_currents(df, date, output_folder, filename):
             - The figure is saved as a high-resolution PNG file in the specified folder.
     """
 
-    # Filter data to include only the time range between 07:00 and 19:00
-    df = df.between_time('07:00', '19:00')
+    # Filter data by time
+    df = df.between_time(TIME_INIT, TIME_END)
+    
+    # Check if the DataFrame contains the column for reference MPPT power measurements
+    pv1_i_clean = 'pv1_i_clean' in df.columns
 
     # Ensure output folder exists; create it if necessary
     os.makedirs(output_folder, exist_ok=True)
@@ -146,17 +165,26 @@ def plot_currents(df, date, output_folder, filename):
     plt.style.use('dark_background')
 
     # Create figure and axis objects with defined size
-    fig, ax = plt.subplots(figsize=(18, 6))
+    fig, ax = plt.subplots(figsize=(12, 6))
 
     # Plot each current with a predefined color and line width
-    for col in ['pv1_i', 'a_i']:
-        ax.plot(df.index, df[col], label=col, color=CURR_VOLT_PALETTE[col], linewidth=3)
+    if pv1_i_clean:
+        line1, = ax.plot(df.index, df['pv1_i_clean'], color=CURR_VOLT_PALETTE['pv1_i_clean'], label='Reference pv1_i', linewidth=2, linestyle=':')
+        line2, = ax.plot(df.index, df['a_i_clean'], color=CURR_VOLT_PALETTE['a_i_clean'], label='Reference a_i', linewidth=2, linestyle=':')
+    line3, = ax.plot(df.index, df['pv1_i'], color=CURR_VOLT_PALETTE['pv1_i'], label='Effective pv1_i', linewidth=3)
+    line4, = ax.plot(df.index, df['a_i'], color=CURR_VOLT_PALETTE['a_i'], label='Effective a_i', linewidth=3)
 
     # Label axes and set tick colors to white for visibility
     ax.set_xlabel("Time")
     ax.set_ylabel("Current (A)", color='white')
     ax.tick_params(axis='x', colors='white')
     ax.tick_params(axis='y', colors='white')
+    
+    # Create legend only for MPPT lines with white frame
+    if pv1_i_clean:
+        ax.legend(handles=[line1, line3, line2, line4], fontsize=10, loc='upper left', facecolor='black', edgecolor='white')
+    else:
+        ax.legend(handles=[line3, line4], fontsize=10, loc='upper left', facecolor='black', edgecolor='white')
 
     # Add horizontal grid lines with light transparency
     ax.grid(True, axis='y', linestyle='--', alpha=0.6)
@@ -166,10 +194,7 @@ def plot_currents(df, date, output_folder, filename):
     plt.setp(ax.get_xticklabels(), rotation=0)
 
     # Set plot title with location and date, white text for dark background
-    plt.title(f"PV and Phase Currents ({LOCAL}, {date})", fontsize=18, verticalalignment='bottom', color='white')
-
-    # Add legend with black background and white edges
-    plt.legend(facecolor='black', edgecolor='white', fontsize=10, loc='upper right')
+    plt.title(f"PV and Phase Currents, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='white')
 
     # Adjust layout to avoid clipping of labels
     plt.tight_layout()
@@ -182,10 +207,9 @@ def plot_currents(df, date, output_folder, filename):
     plt.close()
 
 
-def plot_voltages(df, date, output_folder, filename):
+def plot_voltage(df, date, output_folder, filename):
     """
-        Plot PV string DC (pv1_u) and AC (a_u, ab_u) voltages
-        in the same dark-themed graph.
+        Plot PV string reference and effective DC (pv1_u) in a dark-themed graph.
 
         Args:
             - df (pd.DataFrame): DataFrame containing voltage measurements with a datetime index.
@@ -198,8 +222,11 @@ def plot_voltages(df, date, output_folder, filename):
             - The figure is saved as a high-resolution PNG file in the specified folder.
     """
 
-    # Filter data to include only the time range between 07:00 and 19:00
-    df = df.between_time('07:00', '19:00')
+    # Filter data by time
+    df = df.between_time(TIME_INIT, TIME_END)
+    
+    # Check if the DataFrame contains the column for reference MPPT power measurements
+    pv1_u_clean = 'pv1_u_clean' in df.columns
 
     # Ensure output folder exists
     os.makedirs(output_folder, exist_ok=True)
@@ -208,17 +235,22 @@ def plot_voltages(df, date, output_folder, filename):
     plt.style.use('dark_background')
 
     # Create figure and axis
-    fig, ax = plt.subplots(figsize=(18, 6))
+    fig, ax = plt.subplots(figsize=(12, 6))
 
-    # Plot each voltage if it exists in the DataFrame
-    for col in ['pv1_u', 'a_u', 'ab_u']:
-        ax.plot(df.index, df[col], label=col, color=CURR_VOLT_PALETTE[col], linewidth=3)
+    # Plot voltage
+    if pv1_u_clean:
+        line1, = ax.plot(df.index, df['pv1_u_clean'], color=CURR_VOLT_PALETTE['pv1_u_clean'], label='Reference pv1_u', linewidth=2, linestyle=':')
+    line2, = ax.plot(df.index, df['pv1_u'], label='Effective pv1_u', color=CURR_VOLT_PALETTE['pv1_u'], linewidth=3)
 
     # Axis labels and tick colors
     ax.set_xlabel("Time")
     ax.set_ylabel("Voltage (V)", color='white')
     ax.tick_params(axis='x', colors='white')
     ax.tick_params(axis='y', colors='white')
+    
+    # Create legend only for MPPT lines with white frame
+    if pv1_u_clean:
+        ax.legend(handles=[line1, line2], fontsize=10, loc='upper left', facecolor='black', edgecolor='white')
 
     # Horizontal grid lines
     ax.grid(True, axis='y', linestyle='--', alpha=0.6)
@@ -228,8 +260,7 @@ def plot_voltages(df, date, output_folder, filename):
     plt.setp(ax.get_xticklabels(), rotation=0)
 
     # Title and legend
-    plt.title(f"PV and Phase Voltages ({LOCAL}, {date})", fontsize=18, verticalalignment='bottom', color='white')
-    plt.legend(facecolor='black', edgecolor='white', fontsize=10, loc='upper right')
+    plt.title(f"PV and Phase Voltages, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='white')
 
     # Adjust layout
     plt.tight_layout()

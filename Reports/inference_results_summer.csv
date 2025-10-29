@@ -1,8 +1,8 @@
-Predicted Fault,Count
-Normal,79
-Soling,0
-Shading,10
-Cracks,12
-Ground Fault,0
-Arc Fault,23
-Diode Fault,40
+Predicted Condition,Count
+Normal,110
+Soling,1
+Shading,7
+Cracks,11
+Ground Fault,1
+Arc Fault,26
+Diode Fault,8

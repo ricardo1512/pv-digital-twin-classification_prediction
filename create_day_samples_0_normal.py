@@ -6,9 +6,9 @@ from utils import *
 # ==============================================================
 # Digital Twin Simulation - Normal Condition
 # ==============================================================
-def create_samples_0_nofault(files_year, plot_samples=False):
+def create_samples_0_normal(files_year, plot_samples=False):
     """
-        Runs the digital twin simulation for a photovoltaic system under normal (no-fault) conditions.
+        Runs the digital twin simulation for a photovoltaic system under normal conditions.
 
         This function loads meteorological data for a specified year and simulates the PV system performance
         at 5-minute intervals using pvlib’s ModelChain. It computes electrical and environmental parameters
@@ -42,7 +42,7 @@ def create_samples_0_nofault(files_year, plot_samples=False):
 
     condition_nr = 0
     condition_name = LABELS_MAP[condition_nr][0].lower().replace(' ', '_')
-    output_file = f"{output_folder}/{condition_nr}_digital_twin_output_{train_test}_{condition_name}_samples.csv"
+    output_file = f"{output_folder}/{condition_nr}_{train_test}_{condition_name}_samples.csv"
     plot_folder = f"{PLOT_FOLDER}/Day_samples/Plots_{condition_nr}_{condition_name}_samples"
 
     # ==============================================================
@@ -91,7 +91,7 @@ def create_samples_0_nofault(files_year, plot_samples=False):
             output_image = f"{date.year:04d}_{date.month:02d}_{date.day:02d}_{condition_name}_samples"
             plot_mppt(results_full, date, plot_folder, output_image)
             plot_currents(results_full, date, plot_folder, output_image)
-            plot_voltages(results_full, date, plot_folder, output_image)
+            plot_voltage(results_full, date, plot_folder, output_image)
 
         # Compute and store in daily_features daily statistical features
         compute_store_daily_comprehensive_features(results_full, date, daily_features)

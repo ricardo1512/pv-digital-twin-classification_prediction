@@ -1,9 +1,9 @@
 import pandas as pd
 
 # Define input and output file paths for the weather datasets
-input_file = "original_weather_Vila_do_Conde.csv"
-output_file_2023 = "Vila_do_Conde_weather_2023.csv"
-output_file_2024 = "Vila_do_Conde_weather_2024.csv"
+input_file = "Classification/original_weather_Vila_do_Conde.csv"
+output_file_2023 = "Classification/Vila_do_Conde_weather_2023.csv"
+output_file_2024 = "Classification/Vila_do_Conde_weather_2024.csv"
 
 # Load the original CSV file containing the raw meteorological dataset
 df = pd.read_csv(input_file)

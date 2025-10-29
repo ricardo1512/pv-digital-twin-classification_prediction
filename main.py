@@ -10,9 +10,9 @@ def run(args):
     # ------------------------------------------------------
     # Block 1: Create Samples
     # ------------------------------------------------------
-    if args.create_samples or args.create_samples_with_plot:
+    if args.create_samples or args.create_samples_with_plots:
         create_day_samples(
-            plot_samples=args.create_samples_with_plot,
+            plot_samples=args.create_samples_with_plots,
         )
 
     # ------------------------------------------------------
@@ -58,7 +58,7 @@ if __name__ == '__main__':
     # Block 1: Create Samples
     # ------------------------------------------------------
     parser.add_argument('--create_samples', action='store_true', help="Create sample dataset")
-    parser.add_argument('--create_samples_with_plot', action='store_true', help="Plot sample data")
+    parser.add_argument('--create_samples_with_plots', action='store_true', help="Plot sample data")
 
     # ------------------------------------------------------
     # Block 2: Create Train and Test Sets

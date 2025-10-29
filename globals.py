@@ -15,23 +15,26 @@ LONGITUDE = -8.689926                       # Longitude of the LOCAL
 MODULES_PER_STRING = 10                      # Number of modules per string
 
 # ==============================
-# Label and Folders
+# Variables and Folders
 # ==============================
-LABEL = 'inverter_state'                     # Target label for classification
-WEATHER_FOLDER = "Weather"                   # Folder to the weather data
-DATASETS_FOLDER = "Datasets"                 # Folder to the datasets
-MODELS_FOLDER = "Models"                     # Folder to the trained models
-IMAGE_FOLDER = "Images"                      # Folder for saving images
-PLOT_FOLDER = "Plots"                        # Folder for saving plots
-REPORT_FOLDER = "Reports"                    # Folder for saving reports
+LABEL = 'inverter_state'                        # Target label for classification
+YEARS = [2023, 2024]                            # Available years with data
+WEATHER_FOLDER_CLASS = "Weather/Classification" # Folder to the weather data for classification
+WEATHER_FOLDER_PRED = "Weather/Prediction"      # Folder to the weather data for prediction
+DATASETS_FOLDER = "Datasets"                    # Folder to the datasets
+MODELS_FOLDER = "Models"                        # Folder to the trained models
+IMAGE_FOLDER = "Images"                         # Folder for saving images
+PLOT_FOLDER = "Plots"                           # Folder for saving plots
+REPORT_FOLDER = "Reports"                       # Folder for saving reports
 
 # ==============================
 # Data File Paths
 # ==============================
 FOLDER_TRAIN_SAMPLES = "Day_samples_train"                # Folder with training samples
 FOLDER_TEST_SAMPLES = "Day_samples_test"                  # Folder with test samples
-FILES_YEAR_TRAIN = (f"{WEATHER_FOLDER}/{LOCAL.replace(' ', '_')}_weather_2023.csv", FOLDER_TRAIN_SAMPLES, "train")  # Weather 2023
-FILES_YEAR_TEST = (f"{WEATHER_FOLDER}/{LOCAL.replace(' ', '_')}_weather_2024.csv", FOLDER_TEST_SAMPLES, "train")  # Weather 2024
+TS_SAMPLES = "TS_samples"
+FILE_YEAR_TRAIN = (f"{WEATHER_FOLDER_CLASS}/{LOCAL.replace(' ', '_')}_weather_2023.csv", FOLDER_TRAIN_SAMPLES, "train")  # Weather 2023
+FILE_YEAR_TEST = (f"{WEATHER_FOLDER_CLASS}/{LOCAL.replace(' ', '_')}_weather_2024.csv", FOLDER_TEST_SAMPLES, "train")  # Weather 2024
 TRAIN_VALID_SET_FILE = f"{DATASETS_FOLDER}/trainset_2023.csv"  # Training + validation dataset
 TEST_SET_FILE = f"{DATASETS_FOLDER}/testset_2024.csv"          # Test dataset
 
@@ -75,11 +78,13 @@ EXPORT_COLUMNS = [
 ]
 
 # ==============================
-# Classification Settings
+# Classification and Prediction Settings
 # ==============================
 CLASSIFICATION_HOUR_INIT = '04:00'  # Start hour for classification
 CLASSIFICATION_HOUR_END = '22:00'   # End hour for classification
-TOP_FEATURES = 20                   # Number of top features to consider
+TOP_FEATURES = 20                   # Number of top features to consider for classification
+PREDICTION_HOUR_INIT = '04:00'      # Start hour for prediction
+PREDICTION_HOUR_END = '22:00'       # End hour for prediction
 
 # ================================
 # Labels Mapping for Visualization

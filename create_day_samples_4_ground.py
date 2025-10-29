@@ -34,7 +34,7 @@ def create_samples_4_ground(files_year, plot_samples=False):
             7. Export results to CSV.
 
         Output:
-            Saves a CSV file named "4_digital_twin_output_ground_samples.csv" containing
+            Saves a CSV file named "4_ground_samples.csv" containing
             daily aggregated simulation results in the specified output folder.
     """
 
@@ -45,14 +45,14 @@ def create_samples_4_ground(files_year, plot_samples=False):
 
     condition_nr = 4
     condition_name = LABELS_MAP[condition_nr][0].lower().replace(' ', '_')
-    output_file = f"{output_folder}/{condition_nr}_digital_twin_output_{train_test}_{condition_name}_samples.csv"
+    output_file = f"{output_folder}/{condition_nr}_{train_test}_{condition_name}_samples.csv"
     plot_folder = f"{PLOT_FOLDER}/Day_samples/Plots_{condition_nr}_{condition_name}_samples"
 
     # ==============================================================
     # Define realistic ground fault scenarios
     # Each tuple: (current, voltage)
     # ==============================================================
-    curr_volt_degradation = [
+    curr_volt_degradation = [ # for random
         (1.02, 0.97),  # 1. Mild fault: slight current increase (MPPT effect), small voltage drop
         (0.98, 0.95),  # 2. Mild fault: small decreases in current and voltage
         (0.90, 0.93),  # 3. Moderate fault: noticeable reductions
@@ -95,28 +95,30 @@ def create_samples_4_ground(files_year, plot_samples=False):
             # Run PVLib ModelChain Simulation
             self.mc.run_model(self.weather)
             dc = self.mc.results.dc
-
-            # Apply degradation factors for ground fault condition
-            dc['v_mp'] *= self.voltage_degradation
-            dc['i_mp'] *= self.current_degradation
-            dc['p_mp'] = dc['v_mp'] * dc['i_mp']
-
-            # Recalculate AC power with degraded DC inputs
-            ac = self.inverter.compute_ac(dc['p_mp'], dc['v_mp'])
-            # Limit maximum AC power to simulate protection trip (IEC 60364-4-42 safe limit)
-            ac = np.minimum(ac, 70)
+            ac = self.mc.results.ac
 
             # Initialize output DataFrame for storing simulation results
             output = pd.DataFrame(index=self.df.index)
+                        
+            # Current, voltage, and power under normal (unaffected) conditions
+            output['pv1_i_clean'] = dc['i_mp']
+            output['pv1_u_clean'] = dc['v_mp']
+            output['mppt_power_clean'] = dc['p_mp'] / 1000  # W to kW
+            output['a_i_clean'] = ac / (400 * np.sqrt(3))
 
             # Set inverter_state to indicate fault condition
             output['inverter_state'] = self.condition_nr
 
             # Compute DC current and voltage
+            dc['i_mp'] *= self.current_degradation
+            dc['v_mp'] *= self.voltage_degradation
             output['pv1_i'] = dc['i_mp']
             output['pv1_u'] = dc['v_mp']
 
             # Compute Power Quantities
+            dc['p_mp'] = dc['v_mp'] * dc['i_mp']
+            ac = self.inverter.compute_ac(dc['p_mp'], dc['v_mp'])
+            ac = np.minimum(ac, 70) # Limit maximum AC power to simulate protection trip (IEC 60364-4-42 safe limit)
             output['mppt_power'] = dc['p_mp'] / 1000 # W to kW
             output['active_power'] = ac / 1000 # W to kW
             output['efficiency'] = (ac / dc['p_mp'].replace(0, np.nan)) * 100
@@ -178,7 +180,8 @@ def create_samples_4_ground(files_year, plot_samples=False):
         # Reindex and merge with meteorological data
         group['collectTime'] = pd.to_datetime(group['date'])
         group = group.set_index('collectTime')
-        results_full = results[EXPORT_COLUMNS].merge(
+        clean_features = ['pv1_i_clean', 'pv1_u_clean', 'mppt_power_clean', 'a_i_clean']
+        results_full = results[EXPORT_COLUMNS + clean_features].merge(
             group[METEOROLOGICAL_COLUMNS],
             left_index=True,
             right_index=True,
@@ -192,10 +195,14 @@ def create_samples_4_ground(files_year, plot_samples=False):
             output_image = f"{date.year:04d}_{date.month:02d}_{date.day:02d}_{condition_name}_samples"
             plot_mppt(results_full, date, plot_folder, output_image)
             plot_currents(results_full, date, plot_folder, output_image)
-            plot_voltages(results_full, date, plot_folder, output_image)
+            plot_voltage(results_full, date, plot_folder, output_image)
 
+        # Prepare end dataframe
+        selected_columns = [col for col in results_full.columns if col not in clean_features]
+        results_end = results_full[selected_columns]
+        
         # Compute and store in daily_features daily statistical features
-        compute_store_daily_comprehensive_features(results_full, date, daily_features)
+        compute_store_daily_comprehensive_features(results_end, date, daily_features)
 
     # ==============================================================
     # Export Final Aggregated Results

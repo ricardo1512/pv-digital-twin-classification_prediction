@@ -70,7 +70,7 @@ def random_forest(all_year=False, winter=False):
     
     # OUTPUT FILES
     # Model
-    model_path = f"{MODELS_FOLDER}rf_best_model_{season_name_file}.joblib"
+    model_path = f"{MODELS_FOLDER}/rf_best_model_{season_name_file}.joblib"
     # Confusion Matrices
     cm_validation_image_path = f"{IMAGE_FOLDER}/confusion_matrix_validation_{season_name_file}.png"
     cm_test_image_path = f"{IMAGE_FOLDER}/confusion_matrix_test_{season_name_file}.png"

@@ -46,7 +46,7 @@ def inference(all_year=False, winter=False):
     
     # INPUT FILE
     # Pretrained Model
-    rf_model_path = f"{MODELS_FOLDER}rf_best_model_{season_name_file}.joblib"
+    rf_model_path = f"{MODELS_FOLDER}/rf_best_model_{season_name_file}.joblib"
     # Preprocessed inference test set
     inference_test_file = f"{DATASETS_FOLDER}/inference_test_set_before_classification_{season_name_file}.csv"
     

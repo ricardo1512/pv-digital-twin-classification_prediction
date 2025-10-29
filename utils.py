@@ -296,15 +296,15 @@ def adjust_and_scale_probabilities(proba_inference_df, delta=0.1, top=2):
                   keep at most top 2, normalize them to sum to 1.0, others set to 0.
     
     Args:
-        proba_inference_df (pd.DataFrame): DataFrame with columns [ID, date, predicted_fault, class probabilities...].
+        proba_inference_df (pd.DataFrame): DataFrame with columns [ID, date, predicted_condition, class probabilities...].
         delta (float): Window below max prob to include similar classes for scaling (default=0.05).
 
     Returns:
-        pd.DataFrame: Adjusted probability DataFrame with [ID, date, predicted_fault, adjusted class probabilities...].
+        pd.DataFrame: Adjusted probability DataFrame with [ID, date, predicted_condition, adjusted class probabilities...].
     """
 
     # Identify class probability columns
-    class_cols = [c for c in proba_inference_df.columns if c not in ['ID', 'date', 'predicted_fault']]
+    class_cols = [c for c in proba_inference_df.columns if c not in ['ID', 'date', 'predicted_condition']]
     adjusted_df = proba_inference_df.copy()
 
     # Process each row
@@ -337,7 +337,7 @@ def adjust_and_scale_probabilities(proba_inference_df, delta=0.1, top=2):
         adjusted_df.loc[i, class_cols] = adjusted
 
     # Keep only metadata and adjusted probabilities
-    adjusted_df = adjusted_df[['ID', 'date', 'predicted_fault'] + class_cols]
+    adjusted_df = adjusted_df[['ID', 'date', 'predicted_condition'] + class_cols]
 
     return adjusted_df
 
@@ -349,14 +349,14 @@ def generate_adjusted_probabilities_report(adjusted_df):
     Combinations are grouped first by number of classes (1, 2, ...), then sorted by count descending.
 
     Args:
-        adjusted_df (pd.DataFrame): Adjusted probability DataFrame with [ID, date, predicted_fault, class probabilities...].
+        adjusted_df (pd.DataFrame): Adjusted probability DataFrame with [ID, date, predicted_condition, class probabilities...].
 
     Returns:
         pd.DataFrame: Report DataFrame with columns ['Combination', 'Count'], sorted as described.
     """
 
     # Identify class columns
-    class_cols = [c for c in adjusted_df.columns if c not in ['ID', 'date', 'predicted_fault']]
+    class_cols = [c for c in adjusted_df.columns if c not in ['ID', 'date', 'predicted_condition']]
 
     # Dictionary to count combinations
     combo_counts = {}
