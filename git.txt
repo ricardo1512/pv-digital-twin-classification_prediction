@@ -1,3 +1,0 @@
-git add .
-git commit -m "Creation of Time Series for Soiling"
-git push
