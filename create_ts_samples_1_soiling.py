@@ -4,6 +4,8 @@ import pandas as pd
 import random
 from classes import *
 from globals import *
+from plot_ts_samples import *
+from utils import *
 
 def create_ts_samples_1_soiling(plot_samples=False):
     """
@@ -21,8 +23,8 @@ def create_ts_samples_1_soiling(plot_samples=False):
     # Parameters for soiling accumulation and cleaning
     # ==============================================================
     soiling_min, soiling_max = 0.05, 0.3  # Daily soiling range, for random
-    rain_threshold_mm = 1  # Minimum rainfall to partially clean PV modules
-    cleaning_efficiency = 0.4  # Fraction of soiling removed per rain event
+    rain_threshold_mm = 1                 # Minimum rainfall to partially clean PV modules
+    cleaning_efficiency = 0.4             # Fraction of soiling removed per rain event
 
 
     # ==============================================================
@@ -155,9 +157,14 @@ def create_ts_samples_1_soiling(plot_samples=False):
             ts_df = ts_df[ts_df['date'].dt.month.isin([4, 5, 6, 7, 8, 9])]
 
             # Filter hours between 04:00 and 22:00
-            ts_df = ts_df.set_index('date').between_time(PREDICTION_HOUR_INIT, PREDICTION_HOUR_END).reset_index()
+            ts_df = ts_df.set_index('date').between_time(PREDICTION_HOUR_INIT, PREDICTION_HOUR_END)
             if ts_df.empty:
                 continue
+            
+            # --- Interpolate to 5-min timestep ---
+            for col in ts_df.columns:
+                ts_df[col] = pd.to_numeric(ts_df[col], errors='coerce').astype('float64')
+            ts_df = ts_df.resample('5min').interpolate(method='linear').reset_index()
             
             # Instantiate plant and inverter
             plant = PVPlant(module_data, inverter_data)
@@ -168,13 +175,14 @@ def create_ts_samples_1_soiling(plot_samples=False):
 
             # --- Run simulation ---
             results = twin.run()
-            
-            # --- Daily sums ---
-            # daily_with_soiling = results['mppt_power'].resample('D').sum()
-            # daily_without_soiling = mppt_clean.resample('D').sum()
 
-            # Plot usar local já definido
-            #PLOTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+            # Generate Plots
+            results_plot = ts_resampling(results.between_time(TIME_INIT, TIME_END))
+            condition_title = LABELS_MAP[condition_nr][0]
+            output_image = f"ts_{condition_name}_samples_{year}"
+            # plot_mppt_ts(results_plot, local, condition_title, plot_folder, output_image, soiling=True)
+            # plot_currents_ts(results_plot, local, condition_title, plot_folder, output_image, soiling=True)
+            plot_voltage_ts(results, local, condition_title, plot_folder, output_image)
 
             # --- Export CSV without soiling columns ---
             cols_to_export = [c for c in results.columns if c not in ['pv1_i_clean', 'pv1_u_clean', 'mppt_power_clean', 'a_i_clean']]

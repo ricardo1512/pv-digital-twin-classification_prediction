@@ -391,3 +391,39 @@ def generate_adjusted_probabilities_report(adjusted_df):
     return report_df
 
 
+def ts_resampling(ts):
+    """
+        Resample a time series DataFrame to daily frequency.
+        
+        Arg.:
+            - ts (pd.DataFrame): Time series data indexed by datetime, containing power, meteorological, 
+              and precipitation measurements.
+        
+        Returns:
+            pd.DataFrame: Daily-resampled DataFrame with sums for energy-related columns and 
+            means for weather-related columns. Rows with all NaNs are dropped.
+    """
+    
+    # Columns to aggregate using daily sum
+    sum_cols = ['mppt_power', 'mppt_power_clean', 'precipitation']
+    # Columns to aggregate using daily mean
+    mean_cols = ['pv1_i', 'pv1_i_clean', 'a_i', 'a_i_clean', 'global_tilted_irradiance', 'diffuse_radiation', 'temperature_2m', 'wind_speed_10m']
+    
+    # Initialize a new DataFrame for daily resampled data
+    ts_daily = pd.DataFrame()
+
+    # Compute daily sum for energy-related columns
+    for col in sum_cols:
+        if col in ts.columns:
+            # Use min_count=1 to avoid all-NaN sums resulting in 0
+            ts_daily[col] = ts[col].resample('D').sum(min_count=1)
+
+   # Compute daily mean for meteorological variables
+    for col in mean_cols:
+        if col in ts.columns:
+            ts_daily[col] = ts[col].resample('D').mean()
+
+    # Drop rows that are entirely NaN
+    ts_daily = ts_daily.dropna(how='all')
+    
+    return ts_daily

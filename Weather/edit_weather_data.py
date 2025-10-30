@@ -44,7 +44,7 @@ for col in df.columns:
 df_5min = df.resample('5min').interpolate(method='linear')
 
 # Adjust precipitation values: evenly distribute each hourly total across twelve 5-minute intervals
-df_5min['precipitation'] = df_5min['precipitation'] / 12
+df_5min['precipitation'] = df_5min['precipitation'] / 3
 
 # Reset the index so that the datetime index becomes a regular column again
 df_5min.reset_index(inplace=True)

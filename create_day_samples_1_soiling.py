@@ -51,8 +51,8 @@ def create_samples_1_soiling(files_year, plot_samples=False):
     # Parameters for soiling accumulation and cleaning
     # ==============================================================
     soiling_min, soiling_max = 0.05, 0.3  # Daily soiling range, for random
-    rain_threshold_mm = 1  # Minimum rainfall to partially clean PV modules
-    cleaning_efficiency = 0.4  # Fraction of soiling removed per rain event
+    rain_threshold_mm = 1                 # Minimum rainfall to partially clean PV modules
+    cleaning_efficiency = 0.4             # Fraction of soiling removed per rain event
 
     # ==============================================================
     # Subclass Digital Twin with Soiling
@@ -189,11 +189,12 @@ def create_samples_1_soiling(files_year, plot_samples=False):
         results_full = results_full.clip(lower=0).fillna(0)
 
         # Generate Daily Plots
-        if i in rand_plots and plot_samples:
+        if i == 1 or i in rand_plots and plot_samples:
+            condition_title = LABELS_MAP[condition_nr][0]
             output_image = f"{date.year:04d}_{date.month:02d}_{date.day:02d}_{condition_name}_samples"
-            plot_mppt(results_full, date, plot_folder, output_image)
-            plot_currents(results_full, date, plot_folder, output_image)
-            plot_voltage(results_full, date, plot_folder, output_image)
+            plot_mppt(results_full, date, condition_title, plot_folder, output_image, soiling=True)
+            plot_currents(results_full, date, condition_title, plot_folder, output_image, soiling=True)
+            plot_voltage(results_full, date, condition_title, plot_folder, output_image)
 
         # Prepare end dataframe
         selected_columns = [col for col in results_full.columns if col not in clean_features]
