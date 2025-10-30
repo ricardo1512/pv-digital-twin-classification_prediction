@@ -184,31 +184,33 @@ def extract_comprehensive_features(filtered_results):
     return features
 
 
-def compute_store_daily_comprehensive_features(results_full, date, daily_features):
+def compute_store_daily_comprehensive_features(results_full, date, daily_features=None):
     """
         Compute daily statistical features for a store's numerical data.
 
+        Args:
+            - results_full: DataFrame containing all store data for the day
+            - date: Date corresponding to the data
+            - daily_features: List to append the computed daily feature Series
+        
         Steps:
-        1. Filter the data to the classification hours.
-        2. Extract the inverter state at the start of the period.
-        3. Compute comprehensive statistical features for all numeric columns.
-        4. Combine features and inverter state into a single Pandas Series.
-        5. Append the result to the daily_features list.
-
-        Parameters:
-        - results_full: DataFrame containing all store data for the day
-        - date: Date corresponding to the data
-        - daily_features: List to append the computed daily feature Series
+            1. Filter the data to the classification hours.
+            2. Extract the inverter state at the start of the period.
+            3. Compute comprehensive statistical features for all numeric columns.
+            4. Combine features and inverter state into a single Pandas Series.
+            5. Append the result to the daily_features list.
+        
+        Returns the daily statistical features.
     """
 
     # Filter data within classification hours
     filtered_results = results_full.between_time(CLASSIFICATION_HOUR_INIT, CLASSIFICATION_HOUR_END)
 
     # Get inverter state at the start of the period
-    inverter_state_value = filtered_results['inverter_state'].iloc[0]
+    inverter_state_value = filtered_results[LABEL].iloc[0]
 
     # Remove inverter state column before feature extraction
-    filtered_results_features = filtered_results.drop(columns=['inverter_state'])
+    filtered_results_features = filtered_results.drop(columns=[LABEL])
 
     # Extract comprehensive features from numeric columns
     features_array = extract_comprehensive_features(filtered_results_features)
@@ -217,13 +219,16 @@ def compute_store_daily_comprehensive_features(results_full, date, daily_feature
     feature_series = pd.Series(features_array)
 
     # Add inverter state as a feature
-    feature_series['inverter_state'] = inverter_state_value
+    feature_series[LABEL] = inverter_state_value
 
     # Assign the series a name corresponding to the current date
     feature_series.name = pd.to_datetime(date)
 
-    # Append the series to the list of daily features
-    daily_features.append(feature_series)
+    if daily_features:
+        # Append the series to the list of daily features
+        daily_features.append(feature_series)
+    
+    return feature_series
 
 
 def determine_season(all_year, winter):

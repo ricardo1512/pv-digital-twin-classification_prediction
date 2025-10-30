@@ -146,7 +146,7 @@ def inference(all_year=False, winter=False):
     proba_inference = rf_classifier.predict_proba(X_inference)
 
     # Create a DataFrame to store predicted probabilities
-    columns_names = [f'{LABELS_MAP[c][0]}' for c in rf_classifier.classes_]
+    columns_names = [LABELS_MAP[c][0] for c in rf_classifier.classes_]
     proba_inference_df = pd.DataFrame(
         proba_inference,
         columns=columns_names

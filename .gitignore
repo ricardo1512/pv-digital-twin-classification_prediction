@@ -1,3 +1,8 @@
 Weather/Prediction
+TS_samples
+Plots/TS_samples
 
 git.txt
+create_ts_samples_1_soiling.py
+plot_ts_samples.py
+prediction.py
