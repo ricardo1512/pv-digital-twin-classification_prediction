@@ -77,8 +77,13 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
     ax1.set_ylabel("MPPT (kW)", color=color_mppt)
     ax1.tick_params(axis='y', labelcolor=color_mppt)
 
+    # Configure tick labels
+    ax1.xticks(rotation=0, ha='center', color='white', fontsize=8)
+    ax1.yticks(color='white', fontsize=8)
+        
     # Adjust Y-axis limits for MPPT
     ax1.set_ylim(0, df['mppt_power_clean'].max() * 1.1 if mppt_clean else df['mppt_power'].max() * 1.1)
+    
     
     # Create legend only for MPPT lines with white frame
     if mppt_clean:
@@ -230,6 +235,10 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
     # Adjust Y-axis limits for currents
     max_y = df['pv1_i_clean'].max() * 1.1 if pv1_i_clean else df['pv1_i'].max() * 1.1
     ax1.set_ylim(0, max_y)
+    
+    # Configure tick labels
+    ax1.xticks(rotation=0, ha='center', color='white', fontsize=8)
+    ax1.yticks(color='white', fontsize=8)
 
     # Label axes and set tick colors to white for visibility
     ax1.set_xlabel("Date")
@@ -357,6 +366,10 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
     # Adjust Y-axis limits for voltage
     max_y = df['pv1_u_clean'].max() * 1.1 if pv1_u_clean else df['pv1_u'].max() * 1.1
     ax.set_ylim(0, max_y)
+    
+    # Configure tick labels
+    ax.xticks(rotation=0, ha='center', color='white', fontsize=8)
+    ax.yticks(color='white', fontsize=8)
 
     # Format x-axis as HH:MM
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))

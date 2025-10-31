@@ -143,6 +143,10 @@ def plot_feature_importance(top_features, season_name, image_file):
                  color='white', fontsize=14)
     ax.set_xlabel('Importance', color='white', fontsize=12)
     ax.set_ylabel('Feature', color='white', fontsize=12)
+    
+    # Configure tick labels
+    ax.xticks(rotation=0, ha='center', color='white', fontsize=8)
+    ax.yticks(color='white', fontsize=10)
 
     # Customize tick colors for readability on dark background
     ax.tick_params(axis='x', colors='white')
@@ -283,6 +287,8 @@ def plot_auc_recall_vs_precision(y_true, y_scores, class_names, output_file):
     ax.tick_params(axis='x', colors='white')
     ax.tick_params(axis='y', colors='white')
     ax.set_xlim(1, 0)
+    ax.xticks(rotation=0, ha='center', color='white', fontsize=8)
+    ax.yticks(color='white', fontsize=8)
     ax.grid(True, linestyle='--', color='gray', alpha=0.5)
     ax.legend(facecolor='black', edgecolor='white', fontsize=10)
 
@@ -338,6 +344,8 @@ def plot_fp_tp_curve(y_true, y_scores, class_names, output_file):
     ax.plot([0, 1], [0, 1], 'w--', lw=1, label='Random Guess')
     ax.set_xlim([0.0, 1.0])
     ax.set_ylim([0.0, 1.05])
+    ax.xticks(rotation=0, ha='center', color='white', fontsize=8)
+    ax.yticks(color='white', fontsize=8)
     ax.set_xlabel('False Positive Rate (FP)', color='white', fontsize=12)
     ax.set_ylabel('True Positive Rate (TP)', color='white', fontsize=12)
     ax.set_title('True Positive vs False Positive Per Class', color='white', fontsize=14)
