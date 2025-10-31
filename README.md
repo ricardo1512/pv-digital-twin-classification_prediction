@@ -180,30 +180,32 @@ python main.py --create_samples --create_train_test --random_forest_run --create
 ## Project Structure
 ```
 📦 PV_Digital_Twin_Classification
-├── main.py                              # CLI entry point (argparse workflow)
-├── classes.py                           # Core system and inverter models
-├── create_day_samples_*.py              # Normal, anomaly and fault-specific simulation modules
-├── create_day_samples.py                # Parallel orchestration of all scenarios
-├── create_preprocess_inference_set.py   # Preprocesses inverter data
-├── create_train_test_sets.py            # Aggregates simulation data
-├── globals.py                           # Global constants and paths
-├── inference.py                         # Anomaly and fault classification inference
-├── main.py                              # Argparse commands
-├── random_forest.py                     # ML model training and evaluation
-├── plot_day_samples.py                  # Plotting utilities for sample creation
-├── plot_inference.py                    # Plotting utilities for inference
-├── plot_training.py                     # Plotting utilities for training
-├── utils.py                             # Feature extraction and helpers
-├── Datasets/                            # Aggregated datasets for training and inference
-├── Images/                              # Training and testing plots
-├── Inverters/                           # Real inverter data for inference
-├── Models/                              # Trained Random Forest models
-├── Plots/                               # Sample plots
-├── Reports/                             # Performance reports
-├── Samples_2023/                        # Training samples
-├── Samples_2024/                        # Testing samples
-└── Weather/                             # Meteorological input data
-    └──edit_weather_data.py              # Edits row weather data for simulations
+├── main.py                                    # CLI entry point (argparse workflow)
+├── classes.py                                 # Core system and inverter models
+├── create_day_samples_*.py                    # Normal, anomaly and fault-specific simulation modules
+├── create_day_samples.py                      # Parallel orchestration of all scenarios
+├── create_preprocess_inference_set.py         # Inverter data preprocessing
+├── create_train_test_sets.py                  # Simulation data aggregation
+├── globals.py                                 # Global constants and paths
+├── inference.py                               # Anomaly and fault classification inference
+├── main.py                                    # Argparse commands
+├── preprocess_weather_for_classification.py   # Row weather data for classification preprocessing
+├── random_forest.py                           # ML model training and evaluation
+├── real_data_visualisation.py                 # Visualizing real-world data using plots
+├── plot_day_samples.py                        # Plotting utilities for sample creation
+├── plot_inference.py                          # Plotting utilities for inference
+├── plot_training.py                           # Plotting utilities for training
+├── utils.py                                   # Feature extraction and helpers
+├── Datasets/                                  # Aggregated datasets for training and inference
+├── Images/                                    # Training and testing plots
+├── Inverters/                                 # Real inverter data for inference
+├── Models/                                    # Trained Random Forest models
+├── Plots/                                     # Sample plots
+├── Reports/                                   # Performance reports
+├── Samples_2023/                              # Training samples
+├── Samples_2024/                              # Testing samples
+└── Weather/                                   # Meteorological input data
+
 ```
 
 ---

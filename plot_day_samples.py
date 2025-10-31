@@ -1,11 +1,12 @@
 import os
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.lines as mlines
 from globals import *
 
 # Time limits
-TIME_INIT = "06:00" 
-TIME_END = "20:00"
+TIME_INIT = "05:00" 
+TIME_END = "21:00"
 
 
 # Default colors
@@ -148,8 +149,8 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
         else:
             ax6.set_ylim(0, df['precipitation'].max() * 1.1)
         
-    # Format X-axis as hours:minutes
-    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+    # Format x-axis as HH:MM
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
     plt.setp(ax1.get_xticklabels(), rotation=0)
 
     # Title of the plot
@@ -157,13 +158,31 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
 
     # Enable grid for Y-axis
     plt.grid(True, axis='y', linestyle='--', alpha=0.6)
+    
+    # Draw vertical dashed lines for a specific inverter_state value
+    if condition_title == "Real Data":
+        for i, state in enumerate(df[LABEL]):
+            if state == 768:
+                ax1.axvline(df.index[i], color='red', linestyle='--', linewidth=0.5)
+
+        # Create the vertical line legend manually
+        line_red = mlines.Line2D([], [], color='red', linestyle='--', linewidth=0.5, label='Fault')
+
+        # Add the lines to the legend
+        ax1.legend(handles=[line_red], loc='upper left')
+    
+    # Adjusts subplot parameters to ensure that all labels, titles, and legends fit within the figure area
     plt.tight_layout()
 
     # Save figure
-    plt.savefig(os.path.join(plot_folder, f"{output_image}_mppt_dhi_gti_temp_wind.png"), dpi=300, bbox_inches='tight')
+    image_path = os.path.join(plot_folder, f"{output_image}_mppt_dhi_gti_temp_wind.png")
+    plt.savefig(image_path, dpi=300, bbox_inches='tight')
 
     # Close figure to free memory
     plt.close()
+    
+    # Confirm saving
+    print(f"MPPT plot saved to {image_path}")
 
 
 def plot_currents(df_original, date, condition_title, output_folder, filename, soiling=False):
@@ -203,29 +222,26 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
     if pv1_i_clean:
         line1, = ax1.plot(df.index, df['pv1_i_clean'], color=CURR_VOLT_PALETTE['pv1_i_clean'], label='Reference pv1_i', linewidth=1.5, linestyle=':')
         line2, = ax1.plot(df.index, df['a_i_clean'], color=CURR_VOLT_PALETTE['a_i_clean'], label='Reference a_i', linewidth=1.5, linestyle=':')
-    line3, = ax1.plot(df.index, df['pv1_i'], color=CURR_VOLT_PALETTE['pv1_i'], label='Effective pv1_i', linewidth=2)
-    line4, = ax1.plot(df.index, df['a_i'], color=CURR_VOLT_PALETTE['a_i'], label='Effective a_i', linewidth=2)
+    pv1_i_label = 'Effective pv1_i' if pv1_i_clean else 'pv1_i'
+    a_i_label = 'Effective pv1_i' if pv1_i_clean else 'a_i'
+    line3, = ax1.plot(df.index, df['pv1_i'], color=CURR_VOLT_PALETTE['pv1_i'], label=pv1_i_label, linewidth=2)
+    line4, = ax1.plot(df.index, df['a_i'], color=CURR_VOLT_PALETTE['a_i'], label=a_i_label, linewidth=2)
     
     # Adjust Y-axis limits for currents
-    ax1.set_ylim(0, df['pv1_i_clean'].max() * 1.1)
+    max_y = df['pv1_i_clean'].max() * 1.1 if pv1_i_clean else df['pv1_i'].max() * 1.1
+    ax1.set_ylim(0, max_y)
 
     # Label axes and set tick colors to white for visibility
     ax1.set_xlabel("Date")
     ax1.set_ylabel("Current (A)", color='white')
     ax1.tick_params(axis='x', colors='white')
     ax1.tick_params(axis='y', colors='white')
-    
-    # Create legend only for MPPT lines with white frame
-    if pv1_i_clean:
-        ax1.legend(handles=[line1, line3, line2, line4], fontsize=10, loc='upper left', facecolor='black', edgecolor='white')
-    else:
-        ax1.legend(handles=[line3, line4], fontsize=10, loc='upper left', facecolor='black', edgecolor='white')
 
     # Add horizontal grid lines with light transparency
     ax1.grid(True, axis='y', linestyle='--', alpha=0.6)
 
-    # Format x-axis as hours and minutes
-    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+    # Format x-axis as HH:MM
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
     plt.setp(ax1.get_xticklabels(), rotation=0)
 
     # Set plot title
@@ -249,15 +265,44 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
         else:
             ax2.set_ylim(0, max_precip * 1.1)
 
+        # Initialize a list to store legend handles
+        handles = []
+
+        # Add MPPT lines to the handles
+        if pv1_i_clean:
+            handles.extend([line1, line3, line2, line4])
+        else:
+            handles.extend([line3, line4])
+    
+    # Draw vertical dashed lines for a specific inverter_state value
+    if condition_title == "Real Data":
+        for i, state in enumerate(df[LABEL]):
+            if state == 768:
+                ax1.axvline(df.index[i], color='red', linestyle='--', linewidth=0.5)
+
+        # Create the vertical line legend manually
+        line_red = mlines.Line2D([], [], color='red', linestyle='--', linewidth=0.5, label='Fault')
+
+        # Add the lines to the legend
+        ax1.legend(handles=[line_red], loc='upper left')
+        handles.append(line_red)
+    
+        
+    # Create a single combined legend for all handles
+    ax1.legend(handles=handles, fontsize=10, loc='upper left', facecolor='black', edgecolor='white')
+        
     # Adjust layout to avoid clipping of labels
     plt.tight_layout()
 
     # Construct full output path and save figure with high resolution
-    output_path = os.path.join(output_folder, f"{filename}_pv_phase_currents.png")
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    image_path = os.path.join(output_folder, f"{filename}_pv_phase_currents.png")
+    plt.savefig(image_path, dpi=300, bbox_inches='tight')
 
     # Close figure to free memory
     plt.close()
+    
+    # Confirm saving
+    print(f"Currents plot saved to {image_path}")
 
 
 def plot_voltage(df_original, date, condition_title, output_folder, filename):
@@ -310,11 +355,24 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
     ax.grid(True, axis='y', linestyle='--', alpha=0.6)
     
     # Adjust Y-axis limits for voltage
-    ax.set_ylim(0, df['pv1_u_clean'].max() * 1.1)
+    max_y = df['pv1_u_clean'].max() * 1.1 if pv1_u_clean else df['pv1_u'].max() * 1.1
+    ax.set_ylim(0, max_y)
 
     # Format x-axis as HH:MM
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
     plt.setp(ax.get_xticklabels(), rotation=0)
+    
+    # Draw vertical dashed lines for a specific inverter_state value
+    if condition_title == "Real Data":
+        for i, state in enumerate(df[LABEL]):
+            if state == 768:
+                ax.axvline(df.index[i], color='red', linestyle='--', linewidth=0.5)
+
+        # Create the vertical line legend manually
+        line_red = mlines.Line2D([], [], color='red', linestyle='--', linewidth=0.5, label='Fault')
+
+        # Add the lines to the legend
+        ax.legend(handles=[line_red], loc='upper left')
 
     # Title and legend
     plt.title(f"PV and Phase Voltages, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='white')
@@ -323,8 +381,11 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
     plt.tight_layout()
 
     # Save figure
-    output_path = os.path.join(output_folder, f"{filename}_pv_phase_voltages.png")
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    image_path = os.path.join(output_folder, f"{filename}_pv_phase_voltages.png")
+    plt.savefig(image_path, dpi=300, bbox_inches='tight')
 
     # Close figure to free memory
     plt.close()
+    
+        # Confirm saving
+    print(f"Voltages plot saved to {image_path}")

@@ -67,7 +67,7 @@ def create_preprocess_inference_set(smoothing=False, all_year=False, winter=Fals
                     # Apply moving average smoothing to the selected columns
                     group[cols_to_smooth] = (
                         group[cols_to_smooth]
-                        .rolling(window=48, min_periods=1)
+                        .rolling(window=24, min_periods=1)
                         .mean()
                     )
 
