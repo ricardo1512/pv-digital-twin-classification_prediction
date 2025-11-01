@@ -294,7 +294,7 @@ def adjust_and_scale_probabilities(proba_inference_df, delta=0.1, top=2):
     Adjusts class probabilities based on confidence threshold and proximity window (delta),
     preserving at most the two top-ranked classes.
 
-    Logic:
+    Logic: 
         - If max probability >= 0.7 → set that class to 1.0 and others to 0.0.
         - Else → select probabilities within (max - delta) <= p <= max,
                   keep at most top 2, normalize them to sum to 1.0, others set to 0.
