@@ -299,7 +299,7 @@ def adjust_and_scale_probabilities(proba_inference_df, delta=0.1, top=2):
         - Else → select probabilities within (max - delta) <= p <= max,
                   keep at most top 2, normalize them to sum to 1.0, others set to 0.
     
-    Args:
+    Args: 
         proba_inference_df (pd.DataFrame): DataFrame with columns [ID, date, predicted_condition, class probabilities...].
         delta (float): Window below max prob to include similar classes for scaling (default=0.05).
 
