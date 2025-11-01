@@ -289,7 +289,6 @@ def class_accuracy(cm):
     return np.round(class_acc, 1)
 
 
-
 def adjust_and_scale_probabilities(proba_inference_df, delta=0.1, top=2):
     """
     Adjusts class probabilities based on confidence threshold and proximity window (delta),
