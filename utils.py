@@ -5,10 +5,10 @@ from globals import *
 
 def safe_std(arr):
     """
-    Calculate the standard deviation safely.
+        Calculate the standard deviation safely.
 
-    Returns 0.0 if the array has fewer than 2 elements or all values are identical,
-    avoiding invalid or meaningless results.
+        Returns 0.0 if the array has fewer than 2 elements or all values are identical,
+        avoiding invalid or meaningless results.
     """
 
     if len(arr) < 2 or np.all(arr == arr[0]):
@@ -18,10 +18,10 @@ def safe_std(arr):
 
 def safe_var(arr):
     """
-    Calculate the variance safely.
+        Calculate the variance safely.
 
-    Returns 0.0 if the array has fewer than 2 elements or all values are identical,
-    preventing invalid variance computation.
+        Returns 0.0 if the array has fewer than 2 elements or all values are identical,
+        preventing invalid variance computation.
     """
 
     if len(arr) < 2 or np.all(arr == arr[0]):
@@ -31,10 +31,10 @@ def safe_var(arr):
 
 def safe_mean(arr):
     """
-    Calculate the mean safely.
+        Calculate the mean safely.
 
-    Returns np.nan if the array is empty or contains only NaN values,
-    ensuring a meaningful result.
+        Returns np.nan if the array is empty or contains only NaN values,
+        ensuring a meaningful result.
     """
 
     if len(arr) == 0 or np.all(np.isnan(arr)):
@@ -44,10 +44,10 @@ def safe_mean(arr):
 
 def safe_corrcoef(arr1, arr2):
     """
-    Calculate the Pearson correlation coefficient safely.
+        Calculate the Pearson correlation coefficient safely.
 
-    Returns np.nan if arrays are too short, have constant values, or different lengths,
-    avoiding errors or meaningless correlations.
+        Returns np.nan if arrays are too short, have constant values, or different lengths,
+        avoiding errors or meaningless correlations.
     """
 
     if (len(arr1) < 2 or len(arr2) < 2 or
@@ -291,20 +291,20 @@ def class_accuracy(cm):
 
 def adjust_and_scale_probabilities(proba_inference_df, delta=0.1, top=2):
     """
-    Adjusts class probabilities based on confidence threshold and proximity window (delta),
-    preserving at most the two top-ranked classes.
+        Adjusts class probabilities based on confidence threshold and proximity window (delta),
+        preserving at most the two top-ranked classes.
 
-    Logic: 
-        - If max probability >= 0.7 → set that class to 1.0 and others to 0.0.
-        - Else → select probabilities within (max - delta) <= p <= max,
-                  keep at most top 2, normalize them to sum to 1.0, others set to 0.
-    
-    Args: 
-        proba_inference_df (pd.DataFrame): DataFrame with columns [ID, date, predicted_condition, class probabilities...].
-        delta (float): Window below max prob to include similar classes for scaling (default=0.05).
+        Logic: 
+            - If max probability >= 0.7 → set that class to 1.0 and others to 0.0.
+            - Else → select probabilities within (max - delta) <= p <= max,
+                    keep at most top 2, normalize them to sum to 1.0, others set to 0.
+        
+        Args: 
+            proba_inference_df (pd.DataFrame): DataFrame with columns [ID, date, predicted_condition, class probabilities...].
+            delta (float): Window below max prob to include similar classes for scaling (default=0.05).
 
-    Returns:
-        pd.DataFrame: Adjusted probability DataFrame with [ID, date, predicted_condition, adjusted class probabilities...].
+        Returns:
+            pd.DataFrame: Adjusted probability DataFrame with [ID, date, predicted_condition, adjusted class probabilities...].
     """
 
     # Identify class probability columns
@@ -348,15 +348,15 @@ def adjust_and_scale_probabilities(proba_inference_df, delta=0.1, top=2):
 
 def generate_adjusted_probabilities_report(adjusted_df):
     """
-    Generates a CSV report with counts of each unique combination of selected classes.
-    Each row may contribute a combination of 1 or more classes.
-    Combinations are grouped first by number of classes (1, 2, ...), then sorted by count descending.
+        Generates a CSV report with counts of each unique combination of selected classes.
+        Each row may contribute a combination of 1 or more classes.
+        Combinations are grouped first by number of classes (1, 2, ...), then sorted by count descending.
 
-    Args:
-        adjusted_df (pd.DataFrame): Adjusted probability DataFrame with [ID, date, predicted_condition, class probabilities...].
+        Args:
+            adjusted_df (pd.DataFrame): Adjusted probability DataFrame with [ID, date, predicted_condition, class probabilities...].
 
-    Returns:
-        pd.DataFrame: Report DataFrame with columns ['Combination', 'Count'], sorted as described.
+        Returns:
+            pd.DataFrame: Report DataFrame with columns ['Combination', 'Count'], sorted as described.
     """
 
     # Identify class columns
