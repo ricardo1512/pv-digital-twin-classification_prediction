@@ -1,8 +1,102 @@
 import os
+import numpy as np
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
 from globals import *
 from plot_day_samples import *
 
+
+def correlation_matrix(df, plot_folder):
+    """
+        Generate and save a global correlation matrix heatmap for all inverters' data.
+        
+        Args:
+            df (pd.DataFrame): DataFrame containing data from all inverters.
+            plot_folder (str): Directory where the plot will be saved.
+            
+        Notes:
+            - Only the lower triangle of the correlation matrix is displayed.
+            - Annotation text color adapts automatically based on cell brightness.
+            - The heatmap uses a custom black-gray-white colormap.
+    """
+
+    # Define feature order
+    feature_order = EXPORT_COLUMNS + METEOROLOGICAL_COLUMNS
+
+    # Select only numeric columns
+    df_numeric = df.select_dtypes(include='number')
+    df_numeric = df_numeric[[col for col in feature_order if col in df_numeric.columns and col != 'inverter_state']]
+    corr = df_numeric.corr().round(2)
+
+    # Mask for upper triangle
+    mask = np.triu(np.ones_like(corr, dtype=bool))
+
+    # Custom colormap: black -> gray -> white
+    colors = [(0, 0, 0), (0.5, 0.5, 0.5), (1, 1, 1)]
+    cmap = LinearSegmentedColormap.from_list("black_gray_white", colors)
+
+    # Create figure
+    _, ax = plt.subplots(figsize=(14, 12), facecolor='black')
+
+    # Plot heatmap without annotations, applying the mask
+    sns.heatmap(
+        corr,
+        mask=mask,
+        annot=False,
+        fmt='',
+        cmap=cmap,
+        cbar=True,
+        vmin=-1,
+        vmax=1,
+        linewidths=1,
+        linecolor='white',
+        ax=ax
+    )
+
+    # Set the upper triangle cells to black explicitly
+    # (ensures masked area matches the figure background)
+    for i in range(corr.shape[0]):
+        for j in range(corr.shape[1]):
+            if i < j: # only upper triangle
+                ax.add_patch(plt.Rectangle((j, i), 1, 1, fill=True, color='black', lw=0))
+                
+    # Add annotations manually for lower triangle only
+    for i in range(corr.shape[0]):
+        for j in range(corr.shape[1]):
+            if i >= j:  # only lower triangle
+                val = corr.iloc[i, j]
+                normalized_val = (val + 1) / 2  # -1 -> 0, 1 -> 1
+                color = 'black' if normalized_val > 0.7 else 'white'
+                ax.text(j + 0.5, i + 0.5, f"{val:.2f}", ha='center', va='center', color=color)
+
+    # Customize colorbar
+    cbar = ax.collections[0].colorbar
+    cbar.ax.yaxis.set_tick_params(color='white', labelcolor='white')
+    cbar.outline.set_edgecolor('white')
+    cbar.set_label('Correlation', color='white')
+
+    # Titles and ticks
+    ax.set_title(f'Correlation Matrix, All Inverters (Values: Pearson r)',
+                 color='white', fontsize=16)
+    plt.setp(ax.get_xticklabels(), fontsize=10, rotation=90, ha='right', color='white')
+    plt.setp(ax.get_yticklabels(), fontsize=10, rotation=0, color='white')
+
+    # Adjust layout
+    plt.tight_layout()
+
+    # Save plot
+    output_file = os.path.join(plot_folder, "correlation_matrix.png")
+    plt.savefig(output_file, dpi=300, bbox_inches='tight', facecolor='black')
+    
+    # Close plot to free memory
+    plt.close()
+
+    # Log the output file path
+    print(f"Global Correlation Matrix saved to {output_file}")
+    
+    
 def real_data_visualisation(smoothing=False):
     
     # Input folder
@@ -10,6 +104,9 @@ def real_data_visualisation(smoothing=False):
     
     # Output file path
     plot_folder = f"{PLOT_FOLDER}/Real_data"
+    
+    # Initialize empty DataFrames
+    all_dfs = []
     
     # Get all CSV files in the input folder
     csv_files = [
@@ -30,18 +127,21 @@ def real_data_visualisation(smoothing=False):
         filename_no_ext = os.path.splitext(file)[0]
         inverter_id = filename_no_ext.replace("inverter_", "")
 
+        if smoothing:
+            # Select numeric columns to smooth, excluding inverter_state and weather features
+            cols_to_smooth = [
+                col for col in df.select_dtypes(include='number').columns
+                if col not in ["inverter_state", "diffuse_radiation", "global_tilted_irradiance", "wind_speed_10m",
+                                   "precipitation"]
+            ]
+
+        # Append the DataFrame to the list
+        all_dfs.append(df)
+
         # Process data grouped by each day
         for date, group in df.groupby(df['collectTime'].dt.date):
             # Only consider days when the inverter was active (state 768)
             if (group['inverter_state'] == 768).any():
-
-                # Select numeric columns to smooth, excluding inverter_state and weather features
-                cols_to_smooth = [
-                    col for col in df.select_dtypes(include='number').columns
-                    if col not in ["inverter_state", "diffuse_radiation", "global_tilted_irradiance", "wind_speed_10m",
-                                   "precipitation"]
-                ]
-
                 if smoothing:
                     # Apply moving average smoothing to the selected columns
                     group[cols_to_smooth] = (
@@ -58,6 +158,15 @@ def real_data_visualisation(smoothing=False):
                 plot_mppt(group, date, condition_name, plot_folder, output_image, soiling=True)
                 plot_currents(group, date,condition_name, plot_folder, output_image, soiling=True)
                 plot_voltage(group, date, condition_name, plot_folder, output_image)
+                
                 exit()
+
+    # Concatenate all files
+    combined_df = pd.concat(all_dfs, ignore_index=True)
+        
+    # Generate correlation matrix for all inverters' data
+    correlation_matrix(combined_df, plot_folder)
+
+
 
 real_data_visualisation(smoothing=True)

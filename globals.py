@@ -58,16 +58,17 @@ METEOROLOGICAL_COLUMNS = [
 # ==============================
 # Export Columns
 # ==============================
+    
 EXPORT_COLUMNS = [
     'inverter_state',
+    'pv1_i',
+    'pv1_u',
     'mppt_power',
     'active_power',
     'efficiency',
-    'pv1_i',
     'a_i',
     'b_i',
     'c_i',
-    'pv1_u',
     'a_u',
     'b_u',
     'c_u',
