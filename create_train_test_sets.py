@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from globals import *
+from plot_day_samples import *
 
 # ==============================================================
 # Dataset Consolidation
@@ -32,12 +33,21 @@ def create_train_test_sets():
         have completed successfully to ensure all fault types are included in the datasets.
     """
 
+    # Output folder and files for plots
+    output_folder = f"{PLOT_FOLDER}/Day_samples"
+    train_file = "trainset_2023_scatter_iv.png"
+    test_file = "testset_2024_scatter_iv.png"
+    
     print("\n" + "=" * 40)
     print("CREATING TRAIN AND TEST SETS...")
     print("=" * 40)
 
     # Lists to store DataFrames for each year
     dfs_train, dfs_test = [], []
+    
+    # Initialize empty DataFrames
+    df_plot_train = pd.DataFrame(columns=['pv1_i_mean', 'pv1_u_mean', 'inverter_state'])
+    df_plot_test = pd.DataFrame(columns=['pv1_i_mean', 'pv1_u_mean', 'inverter_state'])
 
     # Load and store all CSV files for 2023 (training)
     for filename in os.listdir(FOLDER_TRAIN_SAMPLES):
@@ -46,13 +56,29 @@ def create_train_test_sets():
             df = pd.read_csv(filepath)
             dfs_train.append(df)
 
+            # Select only required columns
+            df_part = df[['pv1_i_mean', 'pv1_u_mean', 'inverter_state']].copy()
+
+            # Append directly to cumulative DataFrame
+            df_plot_train = pd.concat([df_plot_train, df_part], ignore_index=True)
+
     # Load and store all CSV files for 2024 (testing)
     for filename in os.listdir(FOLDER_TEST_SAMPLES):
         if filename.endswith(".csv"):
             filepath = os.path.join(FOLDER_TEST_SAMPLES, filename)
             df = pd.read_csv(filepath)
             dfs_test.append(df)
+            
+            # Select only required columns
+            df_part = df[['pv1_i_mean', 'pv1_u_mean', 'inverter_state']].copy()
 
+            # Append directly to cumulative DataFrame
+            df_plot_test = pd.concat([df_plot_test, df_part], ignore_index=True)
+
+    # Plot combined scatter I-V for training and test data
+    plot_scatter_iv(df_plot_train, output_folder, train_file)
+    plot_scatter_iv(df_plot_test, output_folder, test_file)
+    
     # Concatenate all DataFrames into single train/test datasets
     combined_df_train = pd.concat(dfs_train, ignore_index=True)
     combined_df_test = pd.concat(dfs_test, ignore_index=True)
@@ -62,3 +88,4 @@ def create_train_test_sets():
     print(f"Combined Train CSV saved as {TRAIN_VALID_SET_FILE}")
     combined_df_test.to_csv(TEST_SET_FILE, index=False)
     print(f"Combined Test CSV saved as {TEST_SET_FILE}")
+    

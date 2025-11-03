@@ -402,3 +402,72 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
     
         # Confirm saving
     print(f"Voltages plot saved to {image_path}")
+    
+    
+
+def plot_scatter_iv(df_plot, output_folder, filename):
+    """
+        Scatter plot of pv1_u_mean (x) vs pv1_i_mean (y), colored by inverter_state,
+        using dark-themed style consistent with other PV plots.
+
+        Args:
+            df_plot (pd.DataFrame): Must contain ['pv1_u_mean', 'pv1_i_mean', 'inverter_state'].
+            output_folder (str): Folder where to save the figure.
+            filename (str): Base name for the saved image (without extension).
+    """
+
+    # Ensure folder exists
+    os.makedirs(output_folder, exist_ok=True)
+
+    # Dark style
+    plt.style.use('dark_background')
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    # Sort unique states for consistent color assignment
+    unique_states = sorted(df_plot['inverter_state'].dropna().unique())
+
+    # Plot by inverter_state
+    handles = []
+    for state in unique_states:
+        if state in LABELS_MAP:
+            label, color = LABELS_MAP[state]
+        else:
+            label, color = (f"State {state}", "#cccccc")  # fallback color
+
+        subset = df_plot[df_plot['inverter_state'] == state]
+        ax.scatter(subset['pv1_u_mean'], subset['pv1_i_mean'],
+                   s=8, alpha=0.6, edgecolors='none', color=color, label=label)
+
+        # Legend marker
+        handle = mlines.Line2D([], [], color=color, marker='o', linestyle='None',
+                               markersize=6, label=label)
+        handles.append(handle)
+
+    # Axes labels
+    ax.set_xlabel("PV1 Voltage Mean (V)", color='white', fontsize=12)
+    ax.set_ylabel("PV1 Current Mean (A)", color='white', fontsize=12)
+
+    # Title
+    plt.title(f"PV1 I–V Scatter by Inverter State, {LOCAL}",
+              fontsize=18, verticalalignment='bottom', color='white')
+
+    # Ticks & grid
+    ax.tick_params(axis='x', colors='white', labelsize=9)
+    ax.tick_params(axis='y', colors='white', labelsize=9)
+    ax.grid(True, linestyle='--', alpha=0.6)
+
+    # Legend (black background, white border)
+    leg = ax.legend(handles=handles, loc='upper left', fontsize=9)
+    leg.get_frame().set_facecolor('black')
+    leg.get_frame().set_edgecolor('white')
+    leg.get_title().set_color('white')
+    for text in leg.get_texts():
+        text.set_color('white')
+
+    # Layout & save
+    plt.tight_layout()
+    image_path = os.path.join(output_folder, f"{filename}_pv1_iv_scatter.png")
+    plt.savefig(image_path, dpi=300, bbox_inches='tight')
+    plt.close()
+
+    print(f"I–V scatter plot saved to {image_path}")
