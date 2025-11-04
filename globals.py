@@ -2,6 +2,7 @@
 # Global Configuration for PV System Anomaly and Fault Classification
 # ===================================================================
 
+
 # ==============================
 # Location Settings
 # ==============================

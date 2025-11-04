@@ -5,7 +5,6 @@ from random_forest import *
 from create_preprocess_inference_set import *
 from inference import *
 
-
 def run(args):
     # ------------------------------------------------------
     # Block 1: Create Samples
