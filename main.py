@@ -8,7 +8,7 @@ from inference import *
 
 def run(args):
     # ------------------------------------------------------
-    # Block 1: Create Samples 
+    # Block 1: Create Samples
     # ------------------------------------------------------
     if args.create_samples or args.create_samples_with_plots:
         create_day_samples(
