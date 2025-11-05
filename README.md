@@ -1,8 +1,8 @@
 # Photovoltaic Digital Twin Simulation Framework for Anomaly and Fault Classification
-#### Ricardo Vicente, Lisbon, 2025
+#### Ricardo Vicente, Lisbon, 2025 
 
 ## Description / Overview
-This project implements a **Photovoltaic (PV) Digital Twin** for the simulation, monitoring, and analysis of a PV system under normal and multiple anomaly and fault conditions.  
+This project implements a **Photovoltaic (PV) Digital Twin** for the simulation, monitoring, and analysis of a PV system under normal and multiple anomaly and fault conditions.
 The framework models the electrical, thermal, and environmental behaviour of a solar plant consisting of **Jinko JKM410M-72HL-V modules** and a **Huawei SUN2000-10KTL-USL0-240V inverter**.  
 
 It uses **pvlib** for irradiance, temperature, wind speed, precipitation, and power flow modeling, and integrates anomaly and fault-specific degradation models (e.g., cracks, shading, ground faults, arc faults). The system supports data aggregation, anomaly and fault classification dataset generation, Random Forest training, and inference on real data.
