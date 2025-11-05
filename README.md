@@ -1,5 +1,5 @@
 # Photovoltaic Digital Twin Simulation Framework for Anomaly and Fault Classification
-#### Ricardo Vicente, Lisbon, 2025 
+#### Ricardo Vicente, Lisbon, 2025
 
 ## Description / Overview
 This project implements a **Photovoltaic (PV) Digital Twin** for the simulation, monitoring, and analysis of a PV system under normal and multiple anomaly and fault conditions.
