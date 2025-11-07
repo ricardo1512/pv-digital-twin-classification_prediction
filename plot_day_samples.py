@@ -256,26 +256,26 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
     # Set plot title
     # plt.title(f"PV and Phase Currents, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='white')
     
+    # Initialize a list to store legend handles
+    handles = []
     # -------------------------
     # Precipitation axis (right)
     # -------------------------
     if soiling:
         # Set plot title
         # plt.title(f"PV and Phase Currents, and Precipitation, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='white')
-        ax2 = ax1.twinx()
-        ax2.plot(df.index, df['precipitation'], color=CURR_VOLT_PALETTE['precipitation'],
-                 linewidth=0.5, label='Precipitation (mm/h)')
-        ax2.set_ylabel("Precipitation (mm/h)", color=CURR_VOLT_PALETTE['precipitation'])
-        ax2.tick_params(axis='y', labelcolor=CURR_VOLT_PALETTE['precipitation'])
-        # Normalize y-axis for small precipitation values
-        max_precip = df['precipitation'].max()
-        if max_precip < 1:
-            ax2.set_ylim(0, 1)
-        else:
-            ax2.set_ylim(0, max_precip * 1.1)
-
-        # Initialize a list to store legend handles
-        handles = []
+        if condition_title != "Real Data":
+            ax2 = ax1.twinx()
+            ax2.plot(df.index, df['precipitation'], color=CURR_VOLT_PALETTE['precipitation'],
+                    linewidth=0.5, label='Precipitation (mm/h)')
+            ax2.set_ylabel("Precipitation (mm/h)", color=CURR_VOLT_PALETTE['precipitation'])
+            ax2.tick_params(axis='y', labelcolor=CURR_VOLT_PALETTE['precipitation'])
+            # Normalize y-axis for small precipitation values
+            max_precip = df['precipitation'].max()
+            if max_precip < 1:
+                ax2.set_ylim(0, 1)
+            else:
+                ax2.set_ylim(0, max_precip * 1.1)
 
         # Add MPPT lines to the handles
         if pv1_i_clean:
