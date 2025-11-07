@@ -368,8 +368,8 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
     ax.set_ylim(0, max_y)
     
     # Configure tick labels
-    ax.xticks(rotation=0, ha='center', color='white', fontsize=8)
-    ax.yticks(color='white', fontsize=8)
+    plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
+    plt.yticks(color='white', fontsize=8)
 
     # Format x-axis as HH:MM
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
