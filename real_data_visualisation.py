@@ -118,6 +118,8 @@ def real_data_visualisation(smoothing=False):
     print("=" * 60)
     
     for file in csv_files:
+        if file != "inverter_Arraiolos_3_137460009.csv":
+            continue
         file_path = os.path.join(input_folder, file)
         print("\nProcessing file:", file)
         df = pd.read_csv(file_path)
@@ -169,4 +171,4 @@ def real_data_visualisation(smoothing=False):
 
 
 
-real_data_visualisation(smoothing=False)
+real_data_visualisation(smoothing=True)

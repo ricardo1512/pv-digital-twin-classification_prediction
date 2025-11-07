@@ -23,8 +23,6 @@ MPPT_PALETTE = {
 CURR_VOLT_PALETTE = {
     'pv1_i': '#ff3300',         # Red
     'pv1_i_clean': '#ff3300',   # Red
-    'a_i': '#3399ff',           # Blue
-    'a_i_clean': '#3399ff',     # Blue
     'pv1_u': '#ff6600',         # Orange
     'pv1_u_clean': '#ff6600',   # Orange
     'precipitation': '#66ffff',     # White
@@ -192,7 +190,7 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
 
 def plot_currents(df_original, date, condition_title, output_folder, filename, soiling=False):
     """
-        Plot PV string DC (pv1_i) and AC phase current (a_i), both reference and effective, as well as Precipitation if soiling is True,
+        Plot reference and effective PV string DC (pv1_i), as well as Precipitation if soiling is True,
         in the same dark-themed graph.
 
         Args:
@@ -226,15 +224,12 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
     # Plot each current with a predefined color and line width
     if pv1_i_clean:
         line1, = ax1.plot(df.index, df['pv1_i_clean'], color=CURR_VOLT_PALETTE['pv1_i_clean'], label='Reference pv1_i', linewidth=1.5, linestyle=':')
-        line2, = ax1.plot(df.index, df['a_i_clean'], color=CURR_VOLT_PALETTE['a_i_clean'], label='Reference a_i', linewidth=1.5, linestyle=':')
     pv1_i_label = 'Effective pv1_i' if pv1_i_clean else 'pv1_i'
-    a_i_label = 'Effective pv1_i' if pv1_i_clean else 'a_i'
-    line3, = ax1.plot(df.index, df['pv1_i'], color=CURR_VOLT_PALETTE['pv1_i'], label=pv1_i_label, linewidth=2)
-    line4, = ax1.plot(df.index, df['a_i'], color=CURR_VOLT_PALETTE['a_i'], label=a_i_label, linewidth=2)
+    line2, = ax1.plot(df.index, df['pv1_i'], color=CURR_VOLT_PALETTE['pv1_i'], label=pv1_i_label, linewidth=2)
     
     # Adjust Y-axis limits for currents
     max_y = df['pv1_i_clean'].max() * 1.1 if pv1_i_clean else df['pv1_i'].max() * 1.1
-    ax1.set_ylim(0, max(max_y, df['a_i'].max() * 1.1))
+    ax1.set_ylim(0, max_y)
     
     # Configure tick labels
     plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
@@ -279,9 +274,9 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
 
         # Add MPPT lines to the handles
         if pv1_i_clean:
-            handles.extend([line1, line3, line2, line4])
+            handles.extend([line1, line2])
         else:
-            handles.extend([line3, line4])
+            handles.extend([line2])
     
     # Draw vertical dashed lines for a specific inverter_state value
     if condition_title == "Real Data":
