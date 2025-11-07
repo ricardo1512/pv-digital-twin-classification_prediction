@@ -237,8 +237,8 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
     ax1.set_ylim(0, max_y)
     
     # Configure tick labels
-    ax1.xticks(rotation=0, ha='center', color='white', fontsize=8)
-    ax1.yticks(color='white', fontsize=8)
+    plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
+    plt.yticks(color='white', fontsize=8)
 
     # Label axes and set tick colors to white for visibility
     ax1.set_xlabel("Date")
