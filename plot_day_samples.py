@@ -171,7 +171,7 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
                 ax1.axvline(df.index[i], color='red', linestyle='--', linewidth=0.5)
 
         # Create the vertical line legend manually
-        line_red = mlines.Line2D([], [], color='red', linestyle='--', linewidth=0.5, label='Fault')
+        line_red = mlines.Line2D([], [], color='red', linestyle='--', linewidth=0.5, label='is 768')
 
         # Add the lines to the legend
         ax1.legend(handles=[line_red], loc='upper left')
@@ -290,7 +290,7 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
                 ax1.axvline(df.index[i], color='red', linestyle='--', linewidth=0.5)
 
         # Create the vertical line legend manually
-        line_red = mlines.Line2D([], [], color='red', linestyle='--', linewidth=0.5, label='Fault')
+        line_red = mlines.Line2D([], [], color='red', linestyle='--', linewidth=0.5, label='is 768')
 
         # Add the lines to the legend
         ax1.legend(handles=[line_red], loc='upper left')
@@ -382,7 +382,7 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
                 ax.axvline(df.index[i], color='red', linestyle='--', linewidth=0.5)
 
         # Create the vertical line legend manually
-        line_red = mlines.Line2D([], [], color='red', linestyle='--', linewidth=0.5, label='Fault')
+        line_red = mlines.Line2D([], [], color='red', linestyle='--', linewidth=0.5, label='is 768')
 
         # Add the lines to the legend
         ax.legend(handles=[line_red], loc='upper left')
