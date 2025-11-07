@@ -20,6 +20,7 @@ def correlation_matrix(df, plot_folder):
             - Only the lower triangle of the correlation matrix is displayed.
             - Annotation text color adapts automatically based on cell brightness.
             - The heatmap uses a custom black-gray-white colormap.
+            - Prints the top 20 positive and top 5 negative correlations to the console.
     """
 
     # Define feature order
@@ -29,6 +30,28 @@ def correlation_matrix(df, plot_folder):
     df_numeric = df.select_dtypes(include='number')
     df_numeric = df_numeric[[col for col in feature_order if col in df_numeric.columns and col != 'inverter_state']]
     corr = df_numeric.corr().round(2)
+    
+    # Reorder correlation matrix
+    corr_pairs = corr.unstack().reset_index()
+    corr_pairs.columns = ['Variable 1', 'Variable 2', 'Correlation']
+
+    # Remove self-correlations
+    corr_pairs = corr_pairs[corr_pairs['Variable 1'] != corr_pairs['Variable 2']]
+
+    # Remove duplicate pairs (A-B and B-A)
+    corr_pairs = corr_pairs.drop_duplicates(subset=['Correlation'])
+
+    # Top 20 positive correlations
+    top_positive = corr_pairs.sort_values(by='Correlation', ascending=False).head(20)
+
+    # Top 5 negative correlations
+    top_negative = corr_pairs.sort_values(by='Correlation', ascending=True).head(5)
+
+    print("\nTop 20 Positive Correlations:")
+    print(top_positive.to_string(index=False))
+
+    print("\nTop 5 Negative Correlations:")
+    print(top_negative.to_string(index=False))
 
     # Mask for upper triangle
     mask = np.triu(np.ones_like(corr, dtype=bool))
@@ -78,8 +101,7 @@ def correlation_matrix(df, plot_folder):
     cbar.set_label('Correlation', color='white')
 
     # Titles and ticks
-    ax.set_title(f'Correlation Matrix, All Inverters (Values: Pearson r)',
-                 color='white', fontsize=16)
+    # ax.set_title(f'Correlation Matrix, All Inverters (Values: Pearson r)', color='white', fontsize=16)
     plt.setp(ax.get_xticklabels(), fontsize=10, rotation=90, ha='right', color='white')
     plt.setp(ax.get_yticklabels(), fontsize=10, rotation=0, color='white')
 
@@ -87,7 +109,7 @@ def correlation_matrix(df, plot_folder):
     plt.tight_layout()
 
     # Save plot
-    output_file = os.path.join(plot_folder, "correlation_matrix.png")
+    output_file = os.path.join(plot_folder, "real_data_correlation_matrix.png")
     plt.savefig(output_file, dpi=300, bbox_inches='tight', facecolor='black')
     
     # Close plot to free memory
@@ -118,8 +140,6 @@ def real_data_visualisation(smoothing=False):
     print("=" * 60)
     
     for file in csv_files:
-        if file != "inverter_Arraiolos_3_137460009.csv":
-            continue
         file_path = os.path.join(input_folder, file)
         print("\nProcessing file:", file)
         df = pd.read_csv(file_path)
@@ -136,12 +156,13 @@ def real_data_visualisation(smoothing=False):
                 if col not in ["inverter_state", "diffuse_radiation", "global_tilted_irradiance", "wind_speed_10m",
                                    "precipitation"]
             ]
-
+        
         # Append the DataFrame to the list
         all_dfs.append(df)
 
         # Process data grouped by each day
         for date, group in df.groupby(df['collectTime'].dt.date):
+            continue
             # Only consider days when the inverter was active (state 768)
             if (group['inverter_state'] == 768).any():
                 if smoothing:
@@ -165,10 +186,9 @@ def real_data_visualisation(smoothing=False):
 
     # Concatenate all files
     combined_df = pd.concat(all_dfs, ignore_index=True)
-        
+    
     # Generate correlation matrix for all inverters' data
     correlation_matrix(combined_df, plot_folder)
-
 
 
 real_data_visualisation(smoothing=True)
