@@ -234,7 +234,7 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
     
     # Adjust Y-axis limits for currents
     max_y = df['pv1_i_clean'].max() * 1.1 if pv1_i_clean else df['pv1_i'].max() * 1.1
-    ax1.set_ylim(0, max_y)
+    ax1.set_ylim(0, max(max_y, df['a_i'].max() * 1.1))
     
     # Configure tick labels
     plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
