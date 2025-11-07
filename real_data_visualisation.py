@@ -159,7 +159,7 @@ def real_data_visualisation(smoothing=False):
                 plot_currents(group, date,condition_name, plot_folder, output_image, soiling=True)
                 plot_voltage(group, date, condition_name, plot_folder, output_image)
                 
-                exit()
+                # exit()
 
     # Concatenate all files
     combined_df = pd.concat(all_dfs, ignore_index=True)
@@ -169,4 +169,4 @@ def real_data_visualisation(smoothing=False):
 
 
 
-real_data_visualisation(smoothing=True)
+real_data_visualisation(smoothing=False)

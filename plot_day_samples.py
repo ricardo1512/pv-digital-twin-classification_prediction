@@ -78,8 +78,8 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
     ax1.tick_params(axis='y', labelcolor=color_mppt)
 
     # Configure tick labels
-    ax1.xticks(rotation=0, ha='center', color='white', fontsize=8)
-    ax1.yticks(color='white', fontsize=8)
+    plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
+    plt.yticks(color='white', fontsize=8)
         
     # Adjust Y-axis limits for MPPT
     ax1.set_ylim(0, df['mppt_power_clean'].max() * 1.1 if mppt_clean else df['mppt_power'].max() * 1.1)
@@ -159,7 +159,7 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
     plt.setp(ax1.get_xticklabels(), rotation=0)
 
     # Title of the plot
-    plt.title(f"MPPT, DHI, GTI, Air Temperature, Wind Speed and Precipitation, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom')
+    # plt.title(f"MPPT, DHI, GTI, Air Temperature, Wind Speed and Precipitation, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom')
 
     # Enable grid for Y-axis
     plt.grid(True, axis='y', linestyle='--', alpha=0.6)
@@ -254,14 +254,14 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
     plt.setp(ax1.get_xticklabels(), rotation=0)
 
     # Set plot title
-    plt.title(f"PV and Phase Currents, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='white')
+    # plt.title(f"PV and Phase Currents, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='white')
     
     # -------------------------
     # Precipitation axis (right)
     # -------------------------
     if soiling:
         # Set plot title
-        plt.title(f"PV and Phase Currents, and Precipitation, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='white')
+        # plt.title(f"PV and Phase Currents, and Precipitation, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='white')
         ax2 = ax1.twinx()
         ax2.plot(df.index, df['precipitation'], color=CURR_VOLT_PALETTE['precipitation'],
                  linewidth=0.5, label='Precipitation (mm/h)')
@@ -343,7 +343,7 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
     plt.style.use('dark_background')
 
     # Create figure and axis
-    fig, ax = plt.subplots(figsize=(12, 6))
+    _, ax = plt.subplots(figsize=(12, 6))
 
     # Plot voltage
     if pv1_u_clean:
@@ -388,7 +388,7 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
         ax.legend(handles=[line_red], loc='upper left')
 
     # Title and legend
-    plt.title(f"PV and Phase Voltages, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='white')
+    # plt.title(f"PV and Phase Voltages, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='white')
 
     # Adjust layout
     plt.tight_layout()
