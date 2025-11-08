@@ -85,7 +85,6 @@ def create_samples_0_normal(files_year, plot_samples=False):
 
         # Clean and Process Daily Data
         results_full = results_full.clip(lower=0).fillna(0)
-
         # Generate Daily Plots
         if i in rand_plots and plot_samples:
             condition_title = LABELS_MAP[condition_nr][0]
@@ -96,6 +95,8 @@ def create_samples_0_normal(files_year, plot_samples=False):
 
         # Compute and store in daily_features daily statistical features
         compute_store_daily_comprehensive_features(results_full, date, daily_features)
+        print(daily_features)
+        break
 
     # ==============================================================
     # Export Final Aggregated Results

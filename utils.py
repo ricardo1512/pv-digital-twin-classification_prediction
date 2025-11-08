@@ -184,7 +184,7 @@ def extract_comprehensive_features(filtered_results):
     return features
 
 
-def compute_store_daily_comprehensive_features(results_full, date, daily_features=None):
+def compute_store_daily_comprehensive_features(results_full, date, daily_features):
     """
         Compute daily statistical features for a store's numerical data.
 
@@ -202,7 +202,7 @@ def compute_store_daily_comprehensive_features(results_full, date, daily_feature
         
         Returns the daily statistical features.
     """
-
+    
     # Filter data within classification hours
     filtered_results = results_full.between_time(CLASSIFICATION_HOUR_INIT, CLASSIFICATION_HOUR_END)
 
@@ -224,9 +224,8 @@ def compute_store_daily_comprehensive_features(results_full, date, daily_feature
     # Assign the series a name corresponding to the current date
     feature_series.name = pd.to_datetime(date)
 
-    if daily_features:
-        # Append the series to the list of daily features
-        daily_features.append(feature_series)
+    # Append the series to the list of daily features
+    daily_features.append(feature_series)
     
     return feature_series
 

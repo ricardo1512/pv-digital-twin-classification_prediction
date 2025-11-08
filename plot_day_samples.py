@@ -409,9 +409,12 @@ def plot_scatter_iv(df_plot, output_folder, filename):
             output_folder (str): Folder where to save the figure.
             filename (str): Base name for the saved image (without extension).
     """
-
+    
     # Ensure folder exists
     os.makedirs(output_folder, exist_ok=True)
+    
+    # Shuffle dataframe to avoid overplotting patterns
+    df_plot = df_plot.sample(frac=1, random_state=42).reset_index(drop=True)
 
     # Dark style
     plt.style.use('dark_background')

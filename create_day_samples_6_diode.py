@@ -196,8 +196,7 @@ def create_samples_6_diode(files_year, plot_samples=False):
         results_full = results_full.clip(lower=0).fillna(0)
 
         # Generate Daily Plots
-        import datetime
-        if date > datetime.date(2023, 11, 1): #i == 0 or i in rand_plots and plot_samples:
+        if i == 0 or i in rand_plots and plot_samples:
             condition_title = LABELS_MAP[condition_nr][0]
             output_image = f"{date.year:04d}_{date.month:02d}_{date.day:02d}_{condition_name}_samples"
             plot_mppt(results_full, date, condition_title, plot_folder, output_image)
@@ -209,7 +208,7 @@ def create_samples_6_diode(files_year, plot_samples=False):
         results_end = results_full[selected_columns]
         
         # Compute and store in daily_features daily statistical features
-        # compute_store_daily_comprehensive_features(results_end, date, daily_features)
+        compute_store_daily_comprehensive_features(results_end, date, daily_features)
 
     # ==============================================================
     # Export Final Aggregated Results
