@@ -95,8 +95,6 @@ def create_samples_0_normal(files_year, plot_samples=False):
 
         # Compute and store in daily_features daily statistical features
         compute_store_daily_comprehensive_features(results_full, date, daily_features)
-        print(daily_features)
-        break
 
     # ==============================================================
     # Export Final Aggregated Results
