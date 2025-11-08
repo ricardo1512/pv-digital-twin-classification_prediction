@@ -88,21 +88,21 @@ def create_samples_1_soiling(files_year, plot_samples=False):
             # Compute soiling accumulation per timestep
             dt_hours = (self.df.index[1] - self.df.index[0]).total_seconds() / 3600
             daily_step = dt_hours / 24  # Fraction of a day
-            days_passed = np.zeros(len(self.df))
-            effective_days = 0.0
+            steps_passed = np.zeros(len(self.df))
+            effective_steps = 0.0
 
             for i in range(1, len(self.df)):
                 if self.df['precipitation'].iloc[i] > rain_threshold_mm:
                     # Rain event partially cleans modules
-                    effective_days *= (1 - cleaning_efficiency)
+                    effective_steps *= (1 - cleaning_efficiency)
                 else:
                     # Accumulate soiling based on time step
-                    effective_days += daily_step
+                    effective_steps += daily_step
 
-                days_passed[i] = effective_days
+                steps_passed[i] = effective_steps
 
             # Apply exponential soiling loss
-            soiling_factor = (1 - self.daily_soiling_loss) ** days_passed
+            soiling_factor = (1 - self.daily_soiling_loss) ** steps_passed
 
             # Initialize output DataFrame for storing simulation results
             output = pd.DataFrame(index=self.df.index)
@@ -162,14 +162,14 @@ def create_samples_1_soiling(files_year, plot_samples=False):
         # Instantiate PV system components
         plant = PVPlant(module_data, inverter_data)
         inverter = InverterTwin(inverter_data)
-        daily_soling_loss = random.uniform(soiling_min, soiling_max)
-        print(f"\tDaily soiling loss: {daily_soling_loss:.3f}\n")
+        daily_soiling_loss = random.uniform(soiling_min, soiling_max)
+        print(f"\tDaily soiling loss: {daily_soiling_loss:.3f}\n")
         twin = DigitalTwinWithSoiling(
             plant,
             inverter,
             group,
             condition_nr,
-            daily_soling_loss,
+            daily_soiling_loss,
         )
 
         # Run daily simulation

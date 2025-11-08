@@ -272,11 +272,11 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
             else:
                 ax2.set_ylim(0, max_precip * 1.1)
 
-        # Add MPPT lines to the handles
-        if pv1_i_clean:
-            handles.extend([line1, line2])
-        else:
-            handles.extend([line2])
+    # Add MPPT lines to the handles
+    if pv1_i_clean:
+        handles.extend([line1, line2])
+    else:
+        handles.extend([line2])
     
     # Draw vertical dashed lines for a specific inverter_state value
     if condition_title == "Real Data":
@@ -290,7 +290,6 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
         # Add the lines to the legend
         ax1.legend(handles=[line_red], loc='upper left')
         handles.append(line_red)
-    
         
     # Create a single combined legend for all handles
     ax1.legend(handles=handles, fontsize=10, loc='upper left', facecolor='black', edgecolor='white')

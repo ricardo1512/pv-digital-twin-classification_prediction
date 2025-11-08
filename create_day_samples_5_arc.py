@@ -51,8 +51,8 @@ def create_samples_5_arc(files_year, plot_samples=False):
     # ==============================================================
     # Define voltage and current variation ranges for arc fault
     # ==============================================================
-    voltage_min, voltage_max = 1, 5 # for random
-    current_min, current_max = 0.3, 0.5 # for random
+    voltage_min, voltage_max = 1, 5 # V, for random
+    current_min, current_max = 0.3, 0.5 # A, for random
 
     # =============================================================
     # Subclass Digital Twin with Arc Fault

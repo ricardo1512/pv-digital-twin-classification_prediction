@@ -145,14 +145,14 @@ def create_samples_2_shading(files_year, plot_samples=False):
         # Instantiate PV system components
         plant = PVPlant(module_data, inverter_data)
         inverter = InverterTwin(inverter_data)
-        shading_factor = random.uniform(shading_min, shading_max)
-        print(f"\tShading factor: {shading_factor:.3f}\n")
+        daily_shading_factor = random.uniform(shading_min, shading_max)
+        print(f"\tShading factor: {daily_shading_factor:.3f}\n")
         twin = DigitalTwinWithShading(
             plant,
             inverter,
             group,
             condition_nr,
-            shad_factor=shading_factor,
+            shad_factor=daily_shading_factor,
         )
 
         # Run daily simulation

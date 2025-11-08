@@ -79,6 +79,7 @@ def create_samples_4_ground(files_year, plot_samples=False):
                 inverter,
                 df,
                 condition_nr,
+                ground_start,
                 volt_degradation,
                 curr_degradation,
         ):
@@ -88,6 +89,7 @@ def create_samples_4_ground(files_year, plot_samples=False):
                 df,
                 condition_nr,
             )
+            self.ground_start = ground_start
             self.current_degradation = curr_degradation
             self.voltage_degradation = volt_degradation
 
@@ -109,29 +111,38 @@ def create_samples_4_ground(files_year, plot_samples=False):
             # Set inverter_state to indicate fault condition
             output['inverter_state'] = self.condition_nr
 
+            # Gradual degradation from start of day until ground fault
+            pre_fault_mask = dc.index < self.ground_start
+            N = pre_fault_mask.sum()
+            i_degraded = np.linspace(1.0, self.current_degradation, N)
+            v_degraded = np.linspace(1.0, self.voltage_degradation, N)
+            dc.loc[pre_fault_mask, 'i_mp'] *= i_degraded
+            dc.loc[pre_fault_mask, 'v_mp'] *= v_degraded
+            dc.loc[pre_fault_mask, 'p_mp'] = dc.loc[pre_fault_mask, 'i_mp'] * dc.loc[pre_fault_mask, 'v_mp']
+
+            # Abrupt shutdown at and after ground fault
+            fault_mask = dc.index >= self.ground_start
+            dc.loc[fault_mask, ['i_mp','v_mp','p_mp']] = 0
+
             # Compute DC current and voltage
-            dc['i_mp'] *= self.current_degradation
-            dc['v_mp'] *= self.voltage_degradation
             output['pv1_i'] = dc['i_mp']
             output['pv1_u'] = dc['v_mp']
-
+            
             # Compute Power Quantities
-            dc['p_mp'] = dc['v_mp'] * dc['i_mp']
             ac = self.inverter.compute_ac(dc['p_mp'], dc['v_mp'])
-            ac = np.minimum(ac, 70) # Limit maximum AC power to simulate protection trip (IEC 60364-4-42 safe limit)
-            output['mppt_power'] = dc['p_mp'] / 1000 # W to kW
-            output['active_power'] = ac / 1000 # W to kW
+            output['mppt_power'] = dc['p_mp'] / 1000
+            output['active_power'] = ac / 1000
             output['efficiency'] = (ac / dc['p_mp'].replace(0, np.nan)) * 100
 
             # Compute AC phase currents (balanced assumption)
             output['a_i'] = output['active_power'] * 1000 / (400 * np.sqrt(3))
             output = output.assign(b_i=output['a_i'], c_i=output['a_i'])
-
+            
             # Compute AC Voltages per phase and line (balanced assumption)
-            output.loc[:, ['a_u', 'b_u', 'c_u']] = 230
-            output.loc[:, ['ab_u', 'bc_u', 'ca_u']] = 400
+            output.loc[:, ['a_u','b_u','c_u']] = 230
+            output.loc[:, ['ab_u','bc_u','ca_u']] = 400
 
-            # Estimate inverter temperature as ambient + 35°C
+            # Inverter temperature
             output['inv_temperature'] = self.df['temp_air'] + 35
 
             return output
@@ -160,8 +171,11 @@ def create_samples_4_ground(files_year, plot_samples=False):
         # Instantiate PV system components
         plant = PVPlant(module_data, inverter_data)
         inverter = InverterTwin(inverter_data)
-        voltage_degradation, current_degradation = random.choice(curr_volt_degradation)
+        random_hour = random.randint(12, 15)
+        ground_start = pd.Timestamp(f"{date} {random_hour}:00:00", tz="Europe/Lisbon")
+        current_degradation, voltage_degradation = random.choice(curr_volt_degradation)
         print(
+            f"\tGround fault starts at: {ground_start.hour}:00\n"
             f"\tCurrent degradation: {voltage_degradation:.3f}\n"
             f"\tVoltage degradation: {current_degradation:.3f}\n"
         )
@@ -170,6 +184,7 @@ def create_samples_4_ground(files_year, plot_samples=False):
             inverter,
             group,
             condition_nr,
+            ground_start,
             voltage_degradation,
             current_degradation,
         )
