@@ -445,8 +445,7 @@ def plot_scatter_iv(df_plot, output_folder, filename):
     ax.set_ylabel("PV1 Current Mean (A)", color='white', fontsize=12)
 
     # Title
-    plt.title(f"PV1 I–V Scatter by Inverter State, {LOCAL}",
-              fontsize=18, verticalalignment='bottom', color='white')
+    # plt.title(f"PV1 I–V Scatter by Inverter State, {LOCAL}", fontsize=18, verticalalignment='bottom', color='white')
 
     # Ticks & grid
     ax.tick_params(axis='x', colors='white', labelsize=9)

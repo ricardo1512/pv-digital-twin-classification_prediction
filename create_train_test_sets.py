@@ -46,8 +46,8 @@ def create_train_test_sets():
     dfs_train, dfs_test = [], []
     
     # Initialize empty DataFrames
-    df_plot_train = pd.DataFrame(columns=['pv1_i_mean', 'pv1_u_mean', 'inverter_state'])
-    df_plot_test = pd.DataFrame(columns=['pv1_i_mean', 'pv1_u_mean', 'inverter_state'])
+    df_plot_train = pd.DataFrame()
+    df_plot_test = pd.DataFrame()
 
     # Load and store all CSV files for 2023 (training)
     for filename in os.listdir(FOLDER_TRAIN_SAMPLES):
