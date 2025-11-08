@@ -39,8 +39,8 @@ def create_day_samples(plot_samples=False):
 
     # List of sample creation functions (each simulates a specific fault scenario)
         funcs = [
-            # create_samples_0_normal,
-            create_samples_1_soiling,
+            create_samples_0_normal,
+            # create_samples_1_soiling,
             # create_samples_2_shading,
             # create_samples_3_cracks,
             # create_samples_4_ground,

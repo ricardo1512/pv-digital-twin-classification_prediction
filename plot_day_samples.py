@@ -139,7 +139,7 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
     # -------------------------
     # Precipitation, if soiling (senary axis)
     # -------------------------
-    if soiling or condition_title == "Normal":
+    if soiling:
         ax6 = ax1.twinx()
         ax6.spines['right'].set_position(('outward', 200))
         color_precip = MPPT_PALETTE['precipitation']
@@ -256,7 +256,7 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
     # -------------------------
     # Precipitation axis (right)
     # -------------------------
-    if soiling or condition_title == "Normal":
+    if soiling:
         # Set plot title
         # plt.title(f"PV and Phase Currents, and Precipitation, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='white')
         if condition_title != "Real Data":
