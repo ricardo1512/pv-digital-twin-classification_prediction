@@ -462,7 +462,7 @@ def plot_scatter_iv(df_plot, output_folder, filename):
 
     # Layout & save
     plt.tight_layout()
-    image_path = os.path.join(output_folder, f"{filename}_pv1_iv_scatter.png")
+    image_path = os.path.join(output_folder, filename)
     plt.savefig(image_path, dpi=300, bbox_inches='tight')
     plt.close()
 
