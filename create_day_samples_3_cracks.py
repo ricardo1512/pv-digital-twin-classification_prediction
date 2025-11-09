@@ -194,7 +194,7 @@ def create_samples_3_cracks(files_year, plot_samples=False):
         results_full = results_full.clip(lower=0).fillna(0)
 
         # Generate Daily Plots
-        if i == 0 or i in rand_plots and plot_samples:
+        if i in rand_plots and plot_samples:
             condition_title = LABELS_MAP[condition_nr][0]
             output_image = f"{date.year:04d}_{date.month:02d}_{date.day:02d}_{condition_name}_samples"
             plot_mppt(results_full, date, condition_title, plot_folder, output_image)

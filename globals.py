@@ -91,13 +91,34 @@ PREDICTION_HOUR_END = '22:00'       # End hour for prediction
 # Labels Mapping for Visualization
 # ================================
 LABELS_MAP = {
-    0: ('Normal', '#00cc00'),      # green
-    1: ('Soling', '#996600'),        # light brown
-    2: ('Shading', '#ff9900'),       # orange
-    3: ('Cracks', '#ffcc00'),        # yellow
-    4: ('Ground Fault', '#9966ff'),  # lilac
-    5: ('Arc Fault', '#ff66ff'),     # dark pink
-    6: ('Diode Fault', '#ff99cc'),   # light pink
+    0: ('Normal', '#00cc00'),        # Green
+    1: ('Soiling', '#996600'),       # Light brown
+    2: ('Shading', '#ff9900'),       # Orange
+    3: ('Cracks', '#ffcc00'),        # Yellow
+    4: ('Ground Fault', '#9966ff'),  # Lilac
+    5: ('Arc Fault', '#ff66ff'),     # Dark pink
+    6: ('Diode Fault', '#ff99cc'),   # Light pink
+}
+
+# ================================
+# Default colors
+# ================================
+MPPT_PALETTE = {
+    'mppt_power': '#00ff00',               # Light cyan / pale cyan
+    'mppt_power_clean': '#00ff00',         # Light cyan / pale cyan
+    'global_tilted_irradiance': '#ffff99', # Light yellow
+    'diffuse_radiation': '#ff6600',        # Orange
+    'temperature_2m': '#ff99bb',           # Light pink / soft pink
+    'wind_speed_10m': '#4d94ff',           # Medium blue / cornflower blue
+    'precipitation': '#66ffff',            # Blueish white
+}
+
+CURR_VOLT_PALETTE = {
+    'pv1_i': '#ff3300',         # Red
+    'pv1_i_clean': '#ff3300',   # Red
+    'pv1_u': '#ff6600',         # Orange
+    'pv1_u_clean': '#ff6600',   # Orange
+    'precipitation': '#66ffff', # Blueish white
 }
 
 # ================================

@@ -155,6 +155,9 @@ def create_samples_6_diode(files_year, plot_samples=False):
     print(f"{condition_name.upper()}: Starting simulation...\n")
     rand_plots = random.sample(range(len(daily_groups)), 5)
     for i, (date, group) in enumerate(daily_groups):
+        import datetime
+        if date != datetime.date(2024, 2, 21):
+            continue
         print(f"{condition_name.title():<8} | Running simulation for {date}...")
 
         # Prepare daily data
@@ -196,7 +199,7 @@ def create_samples_6_diode(files_year, plot_samples=False):
         results_full = results_full.clip(lower=0).fillna(0)
 
         # Generate Daily Plots
-        if i == 0 or i in rand_plots and plot_samples:
+        if True: # i in rand_plots and plot_samples:
             condition_title = LABELS_MAP[condition_nr][0]
             output_image = f"{date.year:04d}_{date.month:02d}_{date.day:02d}_{condition_name}_samples"
             plot_mppt(results_full, date, condition_title, plot_folder, output_image)

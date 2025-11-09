@@ -9,26 +9,6 @@ TIME_INIT = "05:00"
 TIME_END = "21:00"
 
 
-# Default colors
-MPPT_PALETTE = {
-    'mppt_power': '#00ff00',               # Light cyan / pale cyan
-    'mppt_power_clean': '#00ff00',         # Light cyan / pale cyan
-    'global_tilted_irradiance': '#ffff99', # Light yellow
-    'diffuse_radiation': '#ff6600',        # Orange
-    'temperature_2m': '#ff99bb',           # Light pink / soft pink
-    'wind_speed_10m': '#4d94ff',           # Medium blue / cornflower blue
-    'precipitation': '#66ffff',                # White
-}
-
-CURR_VOLT_PALETTE = {
-    'pv1_i': '#ff3300',         # Red
-    'pv1_i_clean': '#ff3300',   # Red
-    'pv1_u': '#ff6600',         # Orange
-    'pv1_u_clean': '#ff6600',   # Orange
-    'precipitation': '#66ffff',     # White
-}
-
-
 def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soiling=False):
     """
         Plots MPPT powers (reference and effective), irradiances (GTI & DHI), air temperature, wind speed and precipitation
@@ -73,11 +53,11 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
     line2, = ax1.plot(df.index, df['mppt_power'], color=color_mppt, label='Effective MPPT', linewidth=2)
     ax1.set_xlabel("Time")
     ax1.set_ylabel("MPPT (kW)", color=color_mppt)
-    ax1.tick_params(axis='y', labelcolor=color_mppt)
 
     # Configure tick labels
     plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
     plt.yticks(color='white', fontsize=8)
+    ax1.tick_params(axis='y', labelcolor=color_mppt)
         
     # Adjust Y-axis limits for MPPT
     ax1.set_ylim(0, df['mppt_power_clean'].max() * 1.1 if mppt_clean else df['mppt_power'].max() * 1.1)
@@ -178,7 +158,7 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
     plt.tight_layout()
 
     # Save figure
-    image_path = os.path.join(plot_folder, f"{output_image}_mppt_dhi_gti_temp_wind.png")
+    image_path = os.path.join(plot_folder, f"{output_image}_mppt_dhi_gti_temp_wind_precip.png")
     plt.savefig(image_path, dpi=300, bbox_inches='tight')
 
     # Close figure to free memory
@@ -222,10 +202,11 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
     fig, ax1 = plt.subplots(figsize=(12, 6))
 
     # Plot each current with a predefined color and line width
+    color_curr = CURR_VOLT_PALETTE['pv1_i']
     if pv1_i_clean:
         line1, = ax1.plot(df.index, df['pv1_i_clean'], color=CURR_VOLT_PALETTE['pv1_i_clean'], label='Reference pv1_i', linewidth=1.5, linestyle=':')
     pv1_i_label = 'Effective pv1_i' if pv1_i_clean else 'pv1_i'
-    line2, = ax1.plot(df.index, df['pv1_i'], color=CURR_VOLT_PALETTE['pv1_i'], label=pv1_i_label, linewidth=2)
+    line2, = ax1.plot(df.index, df['pv1_i'], color=color_curr, label=pv1_i_label, linewidth=2)
     
     # Adjust Y-axis limits for currents
     max_y = df['pv1_i_clean'].max() * 1.1 if pv1_i_clean else df['pv1_i'].max() * 1.1
@@ -237,9 +218,9 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
 
     # Label axes and set tick colors to white for visibility
     ax1.set_xlabel("Date")
-    ax1.set_ylabel("Current (A)", color='white')
-    ax1.tick_params(axis='x', colors='white')
-    ax1.tick_params(axis='y', colors='white')
+    ax1.set_ylabel("Current (A)", color=color_curr)
+    ax1.tick_params(axis='x', colors='white', labelsize=8)
+    ax1.tick_params(axis='y', labelcolor=color_curr, labelsize=8)
 
     # Add horizontal grid lines with light transparency
     ax1.grid(True, axis='y', linestyle='--', alpha=0.6)
@@ -340,15 +321,10 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
     _, ax = plt.subplots(figsize=(12, 6))
 
     # Plot voltage
+    color_volt = CURR_VOLT_PALETTE['pv1_u']
     if pv1_u_clean:
         line1, = ax.plot(df.index, df['pv1_u_clean'], color=CURR_VOLT_PALETTE['pv1_u_clean'], label='Reference pv1_u', linewidth=1.5, linestyle=':')
-    line2, = ax.plot(df.index, df['pv1_u'], label='Effective pv1_u', color=CURR_VOLT_PALETTE['pv1_u'], linewidth=2)
-
-    # Axis labels and tick colors
-    ax.set_xlabel("Time")
-    ax.set_ylabel("Voltage (V)", color='white')
-    ax.tick_params(axis='x', colors='white')
-    ax.tick_params(axis='y', colors='white')
+    line2, = ax.plot(df.index, df['pv1_u'], label='Effective pv1_u', color=color_volt, linewidth=2)
     
     # Create legend only for MPPT lines with white frame
     if pv1_u_clean:
@@ -364,6 +340,12 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
     # Configure tick labels
     plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
     plt.yticks(color='white', fontsize=8)
+    
+    # Axis labels and tick colors
+    ax.set_xlabel("Time")
+    ax.set_ylabel("Voltage (V)", color=color_volt)
+    ax.tick_params(axis='x', colors='white', labelsize=8)
+    ax.tick_params(axis='y', labelcolor=color_volt, labelsize=8)
 
     # Format x-axis as HH:MM
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
@@ -398,7 +380,6 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
     print(f"Voltages plot saved to {image_path}")
     
     
-
 def plot_scatter_iv(df_plot, output_folder, filename):
     """
         Scatter plot of pv1_u_mean (x) vs pv1_i_mean (y), colored by inverter_state,

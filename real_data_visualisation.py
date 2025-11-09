@@ -162,7 +162,7 @@ def real_data_visualisation(smoothing=False):
 
         # Process data grouped by each day
         for date, group in df.groupby(df['collectTime'].dt.date):
-            continue
+            # continue
             # Only consider days when the inverter was active (state 768)
             if (group['inverter_state'] == 768).any():
                 if smoothing:
@@ -191,4 +191,4 @@ def real_data_visualisation(smoothing=False):
     correlation_matrix(combined_df, plot_folder)
 
 
-real_data_visualisation(smoothing=True)
+real_data_visualisation(smoothing=False)

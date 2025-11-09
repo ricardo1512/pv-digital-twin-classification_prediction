@@ -86,16 +86,18 @@ class DigitalTwin:
             inverter: InverterTwin,
             df: pd.DataFrame,
             condition_nr: int,
+            location: Location = LOCATION,
     ):
         self.pvplant = pvplant
         self.inverter = inverter
         self.df = df
         self.condition_nr = condition_nr
+        self.location = location
 
         # Initialize ModelChain for pvlib simulation
         self.mc = ModelChain(
             pvplant.system,
-            LOCATION,
+            self.location,
             ac_model='sandia',
             aoi_model='no_loss',
         )
