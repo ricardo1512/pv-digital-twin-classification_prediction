@@ -1,2 +1,0 @@
-Timestamp,Season,Model,Validation_Accuracy,Validation_Precision,Validation_Recall,Validation_F1,Test_Accuracy,Test_Precision,Test_Recall,Test_F1
-2025-11-10 09:05:47,Summer,Random Forest,0.7840909090909091,0.7875765092867123,0.7840909090909091,0.7795438602974646,0.7909836065573771,0.7915771996637867,0.7909836065573771,0.7885466883066238

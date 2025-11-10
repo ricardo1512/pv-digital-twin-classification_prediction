@@ -1,8 +1,8 @@
 Class,Validation Accuracy (%),Test Accuracy (%)
-Normal,67.3,75.4
-Soiling,92.7,85.5
-Shading,74.5,80.3
-Cracks,67.3,65.0
-Ground Fault,89.1,94.5
-Arc Fault,98.2,100.0
-Diode Fault,67.3,73.8
+Normal,78.2,82.5
+Soiling,63.6,71.0
+Shading,80.0,76.0
+Cracks,63.6,65.6
+Ground Fault,100.0,97.3
+Arc Fault,98.2,98.9
+Diode Fault,65.5,76.0

@@ -96,7 +96,7 @@ def random_forest(all_year=False, winter=False):
     ft_tp_val_image_path = f"{IMAGE_FOLDER}/rf_fp_tp_curve_val_{season_name_file}.png"
     ft_tp_test_image_path = f"{IMAGE_FOLDER}/rf_fp_tp_curve_test_{season_name_file}.png"
     # Overall Performance
-    performance_csv_path = f"{REPORT_FOLDER}/rf_overall_performance.csv"
+    performance_csv_path = f"{REPORT_FOLDER}/overall_performance.csv"
 
     print("\n" + "=" * 60)
     print(f"RUNNING RANDOM FOREST CLASSIFIER, TRAINING SEASON: {season_name.upper()} ...")

@@ -180,6 +180,12 @@ def extract_comprehensive_features(filtered_results):
 
         for name, value in zip(feature_names, all_feat):
             features[name] = value
+        
+    # Identify all rolling correlation columns
+    roll_corr_cols = [col for col in features.keys() if '_roll_corr' in col]
+
+    # Fill NaNs with backfill and forward fill
+    features.update(pd.Series({col: features[col] for col in roll_corr_cols}).bfill().ffill().to_dict())
 
     return features
 
