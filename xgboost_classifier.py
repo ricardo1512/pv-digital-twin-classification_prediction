@@ -6,6 +6,7 @@ import joblib
 from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
 from sklearn.metrics import classification_report, accuracy_score
 from xgboost import XGBClassifier
+from xgboost_confidence import *
 from plot_training import *
 from utils import *
 
@@ -406,6 +407,12 @@ def xgboost_classifier(all_year=False, winter=False):
 
     print(f"\nOverall performance metrics saved to {performance_csv_path}")
 
+    # ==========================================================
+    # Run XGBoost Classifier with Bootstrap Confidence Intervals
+    # ==========================================================
+    print("\nCalculating class-wise accuracy with bootstrap confidence intervals...")
+    xgboost_classifier_bootstrap_ci()
+    
     # ==========================================================
     # Final Performance Summary
     # ==========================================================

@@ -363,3 +363,52 @@ def plot_fp_tp_curve(y_true, y_scores, class_names, output_file):
 
     # Confirm saving
     print(f"FP vs TP curve saved to {output_file}")
+
+def plot_class_accuracy_ci(class_acc, ci_lower, ci_upper, classes, title, output_file):
+    """
+        Plot per-class accuracy as vertical bars with bootstrap confidence intervals in dark theme.
+        
+        Args:
+            class_acc (list or np.ndarray): Mean accuracy per class (%)
+            ci_lower (list or np.ndarray): Lower bound of CI per class (%)
+            ci_upper (list or np.ndarray): Upper bound of CI per class (%)
+            classes (list): Class indices
+            title (str): Plot title
+            output_file (str): File path to save the plot
+    """
+
+    plt.style.use('dark_background')
+    fig, ax = plt.subplots(figsize=(10, 6))
+    fig.patch.set_facecolor('black')
+    ax.set_facecolor('black')
+
+    # Bar colors
+    colors = [LABELS_MAP[i][1] for i in classes]
+    class_labels = [LABELS_MAP[int(i)][0] for i in classes]
+
+    # Plot bars with white error bars (CI)
+    ax.bar(
+        class_labels,
+        class_acc,
+        color=colors,
+        edgecolor='white',
+        yerr=[class_acc - ci_lower, ci_upper - class_acc],
+        capsize=5,
+        ecolor='white'  # white error bars
+    )
+
+    # Labels, grid, and dark theme ticks
+    ax.set_xlabel('Label', color='white')
+    ax.set_ylabel('Accuracy (%)', color='white')
+    # ax.set_title(title, color='white')
+    ax.grid(True, color='gray', linestyle='--', linewidth=0.5, axis='y')
+    plt.setp(ax.get_xticklabels(), fontsize=8, rotation=0, ha='center')
+    plt.setp(ax.get_yticklabels(), fontsize=8, rotation=0)
+    ax.tick_params(axis='x', colors='white')
+    ax.tick_params(axis='y', colors='white')
+
+    # Adjust layout and save
+    plt.tight_layout()
+    plt.savefig(output_file, dpi=300, facecolor=fig.get_facecolor())
+    plt.close()
+    print(f"Class Accuracy plot saved to {output_file}")
