@@ -6,8 +6,11 @@ Predictions
 
 git.txt
 
-xgboost_classifier.py
-svc_classifier.py
+random_forest_classifier.py
+decision_trees_classifier.py
+naive_bayes_classifier.py
+models_comparison.py
+h0_rf_xgb.py
 
 create_ts_samples_1_soiling.py
 create_ts_samples_2_shading.py

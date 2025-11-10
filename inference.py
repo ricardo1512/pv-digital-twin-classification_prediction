@@ -46,7 +46,7 @@ def inference(all_year=False, winter=False):
     
     # INPUT FILE
     # Pretrained Model
-    rf_model_path = f"{MODELS_FOLDER}/rf_best_model_{season_name_file}.joblib"
+    xgb_model_path = f"{MODELS_FOLDER}/xgb_best_model_{season_name_file}.joblib"
     # Preprocessed inference test set
     inference_test_file = f"{DATASETS_FOLDER}/inference_test_set_before_classification_{season_name_file}.csv"
     
@@ -67,16 +67,16 @@ def inference(all_year=False, winter=False):
     print("=" * 60)
     
     # Raise an exception if the model file does not exist
-    rf_model_file_path = Path(rf_model_path)
-    if not os.path.exists(rf_model_file_path):
+    xgb_model_file_path = Path(xgb_model_path)
+    if not os.path.exists(xgb_model_file_path):
         print(
-            f"\nRandom Forest model file not found: {rf_model_path}\n"
+            f"\nRandom Forest model file not found: {xgb_model_path}\n"
             f"\tPlease train the model first for {season_name} (--{season_name_file}).\n"
         )
         exit()
 
     # Load pre-trained Random Forest model
-    rf_classifier = joblib.load(rf_model_path)
+    xgb_classifier = joblib.load(xgb_model_path)
 
     # Raise an exception if the file does not exist, stopping the program
     inference_test_file_path = Path(inference_test_file)
@@ -91,13 +91,13 @@ def inference(all_year=False, winter=False):
     df_inference = pd.read_csv(inference_test_file)
 
     # Select features used by the model
-    X_inference = df_inference[rf_classifier.feature_names_in_]
+    X_inference = df_inference[xgb_classifier.feature_names_in_]
 
     # ===============================================
     # INFERENCE
     # ===============================================
     print("\nPerforming inference on the dataset...")
-    y_inference_pred = rf_classifier.predict(X_inference)
+    y_inference_pred = xgb_classifier.predict(X_inference)
     df_inference['predicted_condition'] = y_inference_pred.astype(int)
 
     # Reorder columns for readability
@@ -143,10 +143,10 @@ def inference(all_year=False, winter=False):
     print("Calculating class probabilities for inference dataset...")
     # Predict class probabilities for each sample in the inference set
     # Returns an array of shape (n_samples, n_classes) with probabilities for each class
-    proba_inference = rf_classifier.predict_proba(X_inference)
+    proba_inference = xgb_classifier.predict_proba(X_inference)
 
     # Create a DataFrame to store predicted probabilities
-    columns_names = [LABELS_MAP[c][0] for c in rf_classifier.classes_]
+    columns_names = [LABELS_MAP[c][0] for c in xgb_classifier.classes_]
     proba_inference_df = pd.DataFrame(
         proba_inference,
         columns=columns_names
