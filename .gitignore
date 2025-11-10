@@ -6,6 +6,8 @@ Predictions
 
 git.txt
 
+xgboost_classifier.py
+
 create_ts_samples_1_soiling.py
 create_ts_samples_2_shading.py
 create_ts_samples_3_cracks.py
