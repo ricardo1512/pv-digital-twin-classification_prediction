@@ -408,9 +408,18 @@ def ts_resampling(ts):
     """
     
     # Columns to aggregate using daily sum
-    sum_cols = ['mppt_power', 'mppt_power_clean', 'precipitation']
+    sum_cols = ['precipitation']
     # Columns to aggregate using daily mean
-    mean_cols = ['pv1_i', 'pv1_i_clean', 'a_i', 'a_i_clean', 'global_tilted_irradiance', 'diffuse_radiation', 'temperature_2m', 'wind_speed_10m']
+    mean_cols = [
+        'mppt_power', 
+        'mppt_power_clean', 
+        'pv1_i', 'pv1_i_clean', 
+        'a_i', 'a_i_clean', 
+        'global_tilted_irradiance', 
+        'diffuse_radiation', 
+        'temperature_2m', 
+        'wind_speed_10m'
+        ]
     
     # Initialize a new DataFrame for daily resampled data
     ts_daily = pd.DataFrame()
