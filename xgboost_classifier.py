@@ -1,17 +1,20 @@
 import os
+import pandas as pd
+import numpy as np
+from datetime import datetime
 import joblib
 from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, accuracy_score
+from xgboost import XGBClassifier
 from plot_training import *
 from utils import *
 
 # ==============================================================
-# Random Forest Classifier for Anomaly/Fault Prediction
+# XGBoost Classifier for Anomaly/Fault Prediction
 # ==============================================================
-def random_forest(all_year=False, winter=False):
+def xgboost_classifier(all_year=False, winter=False):
     """
-        Run a complete Random Forest classification workflow for anomaly and fault prediction
+        Run a complete XGBoost classification workflow for anomaly and fault prediction
         using synthetic PV system data.
 
         This function performs the following steps:
@@ -19,7 +22,7 @@ def random_forest(all_year=False, winter=False):
             2. Prepares labels and features for training, validation, and test sets.
             3. Splits the training dataset into train and validation subsets with stratification.
             4. Performs Stratified K-Fold cross-validation on the training set.
-            5. Trains the Random Forest classifier on the training set.
+            5. Trains the XGBoost classifier on the training set.
             6. Saves the trained model for future use.
             7. Evaluates model performance on validation and test sets:
                 - Computes accuracy
@@ -32,7 +35,9 @@ def random_forest(all_year=False, winter=False):
             9. Computes additional cross-validation metrics (accuracy, precision, recall, f1)
                 and saves raw and summary CSV files.
             10. Generates Precision–Recall (AUC) and FP–TP curves for validation and test sets.
-            11. Prints a final performance summary including CV, validation, and test accuracies.
+            11. Exports global performance metrics (accuracy, precision, recall, f1 for validation and test)
+                to an accumulative CSV file.
+            12. Prints a final performance summary including CV, validation, and test accuracies.
 
         Args:
             all_year (bool, optional): If True, includes data from all months.
@@ -41,18 +46,19 @@ def random_forest(all_year=False, winter=False):
         Inputs (global variables):
             - `TRAIN_VALID_SET_FILE`, `TEST_SET_FILE`: Paths to training/validation and test datasets.
             - `LABEL`: Target column name.
-            - `MODEL_FOLDER`: Folder to save the trained Random Forest model.
+            - `MODEL_FOLDER`: Folder to save the trained XGBoost model.
             - `IMAGE_FOLDER`, `REPORT_FOLDER`: Directories for output plots and reports.
             - `TOP_FEATURES`: Number of top features to display in importance plots.
             - `LABELS_MAP`: Mapping of class indices to descriptive class names.
             
         Outputs:
-            - Saved Random Forest model.
+            - Saved XGBoost model.
             - CSVs with:
                 - Validation and test classification reports
                 - Per-class accuracies
                 - Top N feature importances
                 - Cross-validation raw scores and summary
+                - Accumulative performance metrics (accuracy, precision, recall, f1)
             - Plots saved in `IMAGE_FOLDER`:
                 - Confusion matrices
                 - Class-wise accuracy bars
@@ -70,30 +76,32 @@ def random_forest(all_year=False, winter=False):
     
     # OUTPUT FILES
     # Model
-    model_path = f"{MODELS_FOLDER}/rf_best_model_{season_name_file}.joblib"
+    model_path = f"{MODELS_FOLDER}/xgb_best_model_{season_name_file}.joblib"
     # Confusion Matrices
-    cm_validation_image_path = f"{IMAGE_FOLDER}/confusion_matrix_validation_{season_name_file}.png"
-    cm_test_image_path = f"{IMAGE_FOLDER}/confusion_matrix_test_{season_name_file}.png"
+    cm_validation_image_path = f"{IMAGE_FOLDER}/xgb_confusion_matrix_validation_{season_name_file}.png"
+    cm_test_image_path = f"{IMAGE_FOLDER}/xgb_confusion_matrix_test_{season_name_file}.png"
     # Several Metrics
-    val_report_path = f"{REPORT_FOLDER}/validation_classification_report_{season_name_file}.csv"
-    test_report_path = f"{REPORT_FOLDER}/test_classification_report_{season_name_file}.csv"
-    combined_acc_path = f"{REPORT_FOLDER}/class_accuracies_{season_name_file}.csv"
-    val_class_acc_image_path = f"{IMAGE_FOLDER}/val_class_accuracy_{season_name_file}.png"
-    test_class_acc_image_path = f"{IMAGE_FOLDER}/test_class_accuracy_{season_name_file}.png"
+    val_report_path = f"{REPORT_FOLDER}/xgb_validation_classification_report_{season_name_file}.csv"
+    test_report_path = f"{REPORT_FOLDER}/xgb_test_classification_report_{season_name_file}.csv"
+    combined_acc_path = f"{REPORT_FOLDER}/xgb_class_accuracies_{season_name_file}.csv"
+    val_class_acc_image_path = f"{IMAGE_FOLDER}/xgb_val_class_accuracy_{season_name_file}.png"
+    test_class_acc_image_path = f"{IMAGE_FOLDER}/xgb_test_class_accuracy_{season_name_file}.png"
     # Top Features
-    top_features_file_path = f"{REPORT_FOLDER}/top_{TOP_FEATURES}_features_{season_name_file}.csv"
-    top_features_image_path = f"{IMAGE_FOLDER}/feature_importance_{TOP_FEATURES}_{season_name_file}.png"
+    top_features_file_path = f"{REPORT_FOLDER}/xgb_top_{TOP_FEATURES}_features_{season_name_file}.csv"
+    top_features_image_path = f"{IMAGE_FOLDER}/xgb_feature_importance_{TOP_FEATURES}_{season_name_file}.png"
     # Metrics Reports
-    cv_metrics_path = f"{REPORT_FOLDER}/cross_validation_raw_scores_{season_name_file}.csv"
-    summary_metrics_path = f"{REPORT_FOLDER}/cross_validation_summary_{season_name_file}.csv"
+    cv_metrics_path = f"{REPORT_FOLDER}/xgb_cross_validation_raw_scores_{season_name_file}.csv"
+    summary_metrics_path = f"{REPORT_FOLDER}/xgb_cross_validation_summary_{season_name_file}.csv"
     # AUC and FP-TP Plots
-    auc_val_image_path = f"{IMAGE_FOLDER}/auc_val_precision_vs_recall_{season_name_file}.png"
-    auc_test_image_path = f"{IMAGE_FOLDER}/auc_test_precision_vs_recall_{season_name_file}.png"
-    ft_tp_val_image_path = f"{IMAGE_FOLDER}/fp_tp_curve_val_{season_name_file}.png"
-    ft_tp_test_image_path = f"{IMAGE_FOLDER}/fp_tp_curve_test_{season_name_file}.png"
+    auc_val_image_path = f"{IMAGE_FOLDER}/xgb_auc_val_precision_vs_recall_{season_name_file}.png"
+    auc_test_image_path = f"{IMAGE_FOLDER}/xgb_auc_test_precision_vs_recall_{season_name_file}.png"
+    ft_tp_val_image_path = f"{IMAGE_FOLDER}/xgb_fp_tp_curve_val_{season_name_file}.png"
+    ft_tp_test_image_path = f"{IMAGE_FOLDER}/xgb_fp_tp_curve_test_{season_name_file}.png"
+    # Overall Performance
+    performance_csv_path = f"{REPORT_FOLDER}/xgb_overall_performance.csv"
 
     print("\n" + "=" * 60)
-    print(f"RUNNING RANDOM FOREST CLASSIFIER, TRAINING SEASON: {season_name.upper()} ...")
+    print(f"RUNNING XGBOOST CLASSIFIER, TRAINING SEASON: {season_name.upper()} ...")
     print("=" * 60)
 
     # ==========================================================
@@ -159,17 +167,23 @@ def random_forest(all_year=False, winter=False):
     print("\nPerforming Cross-Validation on Training set...")
 
     # Initialize the classifier
-    rf_classifier = RandomForestClassifier(
-        n_estimators=100,
+    xgb_classifier = XGBClassifier(
+        n_estimators=200,
+        max_depth=6,
+        learning_rate=0.1,
+        subsample=0.8,
+        colsample_bytree=0.8,
         random_state=42,
-        class_weight='balanced'
+        objective='multi:softprob',
+        eval_metric='mlogloss',
+        use_label_encoder=False,
+        n_jobs=-1
     )
-
     # Stratified K-Fold Cross-Validation ensures balanced class splits
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
     # Compute cross-validation accuracy scores
-    cv_scores = cross_val_score(rf_classifier, X_train, y_train, cv=cv, scoring='accuracy')
+    cv_scores = cross_val_score(xgb_classifier, X_train, y_train, cv=cv, scoring='accuracy')
 
     print(f"Cross-Validation Scores: {cv_scores}")
     print(f"Mean CV Accuracy: {cv_scores.mean():.4f} (+/- {cv_scores.std() * 2:.4f})")
@@ -177,11 +191,11 @@ def random_forest(all_year=False, winter=False):
     # ==========================================================
     # Final Model Training
     # ==========================================================
-    print("\nTraining Random Forest classifier...")
-    rf_classifier.fit(X_train, y_train)
+    print("\nTraining XGBoost classifier...")
+    xgb_classifier.fit(X_train, y_train)
 
     # Save the trained model
-    joblib.dump(rf_classifier, model_path)
+    joblib.dump(xgb_classifier, model_path)
     print(f"\nModel saved to {model_path}")
     
     # ==========================================================
@@ -190,8 +204,8 @@ def random_forest(all_year=False, winter=False):
     print("\nEvaluating model performance...")
 
     # Generate predictions
-    y_val_pred = rf_classifier.predict(X_val)
-    y_test_pred = rf_classifier.predict(X_test)
+    y_val_pred = xgb_classifier.predict(X_val)
+    y_test_pred = xgb_classifier.predict(X_test)
 
     # Compute accuracies
     val_accuracy = accuracy_score(y_val, y_val_pred)
@@ -277,7 +291,7 @@ def random_forest(all_year=False, winter=False):
     # Calculate feature importance
     feature_importance = pd.DataFrame({
         'feature': X_train_valid.columns,
-        'importance': rf_classifier.feature_importances_
+        'importance': xgb_classifier.feature_importances_
     }).sort_values('importance', ascending=False)
 
     # Export to CSV
@@ -296,7 +310,7 @@ def random_forest(all_year=False, winter=False):
     cv_results = {}
 
     for metric in scoring_metrics:
-        scores = cross_val_score(rf_classifier, X_train, y_train, cv=cv, scoring=metric)
+        scores = cross_val_score(xgb_classifier, X_train, y_train, cv=cv, scoring=metric)
         cv_results[metric] = scores
 
     # Transform CV results into DataFrame
@@ -319,8 +333,8 @@ def random_forest(all_year=False, winter=False):
     # ==========================================================
     # Compute predicted probabilities for Precision vs Recall
     # ==========================================================
-    y_val_proba = rf_classifier.predict_proba(X_val)
-    y_test_proba = rf_classifier.predict_proba(X_test)
+    y_val_proba = xgb_classifier.predict_proba(X_val)
+    y_test_proba = xgb_classifier.predict_proba(X_test)
 
     # Plot Precision vs Recall curves for validation set
     plot_auc_recall_vs_precision(
@@ -356,13 +370,52 @@ def random_forest(all_year=False, winter=False):
         ft_tp_test_image_path
     )
 
+    # ==============================================================
+    # Export Accuracy, Precision, Recall, and F1 to Accumulative CSV
+    # ==============================================================
+    # Compute overall metrics for validation and test sets
+    val_precision = val_report_df.loc["weighted avg", "precision"]
+    val_recall = val_report_df.loc["weighted avg", "recall"]
+    val_f1 = val_report_df.loc["weighted avg", "f1-score"]
+
+    test_precision = test_report_df.loc["weighted avg", "precision"]
+    test_recall = test_report_df.loc["weighted avg", "recall"]
+    test_f1 = test_report_df.loc["weighted avg", "f1-score"]
+
+    # Create a DataFrame for the current run
+    new_entry = pd.DataFrame([{
+        "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "Season": season_name,
+        "Model": "Xgboost",
+        "Validation_Accuracy": val_accuracy,
+        "Validation_Precision": val_precision,
+        "Validation_Recall": val_recall,
+        "Validation_F1": val_f1,
+        "Test_Accuracy": test_accuracy,
+        "Test_Precision": test_precision,
+        "Test_Recall": test_recall,
+        "Test_F1": test_f1
+    }])
+
+    # If file exists, append; otherwise, create new file with header
+    if os.path.exists(performance_csv_path):
+        existing_df = pd.read_csv(performance_csv_path)
+        combined_df = pd.concat([existing_df, new_entry], ignore_index=True)
+        combined_df.to_csv(performance_csv_path, index=False)
+    else:
+        new_entry.to_csv(performance_csv_path, index=False)
+
+    print(f"\nOverall performance metrics saved to {performance_csv_path}")
+
     # ==========================================================
     # Final Performance Summary
     # ==========================================================
     print("\n" + "-"*40)
-    print("RANDOM FOREST FINAL PERFORMANCE SUMMARY")
+    print("XGBOOST FINAL PERFORMANCE SUMMARY")
     print("-"*40)
     print(f"Cross-Validation Mean Accuracy: {cv_scores.mean():.4f}")
     print(f"Validation Set Accuracy: {val_accuracy:.4f}")
     print(f"Test Set Accuracy: {test_accuracy:.4f}")
     print("-"*40)
+    
+xgboost_classifier()

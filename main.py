@@ -1,7 +1,7 @@
 import argparse
 from create_day_samples import *
 from create_train_test_sets import *
-from random_forest import *
+from random_forest_classifier import *
 from create_preprocess_inference_set import *
 from inference import *
 

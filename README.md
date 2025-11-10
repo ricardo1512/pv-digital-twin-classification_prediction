@@ -92,6 +92,9 @@ Each function receives specific inputs and generates standardized outputs used i
 - Consolidated datasets in `Datasets/`  
   - `train_set.csv`  
   - `test_set.csv`
+- I-V Scatter plots in `Day_samples/`  
+  - `trainset_2023_scatter_iv.png`  
+  - `testset_2024_scatter_iv.png`
 
 
 ### 3. `random_forest()`
@@ -104,23 +107,24 @@ Each function receives specific inputs and generates standardized outputs used i
 **Outputs:**
 - Trained Random Forest model saved in `Models/rf_best_model_*.joblib`
 - Classification reports and accuracy metrics in `Reports/`:
-  - `validation_classification_report_*.csv`
-  - `test_classification_report_*.csv`
-  - `class_accuracies_*.csv`
-  - `top_*_features_*.csv`
-  - `cross_validation_raw_scores_*.csv`
-  - `cross_validation_summary_*.csv`
+  - `rf_validation_classification_report_*.csv`
+  - `rf_test_classification_report_*.csv`
+  - `rf_class_accuracies_*.csv`
+  - `rf_top_*_features_*.csv`
+  - `rf_cross_validation_raw_scores_*.csv`
+  - `rf_cross_validation_summary_*.csv`
+  - `rf_overall_performance.csv`
 
 - Plots in `Images/`:
-  - `confusion_matrix_validation_*.png`
-  - `confusion_matrix_test_*.png`
-  - `val_class_accuracy_*.png`
-  - `test_class_accuracy_*.png`
-  - `feature_importance_*.png`
-  - `auc_val_precision_vs_recall_*.png`
-  - `auc_test_precision_vs_recall_*.png`
-  - `fp_tp_curve_validation_*.png`
-  - `fp_tp_curve_test_*.png`
+  - `rf_confusion_matrix_validation_*.png`
+  - `rf_confusion_matrix_test_*.png`
+  - `rf_val_class_accuracy_*.png`
+  - `rf_test_class_accuracy_*.png`
+  - `rf_feature_importance_*.png`
+  - `rf_auc_val_precision_vs_recall_*.png`
+  - `rf_auc_test_precision_vs_recall_*.png`
+  - `rf_fp_tp_curve_validation_*.png`
+  - `rf_fp_tp_curve_test_*.png`
 
 
 ### 4. `create_inference_set()`
@@ -190,7 +194,7 @@ python main.py --create_samples --create_train_test --random_forest_run --create
 ├── inference.py                               # Anomaly and fault classification inference
 ├── main.py                                    # Argparse commands
 ├── preprocess_weather_for_classification.py   # Row weather data for classification preprocessing
-├── random_forest.py                           # ML model training and evaluation
+├── random_forest_classifier.py                # ML model training and evaluation
 ├── real_data_visualisation.py                 # Visualizing real-world data using plots
 ├── plot_day_samples.py                        # Plotting utilities for sample creation
 ├── plot_inference.py                          # Plotting utilities for inference
