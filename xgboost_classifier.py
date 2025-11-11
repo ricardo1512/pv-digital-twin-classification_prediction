@@ -67,6 +67,7 @@ def xgboost_classifier(all_year=False, winter=False):
                 - Feature importance
                 - Precision vs Recall curves
                 - FP vs TP curves
+                - Class-wise accuracy with bootstrap CIs
             - Printed performance summary to console (CV, validation, and test accuracies).
     """
 
@@ -99,6 +100,8 @@ def xgboost_classifier(all_year=False, winter=False):
     auc_test_image_path = f"{IMAGE_FOLDER}/xgb_auc_test_precision_vs_recall_{season_name_file}.png"
     ft_tp_val_image_path = f"{IMAGE_FOLDER}/xgb_fp_tp_curve_val_{season_name_file}.png"
     ft_tp_test_image_path = f"{IMAGE_FOLDER}/xgb_fp_tp_curve_test_{season_name_file}.png"
+    # Bootstrap CI Plot
+    ci_image_path = f"{IMAGE_FOLDER}/xgb_class_accuracy_ci_{season_name_file}.png"
     # Overall Performance
     performance_csv_path = f"{REPORT_FOLDER}/overall_performance.csv"
 
@@ -180,6 +183,7 @@ def xgboost_classifier(all_year=False, winter=False):
         eval_metric='mlogloss',
         n_jobs=-1
     )
+    
     # Stratified K-Fold Cross-Validation ensures balanced class splits
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
@@ -411,8 +415,36 @@ def xgboost_classifier(all_year=False, winter=False):
     # ==========================================================
     # Run XGBoost Classifier with Bootstrap Confidence Intervals
     # ==========================================================
-    # print("\nCalculating class-wise accuracy with bootstrap confidence intervals...")
-    # xgboost_classifier_bootstrap_ci()
+    print("\nCalculating class-wise accuracy with bootstrap confidence intervals...")
+    
+    # Parameters for bootstrapping
+    n_bootstrap = 1000
+    ci_level = 95
+    
+   # Bootstrapping for class-wise CI
+    classes = sorted(y_test.unique())
+    class_acc_samples = []
+
+    for _ in range(n_bootstrap):
+        print(_)
+        X_res, y_res = resample(X_test, y_test, replace=True, stratify=y_test)
+        y_pred_res = xgb_classifier.predict(X_res)
+        cm_res = confusion_matrix(y_res, y_pred_res, labels=classes)
+        acc_per_class = class_accuracy(cm_res)
+        class_acc_samples.append(acc_per_class)
+
+    class_acc_samples = np.array(class_acc_samples)
+    mean_acc = np.mean(class_acc_samples, axis=0)
+    lower_bounds = np.percentile(class_acc_samples, (100 - ci_level)/2, axis=0)
+    upper_bounds = np.percentile(class_acc_samples, 100 - (100 - ci_level)/2, axis=0)
+
+    # Print results
+    for idx, cls in enumerate(classes):
+        class_name = LABELS_MAP[cls][0]
+        print(f"{class_name}: Accuracy = {mean_acc[idx]:.3f} [{lower_bounds[idx]:.3f} - {upper_bounds[idx]:.3f}] ({ci_level}% CI)")
+
+    # Plot with CI
+    plot_class_accuracy_ci(mean_acc, lower_bounds, upper_bounds, classes, f"Class-wise Accuracy with {ci_level}% CI", ci_image_path)
     
     # ==========================================================
     # Final Performance Summary

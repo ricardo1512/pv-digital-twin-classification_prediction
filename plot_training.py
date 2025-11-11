@@ -364,6 +364,7 @@ def plot_fp_tp_curve(y_true, y_scores, class_names, output_file):
     # Confirm saving
     print(f"FP vs TP curve saved to {output_file}")
 
+
 def plot_class_accuracy_ci(class_acc, ci_lower, ci_upper, classes, title, output_file):
     """
         Plot per-class accuracy as vertical bars with bootstrap confidence intervals in dark theme.
@@ -412,3 +413,4 @@ def plot_class_accuracy_ci(class_acc, ci_lower, ci_upper, classes, title, output
     plt.savefig(output_file, dpi=300, facecolor=fig.get_facecolor())
     plt.close()
     print(f"Class Accuracy plot saved to {output_file}")
+    
