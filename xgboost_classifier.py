@@ -425,7 +425,9 @@ def xgboost_classifier(all_year=False, winter=False):
     classes = sorted(y_test.unique())
     class_acc_samples = []
 
-    for _ in range(n_bootstrap):
+    for i in range(n_bootstrap):
+        if i % 50 == 0:
+            print(f"Bootstrap sample {i+1}/{n_bootstrap}...")
         X_res, y_res = resample(X_test, y_test, replace=True, stratify=y_test)
         y_pred_res = xgb_classifier.predict(X_res)
         cm_res = confusion_matrix(y_res, y_pred_res, labels=classes)
