@@ -5,8 +5,8 @@ from datetime import datetime
 import joblib
 from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
 from sklearn.metrics import classification_report, accuracy_score
+from sklearn.utils import resample
 from xgboost import XGBClassifier
-from xgboost_confidence import *
 from plot_training import *
 from utils import *
 
@@ -426,7 +426,6 @@ def xgboost_classifier(all_year=False, winter=False):
     class_acc_samples = []
 
     for _ in range(n_bootstrap):
-        print(_)
         X_res, y_res = resample(X_test, y_test, replace=True, stratify=y_test)
         y_pred_res = xgb_classifier.predict(X_res)
         cm_res = confusion_matrix(y_res, y_pred_res, labels=classes)
@@ -457,4 +456,3 @@ def xgboost_classifier(all_year=False, winter=False):
     print(f"Test Set Accuracy: {test_accuracy:.4f}")
     print("-"*40)
     
-xgboost_classifier()

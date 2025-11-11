@@ -83,8 +83,8 @@ def plot_confusion_matrix_combined(set_name, season_name, y_true, y_pred, image_
     cbar.set_label('Percentage (%)', color='white')  # label da colorbar
 
     # Set plot title and axis labels
-    ax.set_title(f'Confusion Matrix, {season_name}, {set_name} Set\n(Values: Count over Percentage)',
-                 color='white', fontsize=14)
+    # ax.set_title(f'Confusion Matrix, {season_name}, {set_name} Set\n(Values: Count over Percentage)',
+    #              color='white', fontsize=14)
     ax.set_ylabel('True Label', color='white')
     ax.set_xlabel('Predicted Label', color='white')
 
@@ -125,7 +125,7 @@ def plot_feature_importance(top_features, season_name, image_file):
     """
 
     # Create figure and axes with dark background
-    plt.figure(figsize=(12, 8), facecolor='black')
+    plt.figure(figsize=(12, 7.2), facecolor='black')
     ax = plt.gca()
     ax.set_facecolor('black')
 
@@ -139,10 +139,10 @@ def plot_feature_importance(top_features, season_name, image_file):
     )
 
     # Set title and axis labels
-    ax.set_title(f"Top {TOP_FEATURES} Most Important Features, {season_name}",
-                 color='white', fontsize=14)
+    # ax.set_title(f"Top {TOP_FEATURES} Most Important Features, {season_name}",
+    #              color='white', fontsize=14)
     ax.set_xlabel('Importance', color='white', fontsize=12)
-    ax.set_ylabel('Feature', color='white', fontsize=12)
+    ax.set_ylabel('Features', color='white', fontsize=12)
     
     # Configure tick labels
     plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
@@ -215,7 +215,7 @@ def plot_class_accuracy(class_acc, classes, title, output_file):
     # Set axis labels and title in white for dark theme
     ax.set_xlabel('Label', color='white')
     ax.set_ylabel('Accuracy (%)', color='white')
-    ax.set_title(title, color='white')
+    # ax.set_title(title, color='white')
 
     # Customize tick labels
     plt.setp(ax.get_xticklabels(), fontsize=8, rotation=0, ha='center')
@@ -270,7 +270,7 @@ def plot_auc_recall_vs_precision(y_true, y_scores, class_names, output_file):
     colors = cycle([LABELS_MAP[i][1] for i in range(n_classes)])
 
     # Create figure and axis with dark background
-    fig, ax = plt.subplots(figsize=(10, 7), facecolor='black')
+    fig, ax = plt.subplots(figsize=(10, 10), facecolor='black')
     ax.set_facecolor('black')
 
     # Plot Precision-Recall curve for each class
@@ -283,14 +283,15 @@ def plot_auc_recall_vs_precision(y_true, y_scores, class_names, output_file):
     # Set labels, title, limits, grid, and legend
     ax.set_xlabel('Recall', color='white')
     ax.set_ylabel('Precision', color='white')
-    ax.set_title('Recall vs Precision Curve Per Class', color='white', fontsize=14)
+    # ax.set_title('Recall vs Precision Curve Per Class', color='white', fontsize=14)
     ax.tick_params(axis='x', colors='white')
     ax.tick_params(axis='y', colors='white')
     ax.set_xlim(1, 0)
+    ax.set_ylim(0, 1.005)
     plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
     plt.yticks(color='white', fontsize=8)
     ax.grid(True, linestyle='--', color='gray', alpha=0.5)
-    ax.legend(facecolor='black', edgecolor='white', fontsize=10)
+    ax.legend(facecolor='black', edgecolor='white', fontsize=10, loc='lower right')
 
     # Adjust layout and save figure
     plt.tight_layout()
@@ -327,7 +328,7 @@ def plot_fp_tp_curve(y_true, y_scores, class_names, output_file):
     colors = cycle([LABELS_MAP[i][1] for i in range(n_classes)])
 
     # Create dark-themed figure
-    fig, ax = plt.subplots(figsize=(10, 7), facecolor='black')
+    fig, ax = plt.subplots(figsize=(10, 10), facecolor='black')
     ax.set_facecolor('black')
 
     # Compute FP-TP pairs (equivalent to ROC without thresholds)
@@ -343,12 +344,12 @@ def plot_fp_tp_curve(y_true, y_scores, class_names, output_file):
     # Plot formatting
     ax.plot([0, 1], [0, 1], 'w--', lw=1, label='Random Guess')
     ax.set_xlim([0.0, 1.0])
-    ax.set_ylim([0.0, 1.05])
+    ax.set_ylim([0.0, 1.005])
     plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
     plt.yticks(color='white', fontsize=8)
     ax.set_xlabel('False Positive Rate (FP)', color='white', fontsize=12)
     ax.set_ylabel('True Positive Rate (TP)', color='white', fontsize=12)
-    ax.set_title('True Positive vs False Positive Per Class', color='white', fontsize=14)
+    # ax.set_title('True Positive vs False Positive Per Class', color='white', fontsize=14)
     ax.tick_params(axis='x', colors='white')
     ax.tick_params(axis='y', colors='white')
     ax.legend(facecolor='black', edgecolor='white', fontsize=10)

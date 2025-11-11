@@ -1,7 +1,7 @@
 import argparse
 from create_day_samples import *
 from create_train_test_sets import *
-from random_forest_classifier import *
+from xgboost_classifier import *
 from create_preprocess_inference_set import *
 from inference import *
 
@@ -22,10 +22,10 @@ def run(args):
         create_train_test_sets()
 
     # ------------------------------------------------------
-    # Block 3: Run the Random Forest Model
+    # Block 3: Run the XGBoost Model
     # ------------------------------------------------------
-    if args.random_forest_run:
-        random_forest(
+    if args.xgboost_run:
+        xgboost_classifier(
             all_year=args.all_year, 
             winter=args.winter,
         )
@@ -66,9 +66,9 @@ if __name__ == '__main__':
     parser.add_argument('--create_train_test', action='store_true', help="Create train/test sets")
 
     # ------------------------------------------------------
-    # Block 3: Run the Random Forest Model
+    # Block 3: Run the XGBoost Model
     # ------------------------------------------------------
-    parser.add_argument('--random_forest_run', action='store_true', help="Run Random Forest model")
+    parser.add_argument('--xgboost_run', action='store_true', help="Run XGBoost model")
 
     # ------------------------------------------------------
     # Block 4: Create and Preprocess the Inference Test Set

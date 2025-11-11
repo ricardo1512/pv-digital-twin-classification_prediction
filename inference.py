@@ -6,10 +6,10 @@ from utils import *
 
 def inference(all_year=False, winter=False):
     """
-        Run inference on a real dataset using a pre-trained Random Forest classifier.
+        Run inference on a real dataset using a pre-trained XGBoost classifier.
 
         This function performs the following steps:
-            1. Loads a pre-trained Random Forest model from disk.
+            1. Loads a pre-trained XGBoost model from disk.
             2. Reads the inference dataset CSV containing features and metadata.
             3. Selects the features required by the model.
             4. Performs classification to predict condition labels for each sample.
@@ -28,7 +28,7 @@ def inference(all_year=False, winter=False):
             
         Inputs:
             - `inference_test_file`: CSV file with test data.
-            - `MODELS_FOLDER`: Folder to pre-trained Random Forest model.
+            - `MODELS_FOLDER`: Folder to pre-trained XGBoost model.
             - Other output paths: CSV, image, and plot directories.
 
         Outputs:
@@ -52,15 +52,15 @@ def inference(all_year=False, winter=False):
     
     # OUTPUT FILES AND FOLDERS
     # Results
-    output_results_path = f"{REPORT_FOLDER}/inference_results_{season_name_file}.csv"
+    output_results_path = f"{REPORT_FOLDER}/xgb_inference_results_{season_name_file}.csv"
     # Inference classifications
-    output_inference_path = f"{DATASETS_FOLDER}/inference_test_set_with_classification_{season_name_file}.csv"
-    output_inference_image = f"{IMAGE_FOLDER}/inference_classification_distribution_{season_name_file}.png"
+    output_inference_path = f"{DATASETS_FOLDER}/xgb_inference_test_set_with_classification_{season_name_file}.csv"
+    output_inference_image = f"{IMAGE_FOLDER}/xgb_inference_classification_distribution_{season_name_file}.png"
     # Inference probabilities
-    output_inference_prob_path = f"{REPORT_FOLDER}/inference_test_set_with_prob_classification_{season_name_file}.csv"
-    output_inference_prob_folder = f"{PLOT_FOLDER}/Probabilities/Plots_inference_probabilities_{season_name_file}"
-    output_inference_scaled_prob_path = f"{REPORT_FOLDER}/inference_adjusted_probabilities_report_{season_name_file}.csv"
-    output_inference_scaled_prob_folder = f"{PLOT_FOLDER}/Probabilities_scaled/Plots_inference_probabilities_scaled_{season_name_file}"
+    output_inference_prob_path = f"{REPORT_FOLDER}/xgb_inference_test_set_with_prob_classification_{season_name_file}.csv"
+    output_inference_prob_folder = f"{PLOT_FOLDER}/Inference_probabilities/Plots_inference_probabilities_{season_name_file}"
+    output_inference_scaled_prob_path = f"{REPORT_FOLDER}/xgb_inference_adjusted_probabilities_report_{season_name_file}.csv"
+    output_inference_scaled_prob_folder = f"{PLOT_FOLDER}/Inference_probabilities_scaled/Plots_inference_probabilities_scaled_{season_name_file}"
 
     print("\n" + "=" * 60)
     print(f"PERFORMING INFERENCE, TRAINING SEASON: {season_name.upper()} ...")
@@ -70,12 +70,12 @@ def inference(all_year=False, winter=False):
     xgb_model_file_path = Path(xgb_model_path)
     if not os.path.exists(xgb_model_file_path):
         print(
-            f"\nRandom Forest model file not found: {xgb_model_path}\n"
+            f"\nXGBoost model file not found: {xgb_model_path}\n"
             f"\tPlease train the model first for {season_name} (--{season_name_file}).\n"
         )
         exit()
 
-    # Load pre-trained Random Forest model
+    # Load pre-trained XGBoost model
     xgb_classifier = joblib.load(xgb_model_path)
 
     # Raise an exception if the file does not exist, stopping the program
@@ -162,7 +162,7 @@ def inference(all_year=False, winter=False):
     proba_inference_df.to_csv(output_inference_prob_path, index=False)
     print(f"Class probabilities for inference dataset saved to {output_inference_prob_path}")
     # Generate bar plots for each sample's condition probabilities
-    # plot_inference_condition_probabilities(proba_inference_df, season_name_file, output_inference_prob_folder) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    plot_inference_condition_probabilities(proba_inference_df, season_name_file, output_inference_prob_folder)
     print(f"Class probabilities plots saved to {output_inference_prob_folder}")
     
     # SELECTED AND SCALED PROBABILITIES FOR DECISION MAKING
@@ -174,5 +174,5 @@ def inference(all_year=False, winter=False):
     report_adjusted_proba_df.to_csv(output_inference_scaled_prob_path, index=False)
     print(f"\nAdjusted probabilities report saved to: {output_inference_scaled_prob_path}")
     # Generate bar plots for each sample's selected and scaled condition probabilities    
-    # plot_inference_condition_probabilities(adjusted_proba_df, season_name_file, output_inference_scaled_prob_folder) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    plot_inference_condition_probabilities(adjusted_proba_df, season_name_file, output_inference_scaled_prob_folder, adjusted=True)
     print(f"Scaled class probabilities plots saved to {output_inference_scaled_prob_folder}")

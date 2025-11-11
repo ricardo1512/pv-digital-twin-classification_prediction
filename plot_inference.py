@@ -74,7 +74,7 @@ def plot_inference_condition_distribution(season_name, state_counts, output_infe
     print(f"Inference Condition Distribution plot saved to {output_inference_image}\n")
 
 
-def plot_inference_condition_probabilities(df, season_name_file, output_folder):
+def plot_inference_condition_probabilities(df, season_name_file, output_folder, adjusted=False):
     """
         Generate and save bar plots of predicted condition probabilities for each inverter entry.
 
@@ -113,7 +113,7 @@ def plot_inference_condition_probabilities(df, season_name_file, output_folder):
             ax.text(
                 bar.get_x() + bar.get_width() / 2,
                 prob + 2, # Position label slightly above the bar
-                f"{int(prob)}",
+                f"{prob:.1f}",
                 ha='center', va='bottom', color='white', fontsize=9
             )
 
@@ -125,7 +125,7 @@ def plot_inference_condition_probabilities(df, season_name_file, output_folder):
         id = row['ID'].split('_')
         local = ' '.join(id[:-1])
         number = id[-1] 
-        ax.set_title(f"Predicted Probabilities for Inverter {number}, {local}, {row['date']}", color='white')
+        # ax.set_title(f"Predicted Probabilities for Inverter {number}, {local}, {row['date']}", color='white')
 
         # Fix Y-axis limits from 0% to 100%
         ax.set_ylim(0, 100)
@@ -141,7 +141,8 @@ def plot_inference_condition_probabilities(df, season_name_file, output_folder):
         plt.tight_layout()
 
         # Save the figure to the specified output folder
-        save_path = os.path.join(output_folder, f"Classification_prob_{row['ID']}_{row['date']}_{season_name_file}.png")
+        adjusted_tag = "adjusted" if adjusted else ""
+        save_path = os.path.join(output_folder, f"Classification_prob_{row['ID']}_{row['date']}_{season_name_file}_{adjusted_tag}.png")
         plt.savefig(save_path, dpi=300, facecolor=fig.get_facecolor())
         
         # Close figure to free memory
