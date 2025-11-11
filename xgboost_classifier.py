@@ -38,7 +38,8 @@ def xgboost_classifier(all_year=False, winter=False):
             10. Generates Precision–Recall (AUC) and FP–TP curves for validation and test sets.
             11. Exports global performance metrics (accuracy, precision, recall, f1 for validation and test)
                 to an accumulative CSV file.
-            12. Prints a final performance summary including CV, validation, and test accuracies.
+            12. Calculates class-wise accuracy with bootstrap confidence intervals.
+            13. Prints a final performance summary including CV, validation, and test accuracies.
 
         Args:
             all_year (bool, optional): If True, includes data from all months.
@@ -410,8 +411,8 @@ def xgboost_classifier(all_year=False, winter=False):
     # ==========================================================
     # Run XGBoost Classifier with Bootstrap Confidence Intervals
     # ==========================================================
-    print("\nCalculating class-wise accuracy with bootstrap confidence intervals...")
-    xgboost_classifier_bootstrap_ci()
+    # print("\nCalculating class-wise accuracy with bootstrap confidence intervals...")
+    # xgboost_classifier_bootstrap_ci()
     
     # ==========================================================
     # Final Performance Summary

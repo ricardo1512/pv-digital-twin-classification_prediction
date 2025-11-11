@@ -56,7 +56,8 @@ def xgboost_classifier_bootstrap_ci(n_bootstrap=1000, ci_level=95):
 
     # Print results
     for idx, cls in enumerate(classes):
-        print(f"Class {cls}: Accuracy = {mean_acc[idx]:.3f} [{lower_bounds[idx]:.3f} - {upper_bounds[idx]:.3f}] ({ci_level}% CI)")
+        class_name = LABELS_MAP[cls][0]
+        print(f"{class_name}: Accuracy = {mean_acc[idx]:.3f} [{lower_bounds[idx]:.3f} - {upper_bounds[idx]:.3f}] ({ci_level}% CI)")
 
     # Plot with CI
     plot_class_accuracy_ci(mean_acc, lower_bounds, upper_bounds, classes,
