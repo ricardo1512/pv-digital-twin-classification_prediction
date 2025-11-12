@@ -190,7 +190,7 @@ def extract_comprehensive_features(filtered_results):
     return features
 
 
-def compute_store_daily_comprehensive_features(results_full, date, daily_features):
+def compute_store_daily_comprehensive_features(results_full, date, daily_features=[]):
     """
         Compute daily statistical features for a store's numerical data.
 
@@ -231,7 +231,8 @@ def compute_store_daily_comprehensive_features(results_full, date, daily_feature
     feature_series.name = pd.to_datetime(date)
 
     # Append the series to the list of daily features
-    daily_features.append(feature_series)
+    if daily_features is not []:
+        daily_features.append(feature_series)
     
     return feature_series
 
