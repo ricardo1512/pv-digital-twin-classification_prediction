@@ -191,7 +191,7 @@ def plot_feature_importance(top_features, season_name, image_file):
     """
 
     # Create figure and axes
-    plt.figure(figsize=(12, 7.2), facecolor='black')
+    plt.figure(figsize=(12, 7.2))
     ax = plt.gca()
 
     # Create horizontal barplot
@@ -199,18 +199,18 @@ def plot_feature_importance(top_features, season_name, image_file):
         x='importance',
         y='feature',
         data=top_features,
-        # color='white',
+        color='#009999',
         edgecolor='white',
     )
 
     # Set title and axis labels
     # ax.set_title(f"Top {TOP_FEATURES} Most Important Features, {season_name}",
     #              color='white', fontsize=14)
-    ax.set_xlabel('Importance', color='white', fontsize=12)
-    ax.set_ylabel('Features', color='white', fontsize=12)
+    ax.set_xlabel('Importance', color='black', fontsize=12)
+    ax.set_ylabel('Features', color='black', fontsize=12)
     
     # Configure tick labels
-    plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
+    plt.xticks(rotation=0, ha='center', color='black', fontsize=8)
     plt.yticks(color='white', fontsize=10)
 
     # Customize tick colors
@@ -224,7 +224,7 @@ def plot_feature_importance(top_features, season_name, image_file):
     plt.tight_layout()
 
     # Save figure in high resolution
-    plt.savefig(image_file, dpi=300, bbox_inches='tight', facecolor='black')
+    plt.savefig(image_file, dpi=300, bbox_inches='tight')
 
     # Close the figure to free memory
     plt.close()
@@ -258,8 +258,7 @@ def plot_auc_recall_vs_precision(y_true, y_scores, class_names, output_file):
     colors = cycle([LABELS_MAP[i][1] for i in range(n_classes)])
 
     # Create figure and axis
-    fig, ax = plt.subplots(figsize=(10, 10), facecolor='black')
-    ax.set_facecolor('black')
+    fig, ax = plt.subplots(figsize=(10, 10))
 
     # Plot Precision-Recall curve for each class
     for i, color in zip(range(n_classes), colors):
@@ -269,21 +268,21 @@ def plot_auc_recall_vs_precision(y_true, y_scores, class_names, output_file):
                 label=f"{class_names[i]} (AUC={auc_score:.2f})")
 
     # Set labels, title, limits, grid, and legend
-    ax.set_xlabel('Recall', color='white')
-    ax.set_ylabel('Precision', color='white')
+    ax.set_xlabel('Recall', color='black')
+    ax.set_ylabel('Precision', color='black')
     # ax.set_title('Recall vs Precision Curve Per Class', color='white', fontsize=14)
-    ax.tick_params(axis='x', colors='white')
-    ax.tick_params(axis='y', colors='white')
+    ax.tick_params(axis='x', colors='black')
+    ax.tick_params(axis='y', colors='black')
     ax.set_xlim(1, 0)
     ax.set_ylim(0, 1.005)
-    plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
-    plt.yticks(color='white', fontsize=8)
+    plt.xticks(rotation=0, ha='center', color='black', fontsize=8)
+    plt.yticks(color='black', fontsize=8)
     ax.grid(True, linestyle='--', color='gray', alpha=0.5)
-    ax.legend(facecolor='black', edgecolor='white', fontsize=10, loc='lower right')
+    ax.legend(fontsize=10, loc='lower right')
 
     # Adjust layout and save figure
     plt.tight_layout()
-    plt.savefig(output_file, dpi=300, facecolor=fig.get_facecolor())
+    plt.savefig(output_file, dpi=300)
     
     # Close figure to free memory
     plt.close()
@@ -315,7 +314,7 @@ def plot_fp_tp_curve(y_true, y_scores, class_names, output_file):
     colors = cycle([LABELS_MAP[i][1] for i in range(n_classes)])
 
     # Create figure
-    fig, ax = plt.subplots(figsize=(10, 10), facecolor='black')
+    fig, ax = plt.subplots(figsize=(10, 10))
 
     # Compute FP-TP pairs (equivalent to ROC without thresholds)
     for i, color in zip(range(n_classes), colors):
@@ -331,19 +330,19 @@ def plot_fp_tp_curve(y_true, y_scores, class_names, output_file):
     ax.plot([0, 1], [0, 1], 'w--', lw=1, label='Random Guess')
     ax.set_xlim([0.0, 1.0])
     ax.set_ylim([0.0, 1.005])
-    plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
-    plt.yticks(color='white', fontsize=8)
-    ax.set_xlabel('False Positive Rate (FP)', color='white', fontsize=12)
-    ax.set_ylabel('True Positive Rate (TP)', color='white', fontsize=12)
+    plt.xticks(rotation=0, ha='center', color='black', fontsize=8)
+    plt.yticks(color='black', fontsize=8)
+    ax.set_xlabel('False Positive Rate (FP)', color='black', fontsize=12)
+    ax.set_ylabel('True Positive Rate (TP)', color='black', fontsize=12)
     # ax.set_title('True Positive vs False Positive Per Class', color='white', fontsize=14)
-    ax.tick_params(axis='x', colors='white')
-    ax.tick_params(axis='y', colors='white')
-    ax.legend(facecolor='black', edgecolor='white', fontsize=10)
+    ax.tick_params(axis='x', colors='black')
+    ax.tick_params(axis='y', colors='black')
+    ax.legend(fontsize=10)
     ax.grid(True, linestyle='--', color='gray', alpha=0.5)
 
     # Save and close
     plt.tight_layout()
-    plt.savefig(output_file, dpi=300, facecolor=fig.get_facecolor(), bbox_inches='tight')
+    plt.savefig(output_file, dpi=300, bbox_inches='tight')
     
     # Close figure to free memory
     plt.close()
@@ -364,10 +363,8 @@ def plot_class_accuracy_ci(class_acc, ci_lower, ci_upper, classes, title, output
             title (str): Plot title
             output_file (str): File path to save the plot
     """
-
+    # Create figure and axes
     fig, ax = plt.subplots(figsize=(10, 6))
-    fig.patch.set_facecolor('black')
-    ax.set_facecolor('black')
 
     # Bar colors
     colors = [LABELS_MAP[i][1] for i in classes]
@@ -378,25 +375,24 @@ def plot_class_accuracy_ci(class_acc, ci_lower, ci_upper, classes, title, output
         class_labels,
         class_acc,
         color=colors,
-        edgecolor='white',
         yerr=[class_acc - ci_lower, ci_upper - class_acc],
         capsize=5,
-        ecolor='white'  # white error bars
+        ecolor='black'  # black error bars
     )
 
     # Labels, grid, and theme ticks
-    ax.set_xlabel('Label', color='white')
-    ax.set_ylabel('Accuracy (%)', color='white')
-    # ax.set_title(title, color='white')
+    ax.set_xlabel('Label', color='black')
+    ax.set_ylabel('Accuracy (%)', color='black')
+    # ax.set_title(title, color='black')
     ax.grid(True, color='gray', linestyle='--', linewidth=0.5, axis='y')
     plt.setp(ax.get_xticklabels(), fontsize=8, rotation=0, ha='center')
     plt.setp(ax.get_yticklabels(), fontsize=8, rotation=0)
-    ax.tick_params(axis='x', colors='white')
-    ax.tick_params(axis='y', colors='white')
-
+    ax.tick_params(axis='x', colors='black')
+    ax.tick_params(axis='y', colors='black')
+    
     # Adjust layout and save
     plt.tight_layout()
-    plt.savefig(output_file, dpi=300, facecolor=fig.get_facecolor())
+    plt.savefig(output_file, dpi=300)
     plt.close()
     print(f"Class Accuracy plot saved to {output_file}")
     

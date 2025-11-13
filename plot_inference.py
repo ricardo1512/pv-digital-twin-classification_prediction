@@ -13,7 +13,6 @@ def plot_inference_condition_distribution(season_name, state_counts, output_infe
             - save_path (str, optional): File path to save the resulting plot.
         
         Notes:
-            - Dark theme: black background, white text, gray grid lines.
             - Each bar displays its corresponding count on top.
             - The resulting figure is saved as high-resolution PNG (dpi=300).
     """
