@@ -369,9 +369,12 @@ def plot_class_accuracy_ci(class_acc, ci_lower, ci_upper, classes, title, output
     # Bar colors
     colors = [LABELS_MAP[i][1] for i in classes]
     class_labels = [LABELS_MAP[int(i)][0] for i in classes]
+    
+    # Compute CI ranges
+    ci_diff = np.array(ci_upper) - np.array(ci_lower)
 
     # Plot bars with white error bars (CI)
-    ax.bar(
+    bars = ax.bar(
         class_labels,
         class_acc,
         color=colors,
@@ -379,6 +382,21 @@ def plot_class_accuracy_ci(class_acc, ci_lower, ci_upper, classes, title, output
         capsize=5,
         ecolor='black'  # black error bars
     )
+    
+    # Add text showing CI width above bars
+    for i, bar in enumerate(bars):
+        upper = ci_upper[i]
+        diff_text = f"{ci_diff[i]/2:.1f}"  
+        ax.text(
+            bar.get_x() + bar.get_width()/2,
+            upper + 0.5,
+            diff_text,
+            ha='center',
+            va='bottom',
+            fontsize=8,
+            color='black'
+        )
+
 
     # Labels, grid, and theme ticks
     ax.set_xlabel('Label', color='black')
