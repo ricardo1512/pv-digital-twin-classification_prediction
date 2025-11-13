@@ -1,7 +1,7 @@
 Combination,Count
-Normal,114
+Normal,126
 Diode Fault,23
-Soiling,13
-Normal + Soiling,6
-Shading + Soiling,5
-Diode Fault + Normal,3
+Soiling,7
+Shading + Soiling,6
+Normal + Soiling,1
+Diode Fault + Shading,1
