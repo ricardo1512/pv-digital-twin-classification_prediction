@@ -23,7 +23,6 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
             - soiling (bool): If True, adds precipitation axis.
             
         Notes:
-            - The plot uses a dark theme for better visibility.
             - MPPT powers is plotted on the primary Y-axis (left).
             - Global Tilted Irradiance (GTI) and Diffuse Horizontal Irradiance (DHI)
               are plotted on secondary and tertiary Y-axes respectively (right).
@@ -40,8 +39,6 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
     # Ensure output folder exists
     os.makedirs(plot_folder, exist_ok=True)
 
-    # Use dark style for the plot
-    plt.style.use('dark_background')
     fig, ax1 = plt.subplots(figsize=(18, 6))
 
     # -------------------------
@@ -49,24 +46,24 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
     # -------------------------
     color_mppt = MPPT_PALETTE['mppt_power']
     if mppt_clean:
-        line1, = ax1.plot(df.index, df['mppt_power_clean'], color=MPPT_PALETTE['mppt_power_clean'], label='Reference MPPT', linewidth=1.5, linestyle=':')
-    line2, = ax1.plot(df.index, df['mppt_power'], color=color_mppt, label='Effective MPPT', linewidth=2)
+        line1, = ax1.plot(df.index, df['mppt_power_clean'], color=MPPT_PALETTE['mppt_power_clean'], label='Reference MPPT', linewidth=2, linestyle=':')
+    line2, = ax1.plot(df.index, df['mppt_power'], color=color_mppt, label='Effective MPPT', linewidth=3)
     ax1.set_xlabel("Time")
     ax1.set_ylabel("MPPT (kW)", color=color_mppt)
 
     # Configure tick labels
-    plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
-    plt.yticks(color='white', fontsize=8)
+    plt.xticks(rotation=0, ha='center', color='black', fontsize=8)
+    plt.yticks(color='black', fontsize=8)
     ax1.tick_params(axis='y', labelcolor=color_mppt)
         
     # Adjust Y-axis limits for MPPT
     ax1.set_ylim(0, df['mppt_power_clean'].max() * 1.1 if mppt_clean else df['mppt_power'].max() * 1.1)
     
     
-    # Create legend only for MPPT lines with white frame
+    # Create legend only for MPPT lines
     if mppt_clean:
-        ax1.legend(handles=[line1, line2], fontsize=10, loc='upper left', facecolor='black', edgecolor='white')
-
+        ax1.legend(handles=[line1, line2], fontsize=10, loc='upper left')
+        
     # -------------------------
     # Global Tilted Irradiance (secondary axis)
     # -------------------------
@@ -170,8 +167,7 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
 
 def plot_currents(df_original, date, condition_title, output_folder, filename, soiling=False):
     """
-        Plot reference and effective PV string DC (pv1_i), as well as Precipitation if soiling is True,
-        in the same dark-themed graph.
+        Plot reference and effective PV string DC (pv1_i), as well as Precipitation if soiling is True.
 
         Args:
             - df_original (pd.DataFrame): DataFrame containing current measurements with a datetime index.
@@ -182,7 +178,6 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
             - soiling (bool): If True, adds precipitation axis.
             
         Notes:
-            - The plot uses a dark background for better visibility.
             - The figure is saved as a high-resolution PNG file in the specified folder.
     """
 
@@ -194,9 +189,6 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
 
     # Ensure output folder exists; create it if necessary
     os.makedirs(output_folder, exist_ok=True)
-
-    # Set dark background style for the plot
-    plt.style.use('dark_background')
 
     # Create figure and axis objects with defined size
     fig, ax1 = plt.subplots(figsize=(12, 6))
@@ -213,13 +205,13 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
     ax1.set_ylim(0, max_y)
     
     # Configure tick labels
-    plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
-    plt.yticks(color='white', fontsize=8)
+    plt.xticks(rotation=0, ha='center', color='black', fontsize=8)
+    plt.yticks(color='black', fontsize=8)
 
-    # Label axes and set tick colors to white for visibility
+    # Label axes and set tick colors
     ax1.set_xlabel("Date")
     ax1.set_ylabel("Current (A)", color=color_curr)
-    ax1.tick_params(axis='x', colors='white', labelsize=8)
+    ax1.tick_params(axis='x', colors='black', labelsize=8)
     ax1.tick_params(axis='y', labelcolor=color_curr, labelsize=8)
 
     # Add horizontal grid lines with light transparency
@@ -230,7 +222,7 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
     plt.setp(ax1.get_xticklabels(), rotation=0)
 
     # Set plot title
-    # plt.title(f"PV and Phase Currents, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='white')
+    # plt.title(f"PV and Phase Currents, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='black')
     
     # Initialize a list to store legend handles
     handles = []
@@ -239,7 +231,7 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
     # -------------------------
     if soiling:
         # Set plot title
-        # plt.title(f"PV and Phase Currents, and Precipitation, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='white')
+        # plt.title(f"PV and Phase Currents, and Precipitation, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='black')
         if condition_title != "Real Data":
             ax2 = ax1.twinx()
             ax2.plot(df.index, df['precipitation'], color=CURR_VOLT_PALETTE['precipitation'],
@@ -256,8 +248,6 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
     # Add MPPT lines to the handles
     if pv1_i_clean:
         handles.extend([line1, line2])
-    else:
-        handles.extend([line2])
     
     # Draw vertical dashed lines for a specific inverter_state value
     if condition_title == "Real Data":
@@ -273,7 +263,7 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
         handles.append(line_red)
         
     # Create a single combined legend for all handles
-    ax1.legend(handles=handles, fontsize=10, loc='upper left', facecolor='black', edgecolor='white')
+    ax1.legend(handles=handles, fontsize=10, loc='upper left')
         
     # Adjust layout to avoid clipping of labels
     plt.tight_layout()
@@ -291,7 +281,7 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
 
 def plot_voltage(df_original, date, condition_title, output_folder, filename):
     """
-        Plot PV string reference and effective DC (pv1_u) in a dark-themed graph.
+        Plot PV string reference and effective DC (pv1_u).
 
         Args:
             - df_original (pd.DataFrame): DataFrame containing voltage measurements with a datetime index.
@@ -301,7 +291,6 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
             - filename (str): Base name for the saved plot image.
         
         Notes:
-            - The plot uses a dark background for better visibility.
             - The figure is saved as a high-resolution PNG file in the specified folder.
     """
 
@@ -314,9 +303,6 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
     # Ensure output folder exists
     os.makedirs(output_folder, exist_ok=True)
 
-    # Set dark background style
-    plt.style.use('dark_background')
-
     # Create figure and axis
     _, ax = plt.subplots(figsize=(12, 6))
 
@@ -326,9 +312,9 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
         line1, = ax.plot(df.index, df['pv1_u_clean'], color=CURR_VOLT_PALETTE['pv1_u_clean'], label='Reference pv1_u', linewidth=1.5, linestyle=':')
     line2, = ax.plot(df.index, df['pv1_u'], label='Effective pv1_u', color=color_volt, linewidth=2)
     
-    # Create legend only for MPPT lines with white frame
+    # Create legend only for MPPT lines
     if pv1_u_clean:
-        ax.legend(handles=[line1, line2], fontsize=10, loc='upper left', facecolor='black', edgecolor='white')
+        ax.legend(handles=[line1, line2], fontsize=10, loc='upper left')
 
     # Horizontal grid lines
     ax.grid(True, axis='y', linestyle='--', alpha=0.6)
@@ -338,13 +324,13 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
     ax.set_ylim(0, max_y)
     
     # Configure tick labels
-    plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
-    plt.yticks(color='white', fontsize=8)
+    plt.xticks(rotation=0, ha='center', color='black', fontsize=8)
+    plt.yticks(color='black', fontsize=8)
     
     # Axis labels and tick colors
     ax.set_xlabel("Time")
     ax.set_ylabel("Voltage (V)", color=color_volt)
-    ax.tick_params(axis='x', colors='white', labelsize=8)
+    ax.tick_params(axis='x', colors='black', labelsize=8)
     ax.tick_params(axis='y', labelcolor=color_volt, labelsize=8)
 
     # Format x-axis as HH:MM
@@ -364,7 +350,7 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
         ax.legend(handles=[line_red], loc='upper left')
 
     # Title and legend
-    # plt.title(f"PV and Phase Voltages, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='white')
+    # plt.title(f"PV and Phase Voltages, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='black')
 
     # Adjust layout
     plt.tight_layout()
@@ -382,8 +368,7 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
     
 def plot_scatter_iv(df_plot, output_folder, filename):
     """
-        Scatter plot of pv1_u_mean (x) vs pv1_i_mean (y), colored by inverter_state,
-        using dark-themed style consistent with other PV plots.
+        Scatter plot of pv1_u_mean (x) vs pv1_i_mean (y), colored by inverter_state.
 
         Args:
             df_plot (pd.DataFrame): Must contain ['pv1_u_mean', 'pv1_i_mean', 'inverter_state'].
@@ -397,8 +382,7 @@ def plot_scatter_iv(df_plot, output_folder, filename):
     # Shuffle dataframe to avoid overplotting patterns
     df_plot = df_plot.sample(frac=1, random_state=42).reset_index(drop=True)
 
-    # Dark style
-    plt.style.use('dark_background')
+    # Create figure and axis
     fig, ax = plt.subplots(figsize=(10, 6))
 
     # Sort unique states for consistent color assignment
@@ -414,7 +398,7 @@ def plot_scatter_iv(df_plot, output_folder, filename):
 
         subset = df_plot[df_plot['inverter_state'] == state]
         ax.scatter(subset['pv1_u_mean'], subset['pv1_i_mean'],
-                   s=8, alpha=0.6, edgecolors='none', color=color, label=label)
+                   s=15, alpha=1.0, edgecolors='none', color=color, label=label)
 
         # Legend marker
         handle = mlines.Line2D([], [], color=color, marker='o', linestyle='None',
@@ -422,24 +406,22 @@ def plot_scatter_iv(df_plot, output_folder, filename):
         handles.append(handle)
 
     # Axes labels
-    ax.set_xlabel("PV1 Voltage Mean (V)", color='white', fontsize=12)
-    ax.set_ylabel("PV1 Current Mean (A)", color='white', fontsize=12)
+    ax.set_xlabel("PV1 Voltage Mean (V)", color='black', fontsize=12)
+    ax.set_ylabel("PV1 Current Mean (A)", color='black', fontsize=12)
 
     # Title
-    # plt.title(f"PV1 I–V Scatter by Inverter State, {LOCAL}", fontsize=18, verticalalignment='bottom', color='white')
+    # plt.title(f"PV1 I–V Scatter by Inverter State, {LOCAL}", fontsize=18, verticalalignment='bottom', color='black')
 
     # Ticks & grid
-    ax.tick_params(axis='x', colors='white', labelsize=9)
-    ax.tick_params(axis='y', colors='white', labelsize=9)
+    ax.tick_params(axis='x', colors='black', labelsize=9)
+    ax.tick_params(axis='y', colors='black', labelsize=9)
     ax.grid(True, linestyle='--', alpha=0.6)
 
-    # Legend (black background, white border)
+    # Legend
     leg = ax.legend(handles=handles, loc='upper left', fontsize=9)
-    leg.get_frame().set_facecolor('black')
-    leg.get_frame().set_edgecolor('white')
-    leg.get_title().set_color('white')
-    for text in leg.get_texts():
-        text.set_color('white')
+    leg.get_frame().set_facecolor('white')
+    leg.get_frame().set_edgecolor('gray')
+    leg.get_title().set_color('black')
 
     # Layout & save
     plt.tight_layout()

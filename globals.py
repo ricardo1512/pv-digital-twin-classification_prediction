@@ -104,21 +104,21 @@ LABELS_MAP = {
 # Default colors
 # ================================
 MPPT_PALETTE = {
-    'mppt_power': '#00ff00',               # Light cyan / pale cyan
-    'mppt_power_clean': '#00ff00',         # Light cyan / pale cyan
-    'global_tilted_irradiance': '#ffff99', # Light yellow
-    'diffuse_radiation': '#ff6600',        # Orange
-    'temperature_2m': '#ff99bb',           # Light pink / soft pink
-    'wind_speed_10m': '#4d94ff',           # Medium blue / cornflower blue
-    'precipitation': '#66ffff',            # Blueish white
+    'mppt_power': '#33cc33',               # Light cyan / pale cyan
+    'mppt_power_clean': '#33cc33',         # Light cyan / pale cyan
+    'global_tilted_irradiance': '#b3b300', # Light yellow
+    'diffuse_radiation': '#e65c00',        # Orange
+    'temperature_2m': '#cc0088',           # Light pink / soft pink
+    'wind_speed_10m': '#3333cc',           # Medium blue / cornflower blue
+    'precipitation': '#00b3b3',            # Blueish white
 }
 
 CURR_VOLT_PALETTE = {
     'pv1_i': '#ff3300',         # Red
     'pv1_i_clean': '#ff3300',   # Red
-    'pv1_u': '#ff6600',         # Orange
-    'pv1_u_clean': '#ff6600',   # Orange
-    'precipitation': '#66ffff', # Blueish white
+    'pv1_u': '#cc5200',         # Orange
+    'pv1_u_clean': '#cc5200',   # Orange
+    'precipitation': '#0073e6', # Blueish white
 }
 
 # ================================

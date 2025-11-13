@@ -50,12 +50,11 @@ def plot_confusion_matrix_combined(set_name, season_name, y_true, y_pred, image_
     # Use label names from LABELS_MAP
     classes = [LABELS_MAP[i][0] for i in range(len(LABELS_MAP))]
 
-    # Custom colormap: black -> gray -> white
-    colors = [(0, 0, 0), (0.5, 0.5, 0.5), (1, 1, 1)]
-    cmap = LinearSegmentedColormap.from_list("black_gray_white", colors)
+    # Custom colormap: light blue → navy
+    cmap = plt.cm.Blues
 
     # Create the figure for the heatmap
-    fig, ax = plt.subplots(figsize=(12, 10), facecolor='black')
+    fig, ax = plt.subplots(figsize=(12, 10), facecolor='white')
 
     # Plot heatmap
     sns.heatmap(
@@ -68,37 +67,37 @@ def plot_confusion_matrix_combined(set_name, season_name, y_true, y_pred, image_
         cbar=True,              # Display the grayscale bar showing mapping between intensity and percentage values
         vmin=0,                 # Minimum value for color scale (0% → black)
         vmax=100,               # Maximum value for color scale (100% → white)
-        linewidths=1,           # Width of the grid lines separating cells
-        linecolor='white',      # Color of the grid lines (white for contrast on dark background)
+        linewidths=0.2,           # Width of the grid lines separating cells
+        linecolor='black',      # Color of the grid lines separating cells
         ax=ax                   # Matplotlib Axes object to draw the heatmap on (ensures full control over styling)
     )
 
-    # Customize the grayscale bar appearance for dark theme
+    # Customize the scale bar appearance
     cbar = ax.collections[0].colorbar
-    # Set color of tick marks and numeric labels (for readability on dark background)
-    cbar.ax.yaxis.set_tick_params(color='white', labelcolor='white')
+    # Set color of tick marks and numeric labels
+    cbar.ax.yaxis.set_tick_params(color='black', labelcolor='black')
     # Set the color and label text of the colorbar border
-    cbar.outline.set_edgecolor('white')
-    # Add label text to the colorbar with white font color for visibility
-    cbar.set_label('Percentage (%)', color='white')  # label da colorbar
+    cbar.outline.set_edgecolor('black')
+    # Add label text to the colorbar 
+    cbar.set_label('Percentage (%)', color='black')  # label da colorbar
 
     # Set plot title and axis labels
     # ax.set_title(f'Confusion Matrix, {season_name}, {set_name} Set\n(Values: Count over Percentage)',
     #              color='white', fontsize=14)
-    ax.set_ylabel('True Label', color='white')
-    ax.set_xlabel('Predicted Label', color='white')
+    ax.set_ylabel('True Label', color='black')
+    ax.set_xlabel('Predicted Label', color='black')
 
     # Tick labels
     plt.setp(ax.get_xticklabels(), fontsize=8, rotation=0, ha='center')
     plt.setp(ax.get_yticklabels(), fontsize=8, rotation=90)
-    ax.tick_params(axis='x', colors='white')
-    ax.tick_params(axis='y', colors='white')
+    ax.tick_params(axis='x', colors='black')
+    ax.tick_params(axis='y', colors='black')
 
     # Adjust layout to avoid overlapping labels
     plt.tight_layout()
 
     # Save the figure
-    plt.savefig(image_file, dpi=300, bbox_inches='tight', facecolor='black')
+    plt.savefig(image_file, dpi=300, bbox_inches='tight')
 
     # Close the figure to free memory
     plt.close()
@@ -109,9 +108,77 @@ def plot_confusion_matrix_combined(set_name, season_name, y_true, y_pred, image_
     return cm, cm_percentage
 
 
+def plot_class_accuracy(class_acc, classes, title, output_file):
+    """
+        Plot per-class accuracy as a vertical bar chart.
+        Includes a red dashed line for mean accuracy with an automatic legend and values on top of each bar.
+
+        Args:
+            - class_acc (list or np.ndarray): Accuracy values for each class (in %).
+            - class_names (list of str): Names/labels of each class for x-axis.
+            - title (str): Title of the plot.
+            - output_file (str): Filename for saving the plot (including .png extension).
+
+        Notes:
+            - Each bar displays its corresponding accuracy value on top.
+            - Mean accuracy is indicated with a red dashed horizontal line and automatic legend.
+            - The resulting figure is saved as high-resolution PNG (dpi=300).
+    """
+
+    # Create figure and axes
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    # Map class_names to colors using LABELS_MAP
+    colors = [LABELS_MAP[i][1] for i in range(len(classes))]
+    # Map class indices to their names using LABELS_MAP
+    class_labels = [LABELS_MAP[int(i)][0] for i in classes]
+
+    # Plot bars for each class
+    bars = ax.bar(class_labels, class_acc, color=colors, edgecolor='white')
+
+    # Annotate bars with accuracy values on top
+    for bar, acc in zip(bars, class_acc):
+        height = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width() / 2, height + 1, f"{acc:.1f}%",
+                ha='center', va='bottom', color='black', fontsize=10)
+
+    # Calculate mean accuracy and plot a horizontal dashed line
+    mean_acc = np.mean(class_acc)
+    ax.axhline(mean_acc, color='red', linestyle='--', linewidth=1.2, label=f"Mean accuracy = {mean_acc:.1f}%")
+
+    # Set axis labels and title
+    ax.set_xlabel('Label', color='black')
+    ax.set_ylabel('Accuracy (%)', color='black')
+    # ax.set_title(title, color='black')
+
+    # Customize tick labels
+    plt.setp(ax.get_xticklabels(), fontsize=8, rotation=0, ha='center')
+    plt.setp(ax.get_yticklabels(), fontsize=8, rotation=0)
+    ax.tick_params(axis='x', colors='black')
+    ax.tick_params(axis='y', colors='black')
+
+    # Add horizontal dashed grid lines for reference
+    ax.grid(True, color='gray', linestyle='--', linewidth=0.5, axis='y')
+
+    # Add legend with automatic positioning
+    legend = ax.legend(fontsize=10, loc='best')
+
+    # Adjust layout to avoid overlapping elements
+    plt.tight_layout()
+
+    # Save figure in high resolution
+    plt.savefig(output_file, dpi=300, facecolor=fig.get_facecolor())
+
+    # Close the figure to free memory
+    plt.close()
+
+    # Confirm saving
+    print(f"Class Accuracy plot saved to {output_file}")
+    
+    
 def plot_feature_importance(top_features, season_name, image_file):
     """
-        Plot the top-N most important features from a trained model using a dark-themed bar chart.
+        Plot the top-N most important features from a trained model.
 
         Args:
             - feature_importance (pd.DataFrame): DataFrame containing TOP_FEATURES 'feature' and 'importance' columns.
@@ -120,14 +187,12 @@ def plot_feature_importance(top_features, season_name, image_file):
 
         Notes:
             - The function visualizes feature importance in descending order.
-            - The chart uses a dark background with white text and vertical dashed grid lines.
             - The image is saved as a high-resolution PNG file in the given folder.
     """
 
-    # Create figure and axes with dark background
+    # Create figure and axes
     plt.figure(figsize=(12, 7.2), facecolor='black')
     ax = plt.gca()
-    ax.set_facecolor('black')
 
     # Create horizontal barplot
     sns.barplot(
@@ -148,9 +213,9 @@ def plot_feature_importance(top_features, season_name, image_file):
     plt.xticks(rotation=0, ha='center', color='white', fontsize=8)
     plt.yticks(color='white', fontsize=10)
 
-    # Customize tick colors for readability on dark background
-    ax.tick_params(axis='x', colors='white')
-    ax.tick_params(axis='y', colors='white')
+    # Customize tick colors
+    ax.tick_params(axis='x', colors='black')
+    ax.tick_params(axis='y', colors='black')
 
     # Add vertical dashed grid lines for better reference
     ax.grid(True, axis='x', linestyle='--', color='gray', alpha=0.6)
@@ -168,82 +233,6 @@ def plot_feature_importance(top_features, season_name, image_file):
     print(f"Feature Importance plot saved to {image_file}")
 
 
-def plot_class_accuracy(class_acc, classes, title, output_file):
-    """
-        Plot per-class accuracy as a vertical bar chart using a dark theme.
-        Includes a red dashed line for mean accuracy with an automatic legend and values on top of each bar.
-
-        Args:
-            - class_acc (list or np.ndarray): Accuracy values for each class (in %).
-            - class_names (list of str): Names/labels of each class for x-axis.
-            - title (str): Title of the plot.
-            - output_file (str): Filename for saving the plot (including .png extension).
-
-        Notes:
-            - Dark theme: black background, white text, grid lines gray.
-            - Each bar displays its corresponding accuracy value on top.
-            - Mean accuracy is indicated with a red dashed horizontal line and automatic legend.
-            - The resulting figure is saved as high-resolution PNG (dpi=300).
-    """
-
-    # Use dark background style
-    plt.style.use('dark_background')
-
-    # Create figure and axes
-    fig, ax = plt.subplots(figsize=(10, 6))
-    fig.patch.set_facecolor('black')
-    ax.set_facecolor('black')
-
-    # Map class_names to colors using LABELS_MAP
-    colors = [LABELS_MAP[i][1] for i in range(len(classes))]
-    # Map class indices to their names using LABELS_MAP
-    class_labels = [LABELS_MAP[int(i)][0] for i in classes]
-
-    # Plot bars for each class
-    bars = ax.bar(class_labels, class_acc, color=colors, edgecolor='white')
-
-    # Annotate bars with accuracy values on top
-    for bar, acc in zip(bars, class_acc):
-        height = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width() / 2, height + 1, f"{acc:.1f}%",
-                ha='center', va='bottom', color='white', fontsize=10)
-
-    # Calculate mean accuracy and plot a horizontal dashed line
-    mean_acc = np.mean(class_acc)
-    ax.axhline(mean_acc, color='red', linestyle='--', linewidth=1.2, label=f"Mean accuracy = {mean_acc:.1f}%")
-
-    # Set axis labels and title in white for dark theme
-    ax.set_xlabel('Label', color='white')
-    ax.set_ylabel('Accuracy (%)', color='white')
-    # ax.set_title(title, color='white')
-
-    # Customize tick labels
-    plt.setp(ax.get_xticklabels(), fontsize=8, rotation=0, ha='center')
-    plt.setp(ax.get_yticklabels(), fontsize=8, rotation=0)
-    ax.tick_params(axis='x', colors='white')
-    ax.tick_params(axis='y', colors='white')
-
-    # Add horizontal dashed grid lines for reference
-    ax.grid(True, color='gray', linestyle='--', linewidth=0.5, axis='y')
-
-    # Add legend with automatic positioning, styled for dark background
-    legend = ax.legend(facecolor='black', edgecolor='white', fontsize=10, loc='best')
-    for text in legend.get_texts():
-        text.set_color('white')
-
-    # Adjust layout to avoid overlapping elements
-    plt.tight_layout()
-
-    # Save figure in high resolution
-    plt.savefig(output_file, dpi=300, facecolor=fig.get_facecolor())
-
-    # Close the figure to free memory
-    plt.close()
-
-    # Confirm saving
-    print(f"Class Accuracy plot saved to {output_file}")
-
-
 def plot_auc_recall_vs_precision(y_true, y_scores, class_names, output_file):
     """
         Plot Precision vs Recall (Recall on X, Precision on Y) for multi-class classification.
@@ -255,7 +244,6 @@ def plot_auc_recall_vs_precision(y_true, y_scores, class_names, output_file):
             output_file (str): Name for the saved filename.
             
         Notes:
-            - Dark theme: black background, white text, gray grid lines.
             - Each class's curve is colored according to LABELS_MAP.
             - AUC for each class is displayed in the legend.
             - The resulting figure is saved as high-resolution PNG (dpi=300).
@@ -269,7 +257,7 @@ def plot_auc_recall_vs_precision(y_true, y_scores, class_names, output_file):
     from globals import LABELS_MAP
     colors = cycle([LABELS_MAP[i][1] for i in range(n_classes)])
 
-    # Create figure and axis with dark background
+    # Create figure and axis
     fig, ax = plt.subplots(figsize=(10, 10), facecolor='black')
     ax.set_facecolor('black')
 
@@ -316,7 +304,6 @@ def plot_fp_tp_curve(y_true, y_scores, class_names, output_file):
         output_file (str): Path to save the output plot.
 
     Notes:
-        - Saves a dark-themed FP vs TP curve per class to 'output_file'.
         - Prints a confirmation message with the save path.
     """
 
@@ -327,9 +314,8 @@ def plot_fp_tp_curve(y_true, y_scores, class_names, output_file):
     # Color cycle for each class (using a global palette if available)
     colors = cycle([LABELS_MAP[i][1] for i in range(n_classes)])
 
-    # Create dark-themed figure
+    # Create figure
     fig, ax = plt.subplots(figsize=(10, 10), facecolor='black')
-    ax.set_facecolor('black')
 
     # Compute FP-TP pairs (equivalent to ROC without thresholds)
     for i, color in zip(range(n_classes), colors):
@@ -368,7 +354,7 @@ def plot_fp_tp_curve(y_true, y_scores, class_names, output_file):
 
 def plot_class_accuracy_ci(class_acc, ci_lower, ci_upper, classes, title, output_file):
     """
-        Plot per-class accuracy as vertical bars with bootstrap confidence intervals in dark theme.
+        Plot per-class accuracy as vertical bars with bootstrap confidence intervals.
         
         Args:
             class_acc (list or np.ndarray): Mean accuracy per class (%)
@@ -379,7 +365,6 @@ def plot_class_accuracy_ci(class_acc, ci_lower, ci_upper, classes, title, output
             output_file (str): File path to save the plot
     """
 
-    plt.style.use('dark_background')
     fig, ax = plt.subplots(figsize=(10, 6))
     fig.patch.set_facecolor('black')
     ax.set_facecolor('black')
@@ -399,7 +384,7 @@ def plot_class_accuracy_ci(class_acc, ci_lower, ci_upper, classes, title, output
         ecolor='white'  # white error bars
     )
 
-    # Labels, grid, and dark theme ticks
+    # Labels, grid, and theme ticks
     ax.set_xlabel('Label', color='white')
     ax.set_ylabel('Accuracy (%)', color='white')
     # ax.set_title(title, color='white')

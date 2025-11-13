@@ -1,4 +1,5 @@
 import os
+from matplotlib import colors
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -19,7 +20,6 @@ def correlation_matrix(df, plot_folder):
         Notes:
             - Only the lower triangle of the correlation matrix is displayed.
             - Annotation text color adapts automatically based on cell brightness.
-            - The heatmap uses a custom black-gray-white colormap.
             - Prints the top 20 positive and top 5 negative correlations to the console.
     """
 
@@ -54,14 +54,13 @@ def correlation_matrix(df, plot_folder):
     print(top_negative.to_string(index=False))
 
     # Mask for upper triangle
-    mask = np.triu(np.ones_like(corr, dtype=bool))
+    mask = np.triu(np.ones_like(corr, dtype=bool), k=1)
 
-    # Custom colormap: black -> gray -> white
-    colors = [(0, 0, 0), (0.5, 0.5, 0.5), (1, 1, 1)]
-    cmap = LinearSegmentedColormap.from_list("black_gray_white", colors)
+    # Custom colormap: light blue → navy
+    cmap = plt.cm.Blues
 
     # Create figure
-    _, ax = plt.subplots(figsize=(14, 12), facecolor='black')
+    _, ax = plt.subplots(figsize=(14, 12), facecolor='white')
 
     # Plot heatmap without annotations, applying the mask
     sns.heatmap(
@@ -74,7 +73,6 @@ def correlation_matrix(df, plot_folder):
         vmin=-1,
         vmax=1,
         linewidths=1,
-        linecolor='white',
         ax=ax
     )
 
@@ -83,7 +81,7 @@ def correlation_matrix(df, plot_folder):
     for i in range(corr.shape[0]):
         for j in range(corr.shape[1]):
             if i < j: # only upper triangle
-                ax.add_patch(plt.Rectangle((j, i), 1, 1, fill=True, color='black', lw=0))
+                ax.add_patch(plt.Rectangle((j, i), 1, 1, fill=True, color='white', lw=0))
                 
     # Add annotations manually for lower triangle only
     for i in range(corr.shape[0]):
@@ -91,26 +89,26 @@ def correlation_matrix(df, plot_folder):
             if i >= j:  # only lower triangle
                 val = corr.iloc[i, j]
                 normalized_val = (val + 1) / 2  # -1 -> 0, 1 -> 1
-                color = 'black' if normalized_val > 0.7 else 'white'
+                color = 'white' if val > 0.5 else 'black'
                 ax.text(j + 0.5, i + 0.5, f"{val:.2f}", ha='center', va='center', color=color)
 
     # Customize colorbar
     cbar = ax.collections[0].colorbar
-    cbar.ax.yaxis.set_tick_params(color='white', labelcolor='white')
-    cbar.outline.set_edgecolor('white')
-    cbar.set_label('Correlation', color='white')
+    cbar.ax.yaxis.set_tick_params(color='black', labelcolor='black')
+    cbar.outline.set_edgecolor('black')
+    cbar.set_label('Correlation', color='black')
 
     # Titles and ticks
     # ax.set_title(f'Correlation Matrix, All Inverters (Values: Pearson r)', color='white', fontsize=16)
-    plt.setp(ax.get_xticklabels(), fontsize=10, rotation=90, ha='right', color='white')
-    plt.setp(ax.get_yticklabels(), fontsize=10, rotation=0, color='white')
+    plt.setp(ax.get_xticklabels(), fontsize=10, rotation=90, ha='right', color='black')
+    plt.setp(ax.get_yticklabels(), fontsize=10, rotation=0, color='black')
 
     # Adjust layout
     plt.tight_layout()
 
     # Save plot
     output_file = os.path.join(plot_folder, "real_data_correlation_matrix.png")
-    plt.savefig(output_file, dpi=300, bbox_inches='tight', facecolor='black')
+    plt.savefig(output_file, dpi=300, bbox_inches='tight', facecolor='white')
     
     # Close plot to free memory
     plt.close()
@@ -159,7 +157,7 @@ def real_data_visualisation(smoothing=False):
         
         # Append the DataFrame to the list
         all_dfs.append(df)
-
+        
         # Process data grouped by each day
         for date, group in df.groupby(df['collectTime'].dt.date):
             # continue
@@ -191,4 +189,4 @@ def real_data_visualisation(smoothing=False):
     correlation_matrix(combined_df, plot_folder)
 
 
-real_data_visualisation(smoothing=False)
+real_data_visualisation(smoothing=True)

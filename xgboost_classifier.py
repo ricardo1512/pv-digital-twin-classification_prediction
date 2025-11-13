@@ -239,7 +239,7 @@ def xgboost_classifier(all_year=False, winter=False):
         y_test_pred,
         cm_test_image_path,
     )
-
+    
     # ==========================================================
     # Classification Reports
     # ==========================================================
@@ -289,7 +289,7 @@ def xgboost_classifier(all_year=False, winter=False):
                         f"Validation Accuracy per Class, {season_name.title()}", val_class_acc_image_path)
     plot_class_accuracy(test_class_acc, classes, 
                         f"Test Accuracy per Class, {season_name.title()}", test_class_acc_image_path)
-
+    
     # ==========================================================
     # Feature Importance Export and Plot
     # ==========================================================
@@ -306,7 +306,7 @@ def xgboost_classifier(all_year=False, winter=False):
     
     # Plot feature importance  
     plot_feature_importance(top_features, season_name, top_features_image_path)
-
+    exit()
     # ==========================================================
     # Additional Cross-Validation Metrics
     # ==========================================================
