@@ -394,7 +394,7 @@ def plot_class_accuracy_ci(class_acc, ci_lower, ci_upper, classes, title, output
             ha='center',
             va='bottom',
             fontsize=8,
-            color='black',
+            color='black', 
         )
 
 
