@@ -4,7 +4,7 @@ from pathlib import Path
 from plot_inference import *
 from utils import *
 
-def inference(all_year=False, winter=False):
+def inference(all_year=False, winter=False): 
     """
         Run inference on a real dataset using a pre-trained XGBoost classifier.
 
