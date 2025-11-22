@@ -113,7 +113,7 @@ MPPT_PALETTE = {
     'precipitation': '#00b3b3',            # Blueish white
 }
 
-CURR_VOLT_PALETTE = {
+CURR_VOLT_PALETTE = { 
     'pv1_i': '#ff3300',         # Red
     'pv1_i_clean': '#ff3300',   # Red
     'pv1_u': '#cc5200',         # Orange
