@@ -6,7 +6,9 @@ from create_preprocess_inference_set import *
 from inference import *
 
 
-def run(args):   
+def run(args):    git add .
+git commit -m "Update"
+git push
     # ------------------------------------------------------
     # Block 1: Create Samples
     # ------------------------------------------------------
