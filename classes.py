@@ -6,7 +6,7 @@ from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from pvlib.modelchain import ModelChain
 from pvlib.location import Location
 from pvlib.irradiance import erbs
-from globals import *    
+from globals import *
 
 # ==============================================================
 # Module and Inverter Data
