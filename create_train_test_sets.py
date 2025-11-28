@@ -6,7 +6,7 @@ from plot_day_samples import *
 # ==============================================================
 # Dataset Consolidation
 # ==============================================================
-def create_train_test_sets():   
+def create_train_test_sets():    
     """
     Consolidate and generate the final training and testing datasets for PV fault classification.
 
