@@ -187,7 +187,7 @@ def create_samples_3_cracks(files_year, plot_samples=False):
         results_full = results[EXPORT_COLUMNS + clean_features].merge(
             group[METEOROLOGICAL_COLUMNS],
             left_index=True,
-            right_index=True,   
+            right_index=True,
         )
 
         # Clean and Process Daily Data
