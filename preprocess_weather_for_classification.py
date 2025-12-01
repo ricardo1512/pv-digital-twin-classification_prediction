@@ -1,6 +1,5 @@
 import pandas as pd
 
-
 # Define input and output file paths for the weather datasets
 input_file = "Classification/original_weather_Vila_do_Conde.csv"
 output_file_2023 = "Classification/Vila_do_Conde_weather_2023.csv"
