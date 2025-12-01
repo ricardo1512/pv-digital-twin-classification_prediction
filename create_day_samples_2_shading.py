@@ -133,7 +133,6 @@ def create_samples_2_shading(files_year, plot_samples=False):
     daily_groups = df_input.groupby(df_input['date'].dt.date)
 
     print(f"{condition_name.upper()}: Starting simulation...\n")
-    rand_plots = random.sample(range(len(daily_groups)), 5)
     for i, (date, group) in enumerate(daily_groups):
         print(f"{condition_name.title():<8} | Running simulation for {date}...")
 
@@ -171,7 +170,7 @@ def create_samples_2_shading(files_year, plot_samples=False):
         results_full = results_full.clip(lower=0).fillna(0)
 
         # Generate Daily Plots
-        if i in rand_plots and plot_samples:
+        if plot_samples:
             condition_title = LABELS_MAP[condition_nr][0]
             output_image = f"{date.year:04d}_{date.month:02d}_{date.day:02d}_{condition_name}_samples"
             plot_mppt(results_full, date, condition_title, plot_folder, output_image)

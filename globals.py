@@ -127,7 +127,7 @@ CURR_VOLT_PALETTE = {
     'pv1_i_clean': '#ff3300',   # Red
     'pv1_u': '#cc5200',         # Orange
     'pv1_u_clean': '#cc5200',   # Orange
-    'precipitation': '#0073e6', # Blueish white
+    'precipitation': '#00b3b3', # Blueish white
 }
 
 # ================================
