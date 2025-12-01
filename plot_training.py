@@ -1,37 +1,34 @@
 import numpy as np
 from itertools import cycle
-import seaborn as sns
 from sklearn.preprocessing import label_binarize
-from sklearn.metrics import precision_recall_curve, auc, roc_curve
+from sklearn.metrics import auc, confusion_matrix, precision_recall_curve, roc_curve
+import seaborn as sns
 import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap
-from sklearn.metrics import confusion_matrix
 from globals import *
 
 
 def plot_confusion_matrix_combined(set_name, season_name, y_true, y_pred, image_file):
     """
-        Plot combined confusion matrix showing both absolute counts and row-wise percentages.
+    Plot combined confusion matrix showing both absolute counts and row-wise percentages.
 
-        Args:
-            - set_name (str): Name of the dataset (e.g., 'Train', 'Test') for the plot title.
-            - season_name (str): Name of the season or scenario to display in the plot title.
-            - y_true (array-like): Ground truth labels.
-            - y_pred (array-like): Predicted labels.
-            - image_file (str): Path where the plot image will be saved.
-            
-            - classes (list of str, optional): Class names for axes labels. If None, integers are used.
+    Args:
+        - set_name (str): Name of the dataset (e.g., 'Train', 'Test') for the plot title.
+        - season_name (str): Name of the season or scenario to display in the plot title.
+        - y_true (array-like): Ground truth labels.
+        - y_pred (array-like): Predicted labels.
+        - image_file (str): Path where the plot image will be saved.    
+        - classes (list of str, optional): Class names for axes labels. If None, integers are used.
 
-        Returns:
-            - cm (np.ndarray): Confusion matrix with absolute counts.
-            - cm_percentage (np.ndarray): Confusion matrix converted to percentages by row.
+    Returns:
+        - cm (np.ndarray): Confusion matrix with absolute counts.
+        - cm_percentage (np.ndarray): Confusion matrix converted to percentages by row.
 
-        Notes:
-            - Each cell shows both count and percentage (Count\n(Percentage%)).
-            - Heatmap uses a white/grey/black colormap, with values ranging from 0% to 100%.
-            - The plot is saved as a high-resolution PNG in the specified folder.
+    Notes:
+        - Each cell shows both count and percentage (Count\n(Percentage%)).
+        - Heatmap uses a white/grey/black colormap, with values ranging from 0% to 100%.
+        - The plot is saved as a high-resolution PNG in the specified folder.
     """
-
+    
     # Compute the confusion matrix from true and predicted labels
     cm = confusion_matrix(y_true, y_pred)
 
@@ -67,7 +64,7 @@ def plot_confusion_matrix_combined(set_name, season_name, y_true, y_pred, image_
         cbar=True,              # Display the grayscale bar showing mapping between intensity and percentage values
         vmin=0,                 # Minimum value for color scale (0% → black)
         vmax=100,               # Maximum value for color scale (100% → white)
-        linewidths=0.2,           # Width of the grid lines separating cells
+        linewidths=0.2,         # Width of the grid lines separating cells
         linecolor='black',      # Color of the grid lines separating cells
         ax=ax                   # Matplotlib Axes object to draw the heatmap on (ensures full control over styling)
     )
@@ -110,19 +107,19 @@ def plot_confusion_matrix_combined(set_name, season_name, y_true, y_pred, image_
 
 def plot_class_accuracy(class_acc, classes, title, output_file):
     """
-        Plot per-class accuracy as a vertical bar chart.
-        Includes a red dashed line for mean accuracy with an automatic legend and values on top of each bar.
+    Plot per-class accuracy as a vertical bar chart.
+    Includes a red dashed line for mean accuracy with an automatic legend and values on top of each bar.
 
-        Args:
-            - class_acc (list or np.ndarray): Accuracy values for each class (in %).
-            - class_names (list of str): Names/labels of each class for x-axis.
-            - title (str): Title of the plot.
-            - output_file (str): Filename for saving the plot (including .png extension).
+    Args:
+        - class_acc (list or np.ndarray): Accuracy values for each class (in %).
+        - class_names (list of str): Names/labels of each class for x-axis.
+        - title (str): Title of the plot.
+        - output_file (str): Filename for saving the plot (including .png extension).
 
-        Notes:
-            - Each bar displays its corresponding accuracy value on top.
-            - Mean accuracy is indicated with a red dashed horizontal line and automatic legend.
-            - The resulting figure is saved as high-resolution PNG (dpi=300).
+    Notes:
+        - Each bar displays its corresponding accuracy value on top.
+        - Mean accuracy is indicated with a red dashed horizontal line and automatic legend.
+        - The resulting figure is saved as high-resolution PNG (dpi=300).
     """
 
     # Create figure and axes
@@ -178,16 +175,16 @@ def plot_class_accuracy(class_acc, classes, title, output_file):
     
 def plot_feature_importance(top_features, season_name, image_file):
     """
-        Plot the top-N most important features from a trained model.
+    Plot the top-N most important features from a trained model.
 
-        Args:
-            - feature_importance (pd.DataFrame): DataFrame containing TOP_FEATURES 'feature' and 'importance' columns.
-            - season_name (str): Name of the season used in the plot title.
-            - image_file (str): Path where the resulting plot image will be saved.
+    Args:
+        - feature_importance (pd.DataFrame): DataFrame containing TOP_FEATURES 'feature' and 'importance' columns.
+        - season_name (str): Name of the season used in the plot title.
+        - image_file (str): Path where the resulting plot image will be saved.
 
-        Notes:
-            - The function visualizes feature importance in descending order.
-            - The image is saved as a high-resolution PNG file in the given folder.
+    Notes:
+        - The function visualizes feature importance in descending order.
+        - The image is saved as a high-resolution PNG file in the given folder.
     """
 
     # Create figure and axes
@@ -235,18 +232,18 @@ def plot_feature_importance(top_features, season_name, image_file):
 
 def plot_auc_recall_vs_precision(y_true, y_scores, class_names, output_file):
     """
-        Plot Precision vs Recall (Recall on X, Precision on Y) for multi-class classification.
+    Plot Precision vs Recall (Recall on X, Precision on Y) for multi-class classification.
 
-        Args:
-            y_true (array-like): True class labels.
-            y_scores (array-like, shape=[n_samples, n_classes]): Predicted probabilities for each class.
-            class_names (list of str): Names of classes for legend.
-            output_file (str): Name for the saved filename.
+    Args:
+        y_true (array-like): True class labels.
+        y_scores (array-like, shape=[n_samples, n_classes]): Predicted probabilities for each class.
+        class_names (list of str): Names of classes for legend.
+        output_file (str): Name for the saved filename.
             
-        Notes:
-            - Each class's curve is colored according to LABELS_MAP.
-            - AUC for each class is displayed in the legend.
-            - The resulting figure is saved as high-resolution PNG (dpi=300).
+    Notes:
+        - Each class's curve is colored according to LABELS_MAP.
+        - AUC for each class is displayed in the legend.
+        - The resulting figure is saved as high-resolution PNG (dpi=300).
     """
     
     # Binarize the true labels for multi-class precision-recall calculation
@@ -353,16 +350,17 @@ def plot_fp_tp_curve(y_true, y_scores, class_names, output_file):
 
 def plot_class_accuracy_ci(class_acc, ci_lower, ci_upper, classes, title, output_file):
     """
-        Plot per-class accuracy as vertical bars with bootstrap confidence intervals.
+    Plot per-class accuracy as vertical bars with bootstrap confidence intervals.
         
-        Args:
-            class_acc (list or np.ndarray): Mean accuracy per class (%)
-            ci_lower (list or np.ndarray): Lower bound of CI per class (%)
-            ci_upper (list or np.ndarray): Upper bound of CI per class (%)
-            classes (list): Class indices
-            title (str): Plot title
-            output_file (str): File path to save the plot
+    Args:
+        class_acc (list or np.ndarray): Mean accuracy per class (%)
+        ci_lower (list or np.ndarray): Lower bound of CI per class (%)
+        ci_upper (list or np.ndarray): Upper bound of CI per class (%)
+        classes (list): Class indices
+        title (str): Plot title
+        output_file (str): File path to save the plot
     """
+    
     # Create figure and axes
     fig, ax = plt.subplots(figsize=(10, 6))
 
@@ -397,7 +395,6 @@ def plot_class_accuracy_ci(class_acc, ci_lower, ci_upper, classes, title, output
             color='black',
         )
 
-
     # Labels, grid, and theme ticks
     ax.set_xlabel('Label', color='black')
     ax.set_ylabel('Accuracy (%)', color='black')
@@ -413,4 +410,3 @@ def plot_class_accuracy_ci(class_acc, ci_lower, ci_upper, classes, title, output
     plt.savefig(output_file, dpi=300)
     plt.close()
     print(f"Class Accuracy plot saved to {output_file}")
-    

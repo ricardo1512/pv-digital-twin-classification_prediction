@@ -1,73 +1,73 @@
 import os
 from datetime import datetime
-import joblib
 from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, accuracy_score
-from plot_training import *
+from sklearn.metrics import accuracy_score, classification_report
+import joblib
 from utils import *
+from plot_training import *
 
 # ==============================================================
 # Random Forest Classifier for Anomaly/Fault Prediction
 # ==============================================================
 def random_forest(all_year=False, winter=False):
     """
-        Run a complete Random Forest classification workflow for anomaly and fault prediction
-        using synthetic PV system data.
+    Run a complete Random Forest classification workflow for anomaly and fault prediction
+    using synthetic PV system data.
 
-        This function performs the following steps:
-            1. Loads and filters the dataset by season.
-            2. Prepares labels and features for training, validation, and test sets.
-            3. Splits the training dataset into train and validation subsets with stratification.
-            4. Performs Stratified K-Fold cross-validation on the training set.
-            5. Trains the Random Forest classifier on the training set.
-            6. Saves the trained model for future use.
-            7. Evaluates model performance on validation and test sets:
-                - Computes accuracy
-                - Produces classification reports
-                - Calculates per-class accuracies
-            8. Plots and saves:
-                - Confusion matrices
-                - Class-wise accuracy bars for validation and test sets
-                - Feature importance (top N features)
-            9. Computes additional cross-validation metrics (accuracy, precision, recall, f1)
-                and saves raw and summary CSV files.
-            10. Generates Precision–Recall (AUC) and FP–TP curves for validation and test sets.
-            11. Exports global performance metrics (accuracy, precision, recall, f1 for validation and test)
-                to an accumulative CSV file.
-            12. Prints a final performance summary including CV, validation, and test accuracies.
+    This function performs the following steps:
+        1. Loads and filters the dataset by season.
+        2. Prepares labels and features for training, validation, and test sets.
+        3. Splits the training dataset into train and validation subsets with stratification.
+        4. Performs Stratified K-Fold cross-validation on the training set.
+        5. Trains the Random Forest classifier on the training set.
+        6. Saves the trained model for future use.
+        7. Evaluates model performance on validation and test sets:
+            - Computes accuracy
+            - Produces classification reports
+            - Calculates per-class accuracies
+        8. Plots and saves:
+            - Confusion matrices
+            - Class-wise accuracy bars for validation and test sets
+            - Feature importance (top N features)
+        9. Computes additional cross-validation metrics (accuracy, precision, recall, f1)
+            and saves raw and summary CSV files.
+        10. Generates Precision–Recall (AUC) and FP–TP curves for validation and test sets.
+        11. Exports global performance metrics (accuracy, precision, recall, f1 for validation and test)
+            to an accumulative CSV file.
+        12. Prints a final performance summary including CV, validation, and test accuracies.
 
-        Args:
-            all_year (bool, optional): If True, includes data from all months.
-            winter (bool, optional): If True, filters the dataset for winter months only.
+    Args:
+        all_year (bool, optional): If True, includes data from all months.
+        winter (bool, optional): If True, filters the dataset for winter months only.
 
-        Inputs (global variables):
-            - `TRAIN_VALID_SET_FILE`, `TEST_SET_FILE`: Paths to training/validation and test datasets.
-            - `LABEL`: Target column name.
-            - `MODEL_FOLDER`: Folder to save the trained Random Forest model.
-            - `IMAGE_FOLDER`, `REPORT_FOLDER`: Directories for output plots and reports.
-            - `TOP_FEATURES`: Number of top features to display in importance plots.
-            - `LABELS_MAP`: Mapping of class indices to descriptive class names.
+    Inputs (global variables):
+        - `TRAIN_VALID_SET_FILE`, `TEST_SET_FILE`: Paths to training/validation and test datasets.
+        - `LABEL`: Target column name.
+        - `MODEL_FOLDER`: Folder to save the trained Random Forest model.
+        - `IMAGE_FOLDER`, `REPORT_FOLDER`: Directories for output plots and reports.
+        - `TOP_FEATURES`: Number of top features to display in importance plots.
+        - `LABELS_MAP`: Mapping of class indices to descriptive class names.
             
-        Outputs:
-            - Saved Random Forest model.
-            - CSVs with:
-                - Validation and test classification reports
-                - Per-class accuracies
-                - Top N feature importances
-                - Cross-validation raw scores and summary
-                - Accumulative performance metrics (accuracy, precision, recall, f1)
-            - Plots saved in `IMAGE_FOLDER`:
-                - Confusion matrices
-                - Class-wise accuracy bars
-                - Feature importance
-                - Precision vs Recall curves
-                - FP vs TP curves
-            - Printed performance summary to console (CV, validation, and test accuracies).
+    Outputs:
+        - Saved Random Forest model.
+        - CSVs with:
+            - Validation and test classification reports
+            - Per-class accuracies
+            - Top N feature importances
+            - Cross-validation raw scores and summary
+            - Accumulative performance metrics (accuracy, precision, recall, f1)
+        - Plots saved in `IMAGE_FOLDER`:
+            - Confusion matrices
+            - Class-wise accuracy bars
+            - Feature importance
+            - Precision vs Recall curves
+            - FP vs TP curves
+        - Printed performance summary to console (CV, validation, and test accuracies).
     """
 
     # ==========================================================
-    # Initialization
+    # INITIALIZATION
     # ==========================================================
     # Determine the active season, its corresponding months, and a formatted name for file usage
     season_name, months, season_name_file = determine_season(all_year, winter)
@@ -103,7 +103,7 @@ def random_forest(all_year=False, winter=False):
     print("=" * 60)
 
     # ==========================================================
-    # Load and Filter Datasets
+    # LOAD AND FILTER DATASETS
     # ==========================================================
     print("\nLoading datasets...")
     df_train_valid = pd.read_csv(TRAIN_VALID_SET_FILE)
@@ -120,7 +120,7 @@ def random_forest(all_year=False, winter=False):
     print(f"\nDataset shape: {df_test.shape}")
 
     # ==========================================================
-    # Label Preparation
+    # LABEL PREPARATION
     # ==========================================================
     # Convert labels to integers (removes .0 if present)
     df_train_valid[LABEL] = df_train_valid[LABEL].astype(int)
@@ -128,7 +128,7 @@ def random_forest(all_year=False, winter=False):
     print(f"\nLabel value counts:\n{df_test[LABEL].value_counts()}")
 
     # ==========================================================
-    # Feature and Target Preparation
+    # FEATURE AND TARGET PREPARATION
     # ==========================================================
     # Remove 'date' column and separate target variable
     X_train_valid = df_train_valid.drop(columns=[LABEL, 'date'])
@@ -138,7 +138,7 @@ def random_forest(all_year=False, winter=False):
     y_test = df_test[LABEL]
 
     # ==========================================================
-    # Split Dataset into Train (70%) and Validation (30%)
+    # SPLIT DATASET INTO TRAIN (70%) AND VALIDATION (30%)
     # ==========================================================
     print("\nSplitting dataset into Train and Validation sets...")
 
@@ -160,7 +160,7 @@ def random_forest(all_year=False, winter=False):
     print(y_test.value_counts(normalize=True).sort_index())
 
     # ==========================================================
-    # Cross-Validation on Training Set
+    # CROSS-VALIDATION ON TRAINING SET
     # ==========================================================
     print("\nPerforming Cross-Validation on Training set...")
 
@@ -181,7 +181,7 @@ def random_forest(all_year=False, winter=False):
     print(f"Mean CV Accuracy: {cv_scores.mean():.4f} (+/- {cv_scores.std() * 2:.4f})")
 
     # ==========================================================
-    # Final Model Training
+    # FINAL MODEL TRAINING
     # ==========================================================
     print("\nTraining Random Forest classifier...")
     rf_classifier.fit(X_train, y_train)
@@ -191,7 +191,7 @@ def random_forest(all_year=False, winter=False):
     print(f"\nModel saved to {model_path}")
     
     # ==========================================================
-    # Model Evaluation on Validation and Test Sets
+    # MODEL EVALUATION ON VALIDATION AND TEST SETS
     # ==========================================================
     print("\nEvaluating model performance...")
 
@@ -207,7 +207,7 @@ def random_forest(all_year=False, winter=False):
     print(f"Test Accuracy: {test_accuracy:.4f}\n")
 
     # ==========================================================
-    # Confusion Matrix Plots
+    # CONFUSION MATRIX PLOTS
     # ==========================================================
     # Plot and save validation confusion matrix
     val_cm, _ = plot_confusion_matrix_combined(
@@ -228,7 +228,7 @@ def random_forest(all_year=False, winter=False):
     )
 
     # ==========================================================
-    # Classification Reports
+    # CLASSIFICATION REPORTS
     # ==========================================================
     classes = [int(cls) for cls in np.unique(y_test)]
     class_names = [LABELS_MAP[cls][0] for cls in classes]
@@ -247,7 +247,7 @@ def random_forest(all_year=False, winter=False):
     print(f"Test Set Classification Report saved to {test_report_path}")
 
     # ==========================================================
-    # Report and Plot Per-Class Accuracy
+    # REPORT AND PLOT PER-CLASS ACCURACY
     # ==========================================================
     val_class_acc = class_accuracy(val_cm)
     test_class_acc = class_accuracy(test_cm)
@@ -278,7 +278,7 @@ def random_forest(all_year=False, winter=False):
                         f"Test Accuracy per Class, {season_name.title()}", test_class_acc_image_path)
 
     # ==========================================================
-    # Feature Importance Export and Plot
+    # FEATURE IMPORTANCE EXPORT AND PLOT
     # ==========================================================
     # Calculate feature importance
     feature_importance = pd.DataFrame({
@@ -295,7 +295,7 @@ def random_forest(all_year=False, winter=False):
     plot_feature_importance(top_features, season_name, top_features_image_path)
 
     # ==========================================================
-    # Additional Cross-Validation Metrics
+    # ADDITIONAL CROSS-VALIDATION METRICS
     # ==========================================================
     print("\nComputing additional cross-validation metrics...")
     scoring_metrics = ['accuracy', 'precision_weighted', 'recall_weighted', 'f1_weighted']
@@ -323,7 +323,7 @@ def random_forest(all_year=False, winter=False):
     print(f"Cross-validation summary saved to {summary_metrics_path}")
 
     # ==========================================================
-    # Compute predicted probabilities for Precision vs Recall
+    # COMPUTE PREDICTED PROBABILITIES FOR PRECISION VS RECALL
     # ==========================================================
     y_val_proba = rf_classifier.predict_proba(X_val)
     y_test_proba = rf_classifier.predict_proba(X_test)
@@ -345,7 +345,7 @@ def random_forest(all_year=False, winter=False):
     )
     
     # ==========================================================
-    # Compute predicted probabilities for FP vs TP plots
+    # COMPUTE PREDICTED PROBABILITIES FOR FP VS TP PLOTS
     # ==========================================================
     # Plot FP vs TP curves for validation and test sets
     plot_fp_tp_curve(
@@ -362,9 +362,9 @@ def random_forest(all_year=False, winter=False):
         ft_tp_test_image_path
     )
 
-    # ==============================================================
-    # Export Accuracy, Precision, Recall, and F1 to Accumulative CSV
-    # ==============================================================
+    # ===============================================================
+    # EXPORT ACCURACY, PRECISION, RECALL, AND F1 TO ACCUMULATIVE CSV
+    # ===============================================================
     # Compute overall metrics for validation and test sets
     val_precision = val_report_df.loc["weighted avg", "precision"]
     val_recall = val_report_df.loc["weighted avg", "recall"]
@@ -399,9 +399,9 @@ def random_forest(all_year=False, winter=False):
 
     print(f"\nOverall performance metrics saved to {performance_csv_path}")
 
-    # ==========================================================
-    # Final Performance Summary
-    # ==========================================================
+    # ===============================================================
+    # FINAL PERFORMANCE SUMMARY
+    # ===============================================================
     print("\n" + "-"*40)
     print("RANDOM FOREST FINAL PERFORMANCE SUMMARY")
     print("-"*40)

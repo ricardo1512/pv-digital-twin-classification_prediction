@@ -4,17 +4,17 @@ from globals import *
 
 def plot_inference_condition_distribution(season_name, state_counts, output_inference_image):
     """
-        Plot the distribution of predicted inverter states from the inference DataFrame.
-        Ensures all classes appear on the X-axis, even if some have zero counts.
+    Plot the distribution of predicted inverter states from the inference DataFrame.
+    Ensures all classes appear on the X-axis, even if some have zero counts.
 
-        Args:
-            - season_name (str): Name of the season for the title.
-            - state_counts (dict or pd.Series): Number of predictions per inverter state.
-            - save_path (str, optional): File path to save the resulting plot.
+    Args:
+        - season_name (str): Name of the season for the title.
+        - state_counts (dict or pd.Series): Number of predictions per inverter state.
+        - save_path (str, optional): File path to save the resulting plot.
         
-        Notes:
-            - Each bar displays its corresponding count on top.
-            - The resulting figure is saved as high-resolution PNG (dpi=300).
+    Notes:
+        - Each bar displays its corresponding count on top.
+        - The resulting figure is saved as high-resolution PNG (dpi=300).
     """
 
     # Create figure and axes
@@ -36,7 +36,7 @@ def plot_inference_condition_distribution(season_name, state_counts, output_infe
     for bar, count in zip(bars, counts):
         height = bar.get_height()
         ax.text(
-            bar.get_x() + bar.get_width() / 2,              # X-position: center of the bar
+            bar.get_x() + bar.get_width() / 2,  # X-position: center of the bar
             height + 1,  # Y-position: slightly above the bar
             f"{int(count)}",  # Text: integer count
             ha='center', va='bottom', color='black', fontsize=10
@@ -69,17 +69,17 @@ def plot_inference_condition_distribution(season_name, state_counts, output_infe
 
 def plot_inference_condition_probabilities(df, season_name_file, output_folder, adjusted=False):
     """
-        Generate and save bar plots of predicted condition probabilities for each inverter entry.
+    Generate and save bar plots of predicted condition probabilities for each inverter entry.
 
-        Args:
-            - df (pd.DataFrame): DataFrame containing predicted probabilities for each condition type, along with 'ID' and 'date' columns.
-            - season_name_file (str): File name used to identify the saved plots.
-            - output_folder (str): Directory where the plots will be saved.
+    Args:
+        - df (pd.DataFrame): DataFrame containing predicted probabilities for each condition type, along with 'ID' and 'date' columns.
+        - season_name_file (str): File name used to identify the saved plots.
+        - output_folder (str): Directory where the plots will be saved.
             
-        Notes:
-            - Bars are colored according to LABELS_MAP.
-            - Each bar displays its corresponding probability value on top.
-            - The resulting figures are saved as high-resolution PNG files in the specified folder.
+    Notes:
+        - Bars are colored according to LABELS_MAP.
+        - Each bar displays its corresponding probability value on top.
+        - The resulting figures are saved as high-resolution PNG files in the specified folder.
     """
 
     # Iterate through each row to create an individual plot per inverter entry
@@ -139,4 +139,3 @@ def plot_inference_condition_probabilities(df, season_name_file, output_folder, 
         
         # Confirmation message
         print(f"Saved Inference Probabilities plot for {row['ID']}, {row['date']}\n\tat {save_path}")
-        

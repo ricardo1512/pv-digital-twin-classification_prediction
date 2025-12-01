@@ -1,18 +1,18 @@
-# ===================================================================
-# Global Configuration for PV System Anomaly and Fault Classification
-# ===================================================================
+# ==================================================================================
+# Global Configuration for PV System Anomaly and Fault Classification and Prediction
+# ==================================================================================
 
 # ==============================
 # Location Settings
 # ==============================
-LOCAL = "Vila do Conde"                     # Location of the PV plant
-LATITUDE = 41.337579                        # Latitude of the LOCAL
-LONGITUDE = -8.689926                       # Longitude of the LOCAL
+LOCAL = "Vila do Conde"                         # Location of the PV plant
+LATITUDE = 41.337579                            # Latitude of the LOCAL
+LONGITUDE = -8.689926                           # Longitude of the LOCAL
 
 # ==============================
 # System Configuration
 # ==============================
-MODULES_PER_STRING = 10                      # Number of modules per string
+MODULES_PER_STRING = 10                         # Number of modules per string
 
 # ==============================
 # Variables and Folders
@@ -26,15 +26,25 @@ MODELS_FOLDER = "Models"                        # Folder to the trained models
 IMAGE_FOLDER = "Images"                         # Folder for saving images
 PLOT_FOLDER = "Plots"                           # Folder for saving plots
 REPORT_FOLDER = "Reports"                       # Folder for saving reports
+TIME_INIT = "05:00"                             # Start time for plots
+TIME_END = "21:00"                              # End time for plots
 
 # ==============================
 # Data File Paths
 # ==============================
-FOLDER_TRAIN_SAMPLES = "Day_samples_train"                # Folder with training samples
-FOLDER_TEST_SAMPLES = "Day_samples_test"                  # Folder with test samples
+FOLDER_TRAIN_SAMPLES = "Day_samples_train"      # Folder with training samples
+FOLDER_TEST_SAMPLES = "Day_samples_test"        # Folder with test samples
 TS_SAMPLES = "TS_samples"
-FILE_YEAR_TRAIN = (f"{WEATHER_FOLDER_CLASS}/{LOCAL.replace(' ', '_')}_weather_2023.csv", FOLDER_TRAIN_SAMPLES, "train")  # Weather 2023
-FILE_YEAR_TEST = (f"{WEATHER_FOLDER_CLASS}/{LOCAL.replace(' ', '_')}_weather_2024.csv", FOLDER_TEST_SAMPLES, "train")  # Weather 2024
+FILE_YEAR_TRAIN = (
+    f"{WEATHER_FOLDER_CLASS}/{LOCAL.replace(' ', '_')}_weather_2023.csv", 
+    FOLDER_TRAIN_SAMPLES,
+    "train"
+)                                               # Weather 2023
+FILE_YEAR_TEST = (
+    f"{WEATHER_FOLDER_CLASS}/{LOCAL.replace(' ', '_')}_weather_2024.csv", 
+    FOLDER_TEST_SAMPLES, 
+    "test"
+)                                               # Weather 2024
 TRAIN_VALID_SET_FILE = f"{DATASETS_FOLDER}/trainset_2023.csv"  # Training + validation dataset
 TEST_SET_FILE = f"{DATASETS_FOLDER}/testset_2024.csv"          # Test dataset
 
@@ -58,7 +68,6 @@ METEOROLOGICAL_COLUMNS = [
 # ==============================
 # Export Columns
 # ==============================
-    
 EXPORT_COLUMNS = [
     'inverter_state',
     'pv1_i',

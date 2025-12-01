@@ -2,11 +2,11 @@ import os
 import pandas as pd
 import numpy as np
 from datetime import datetime
-import joblib
 from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
-from sklearn.metrics import classification_report, accuracy_score
 from sklearn.utils import resample
+from sklearn.metrics import accuracy_score, classification_report
 from xgboost import XGBClassifier
+import joblib
 from plot_training import *
 from utils import *
 
@@ -15,64 +15,64 @@ from utils import *
 # ==============================================================
 def xgboost_classifier(all_year=False, winter=False):
     """
-        Run a complete XGBoost classification workflow for anomaly and fault prediction
-        using synthetic PV system data.
+    Run a complete XGBoost classification workflow for anomaly and fault prediction
+    using synthetic PV system data.
 
-        This function performs the following steps:
-            1. Loads and filters the dataset by season.
-            2. Prepares labels and features for training, validation, and test sets.
-            3. Splits the training dataset into train and validation subsets with stratification.
-            4. Performs Stratified K-Fold cross-validation on the training set.
-            5. Trains the XGBoost classifier on the training set.
-            6. Saves the trained model for future use.
-            7. Evaluates model performance on validation and test sets:
-                - Computes accuracy
-                - Produces classification reports
-                - Calculates per-class accuracies
-            8. Plots and saves:
-                - Confusion matrices
-                - Class-wise accuracy bars for validation and test sets
-                - Feature importance (top N features)
-            9. Computes additional cross-validation metrics (accuracy, precision, recall, f1)
-                and saves raw and summary CSV files.
-            10. Generates Precision–Recall (AUC) and FP–TP curves for validation and test sets.
-            11. Exports global performance metrics (accuracy, precision, recall, f1 for validation and test)
-                to an accumulative CSV file.
-            12. Calculates class-wise accuracy with bootstrap confidence intervals.
-            13. Prints a final performance summary including CV, validation, and test accuracies.
+    This function performs the following steps:
+        1. Loads and filters the dataset by season.
+        2. Prepares labels and features for training, validation, and test sets.
+        3. Splits the training dataset into train and validation subsets with stratification.
+        4. Performs Stratified K-Fold cross-validation on the training set.
+        5. Trains the XGBoost classifier on the training set.
+        6. Saves the trained model for future use.
+        7. Evaluates model performance on validation and test sets:
+            - Computes accuracy
+            - Produces classification reports
+            - Calculates per-class accuracies
+        8. Plots and saves:
+            - Confusion matrices
+            - Class-wise accuracy bars for validation and test sets
+            - Feature importance (top N features)
+        9. Computes additional cross-validation metrics (accuracy, precision, recall, f1)
+            and saves raw and summary CSV files.
+        10. Generates Precision–Recall (AUC) and FP–TP curves for validation and test sets.
+        11. Exports global performance metrics (accuracy, precision, recall, f1 for validation and test)
+            to an accumulative CSV file.
+        12. Calculates class-wise accuracy with bootstrap confidence intervals.
+        13. Prints a final performance summary including CV, validation, and test accuracies.
 
-        Args:
-            all_year (bool, optional): If True, includes data from all months.
-            winter (bool, optional): If True, filters the dataset for winter months only.
+    Args:
+        all_year (bool, optional): If True, includes data from all months.
+        winter (bool, optional): If True, filters the dataset for winter months only.
 
-        Inputs (global variables):
-            - `TRAIN_VALID_SET_FILE`, `TEST_SET_FILE`: Paths to training/validation and test datasets.
-            - `LABEL`: Target column name.
-            - `MODEL_FOLDER`: Folder to save the trained XGBoost model.
-            - `IMAGE_FOLDER`, `REPORT_FOLDER`: Directories for output plots and reports.
-            - `TOP_FEATURES`: Number of top features to display in importance plots.
-            - `LABELS_MAP`: Mapping of class indices to descriptive class names.
-            
-        Outputs:
-            - Saved XGBoost model.
-            - CSVs with:
-                - Validation and test classification reports
-                - Per-class accuracies
-                - Top N feature importances
-                - Cross-validation raw scores and summary
-                - Accumulative performance metrics (accuracy, precision, recall, f1)
-            - Plots saved in `IMAGE_FOLDER`:
-                - Confusion matrices
-                - Class-wise accuracy bars
-                - Feature importance
-                - Precision vs Recall curves
-                - FP vs TP curves
-                - Class-wise accuracy with bootstrap CIs
-            - Printed performance summary to console (CV, validation, and test accuracies).
+    Inputs (global variables):
+        - `TRAIN_VALID_SET_FILE`, `TEST_SET_FILE`: Paths to training/validation and test datasets.
+        - `LABEL`: Target column name.
+        - `MODEL_FOLDER`: Folder to save the trained XGBoost model.
+        - `IMAGE_FOLDER`, `REPORT_FOLDER`: Directories for output plots and reports.
+        - `TOP_FEATURES`: Number of top features to display in importance plots.
+        - `LABELS_MAP`: Mapping of class indices to descriptive class names.
+        
+    Outputs:
+        - Saved XGBoost model.
+        - CSVs with:
+            - Validation and test classification reports
+            - Per-class accuracies
+            - Top N feature importances
+            - Cross-validation raw scores and summary
+            - Accumulative performance metrics (accuracy, precision, recall, f1)
+        - Plots saved in `IMAGE_FOLDER`:
+            - Confusion matrices
+            - Class-wise accuracy bars
+            - Feature importance
+            - Precision vs Recall curves
+            - FP vs TP curves
+            - Class-wise accuracy with bootstrap CIs
+        - Printed performance summary to console (CV, validation, and test accuracies).
     """
 
     # ==========================================================
-    # Initialization
+    # INITIALIZATION
     # ==========================================================
     # Determine the active season, its corresponding months, and a formatted name for file usage
     season_name, months, season_name_file = determine_season(all_year, winter)
@@ -110,7 +110,7 @@ def xgboost_classifier(all_year=False, winter=False):
     print("=" * 60)
 
     # ==========================================================
-    # Load and Filter Datasets
+    # LOAD AND FILTER DATASETS
     # ==========================================================
     print("\nLoading datasets...")
     df_train_valid = pd.read_csv(TRAIN_VALID_SET_FILE)
@@ -127,7 +127,7 @@ def xgboost_classifier(all_year=False, winter=False):
     print(f"\nDataset shape: {df_test.shape}")
 
     # ==========================================================
-    # Label Preparation
+    # LABEL PREPARATION
     # ==========================================================
     # Convert labels to integers (removes .0 if present)
     df_train_valid[LABEL] = df_train_valid[LABEL].astype(int)
@@ -135,7 +135,7 @@ def xgboost_classifier(all_year=False, winter=False):
     print(f"\nLabel value counts:\n{df_test[LABEL].value_counts()}")
 
     # ==========================================================
-    # Feature and Target Preparation
+    # FEATURE AND TARGET PREPARATION
     # ==========================================================
     # Remove 'date' column and separate target variable
     X_train_valid = df_train_valid.drop(columns=[LABEL, 'date'])
@@ -145,7 +145,7 @@ def xgboost_classifier(all_year=False, winter=False):
     y_test = df_test[LABEL]
 
     # ==========================================================
-    # Split Dataset into Train (70%) and Validation (30%)
+    # SPLIT DATASET INTO TRAIN (70%) AND VALIDATION (30%)
     # ==========================================================
     print("\nSplitting dataset into Train and Validation sets...")
 
@@ -167,7 +167,7 @@ def xgboost_classifier(all_year=False, winter=False):
     print(y_test.value_counts(normalize=True).sort_index())
 
     # ==========================================================
-    # Cross-Validation on Training Set
+    # CROSS-VALIDATION ON TRAINING SET
     # ==========================================================
     print("\nPerforming Cross-Validation on Training set...")
 
@@ -194,7 +194,7 @@ def xgboost_classifier(all_year=False, winter=False):
     print(f"Mean CV Accuracy: {cv_scores.mean():.4f} (+/- {cv_scores.std() * 2:.4f})")
 
     # ==========================================================
-    # Final Model Training
+    # FINAL MODEL TRAINING
     # ==========================================================
     print("\nTraining XGBoost classifier...")
     xgb_classifier.fit(X_train, y_train)
@@ -204,7 +204,7 @@ def xgboost_classifier(all_year=False, winter=False):
     print(f"\nModel saved to {model_path}")
     
     # ==========================================================
-    # Model Evaluation on Validation and Test Sets
+    # MODEL EVALUATION ON VALIDATION AND TEST SETS
     # ==========================================================
     print("\nEvaluating model performance...")
 
@@ -220,7 +220,7 @@ def xgboost_classifier(all_year=False, winter=False):
     print(f"Test Accuracy: {test_accuracy:.4f}\n")
 
     # ==========================================================
-    # Confusion Matrix Plots
+    # CONFUSION MATRIX PLOTS
     # ==========================================================
     # Plot and save validation confusion matrix
     val_cm, _ = plot_confusion_matrix_combined(
@@ -241,7 +241,7 @@ def xgboost_classifier(all_year=False, winter=False):
     )
     
     # ==========================================================
-    # Classification Reports
+    # CLASSIFICATION REPORTS
     # ==========================================================
     classes = [int(cls) for cls in np.unique(y_test)]
     class_names = [LABELS_MAP[cls][0] for cls in classes]
@@ -260,7 +260,7 @@ def xgboost_classifier(all_year=False, winter=False):
     print(f"Test Set Classification Report saved to {test_report_path}")
 
     # ==========================================================
-    # Report and Plot Per-Class Accuracy
+    # REPORT AND PLOT PER-CLASS ACCURACY
     # ==========================================================
     val_class_acc = class_accuracy(val_cm)
     test_class_acc = class_accuracy(test_cm)
@@ -291,7 +291,7 @@ def xgboost_classifier(all_year=False, winter=False):
                         f"Test Accuracy per Class, {season_name.title()}", test_class_acc_image_path)
     
     # ==========================================================
-    # Feature Importance Export and Plot
+    # FEATURE IMPORTANCE EXPORT AND PLOT
     # ==========================================================
     # Calculate feature importance
     feature_importance = pd.DataFrame({
@@ -308,7 +308,7 @@ def xgboost_classifier(all_year=False, winter=False):
     plot_feature_importance(top_features, season_name, top_features_image_path)
     
     # ==========================================================
-    # Additional Cross-Validation Metrics
+    # ADDITIONAL CROSS-VALIDATION METRICS
     # ==========================================================
     print("\nComputing additional cross-validation metrics...")
     scoring_metrics = ['accuracy', 'precision_weighted', 'recall_weighted', 'f1_weighted']
@@ -336,7 +336,7 @@ def xgboost_classifier(all_year=False, winter=False):
     print(f"Cross-validation summary saved to {summary_metrics_path}")
 
     # ==========================================================
-    # Compute predicted probabilities for Precision vs Recall
+    # COMPUTE PREDICTED PROBABILITIES FOR PRECISION VS RECALL
     # ==========================================================
     y_val_proba = xgb_classifier.predict_proba(X_val)
     y_test_proba = xgb_classifier.predict_proba(X_test)
@@ -358,7 +358,7 @@ def xgboost_classifier(all_year=False, winter=False):
     )
     
     # ==========================================================
-    # Compute predicted probabilities for FP vs TP plots
+    # COMPUTE PREDICTED PROBABILITIES FOR FP VS TP PLOTS
     # ==========================================================
     # Plot FP vs TP curves for validation and test sets
     plot_fp_tp_curve(
@@ -376,7 +376,7 @@ def xgboost_classifier(all_year=False, winter=False):
     )
     
     # ==============================================================
-    # Export Accuracy, Precision, Recall, and F1 to Accumulative CSV
+    # EXPORT ACCURACY, PRECISION, RECALL, AND F1 TO ACCUMULATIVE CSV
     # ==============================================================
     # Compute overall metrics for validation and test sets
     val_precision = val_report_df.loc["weighted avg", "precision"]
@@ -413,7 +413,7 @@ def xgboost_classifier(all_year=False, winter=False):
     print(f"\nOverall performance metrics saved to {performance_csv_path}")
 
     # ==========================================================
-    # Run XGBoost Classifier with Bootstrap Confidence Intervals
+    # RUN XGBOOST CLASSIFIER WITH BOOTSTRAP CONFIDENCE INTERVALS
     # ==========================================================
     print("\nCalculating class-wise accuracy with bootstrap confidence intervals...")
     
@@ -448,7 +448,7 @@ def xgboost_classifier(all_year=False, winter=False):
     plot_class_accuracy_ci(mean_acc, lower_bounds, upper_bounds, classes, f"Class-wise Accuracy with {ci_level}% CI", ci_image_path)
     
     # ==========================================================
-    # Final Performance Summary
+    # FINAL PERFORMANCE SUMMARY
     # ==========================================================
     print("\n" + "-"*40)
     print("XGBOOST FINAL PERFORMANCE SUMMARY")

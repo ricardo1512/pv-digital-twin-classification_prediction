@@ -1,26 +1,24 @@
 import os
-from matplotlib import colors
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap
 from globals import *
 from plot_day_samples import *
 
 
 def correlation_matrix(df, plot_folder):
     """
-        Generate and save a global correlation matrix heatmap for all inverters' data.
+    Generate and save a global correlation matrix heatmap for all inverters' data.
         
-        Args:
-            df (pd.DataFrame): DataFrame containing data from all inverters.
-            plot_folder (str): Directory where the plot will be saved.
+    Args:
+        df (pd.DataFrame): DataFrame containing data from all inverters.
+        plot_folder (str): Directory where the plot will be saved.
             
-        Notes:
-            - Only the lower triangle of the correlation matrix is displayed.
-            - Annotation text color adapts automatically based on cell brightness.
-            - Prints the top 20 positive and top 5 negative correlations to the console.
+    Notes:
+        - Only the lower triangle of the correlation matrix is displayed.
+        - Annotation text color adapts automatically based on cell brightness.
+        - Prints the top 20 positive and top 5 negative correlations to the console.
     """
 
     # Define feature order

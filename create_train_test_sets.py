@@ -8,10 +8,10 @@ from plot_day_samples import *
 # ==============================================================
 def create_train_test_sets():    
     """
-    Consolidate and generate the final training and testing datasets for PV fault classification.
+    Consolidate and generate the final training and testing datasets for PV anomaly/fault classification.
 
-    This function loads all individual CSV sample files generated for each fault scenario
-    (including the no-fault condition) from their respective folders — 2023 (training) and
+    This function loads all individual CSV sample files generated for each anomaly/fault scenario
+    (including the no-anomaly/fault condition) from their respective folders — 2023 (training) and
     2024 (testing). It then concatenates them into unified CSV files that represent the
     complete datasets used for model training and evaluation.
 

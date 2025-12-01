@@ -1,49 +1,53 @@
 import pandas as pd
 import joblib
 from pathlib import Path
-from plot_inference import *
 from utils import *
+from plot_inference import *
 
 def inference(all_year=False, winter=False):
     """
-        Run inference on a real dataset using a pre-trained XGBoost classifier.
+    Run inference on a real dataset using a pre-trained XGBoost classifier.
 
-        This function performs the following steps:
-            1. Loads a pre-trained XGBoost model from disk.
-            2. Reads the inference dataset CSV containing features and metadata.
-            3. Selects the features required by the model.
-            4. Performs classification to predict condition labels for each sample.
-            5. Saves the predictions to a CSV file, including 'ID', 'date', and 'predicted_condition'.
-            6. Counts occurrences of each predicted condition type and exports a summary report CSV.
-            7. Generates a bar plot of the distribution of predicted conditions.
-            8. Computes class probabilities for each sample and saves them to a CSV.
-            9. Generates individual bar plots for each sample, showing the probability of being in each class.
-            10. Selects and scales probabilities for decision making.
-            11. Generates a report of selected and scaled probability combinations and exports it to CSV.
-            12. Generates bar plots for each sample showing selected and scaled probabilities for further analysis.
+    This function performs the following steps:
+        1. Loads a pre-trained XGBoost model from disk.
+        2. Reads the inference dataset CSV containing features and metadata.
+        3. Selects the features required by the model.
+        4. Performs classification to predict condition labels for each sample.
+        5. Saves the predictions to a CSV file, including 'ID', 'date', and 'predicted_condition'.
+        6. Counts occurrences of each predicted condition type and exports a summary report CSV.
+        7. Generates a bar plot of the distribution of predicted conditions.
+        8. Computes class probabilities for each sample and saves them to a CSV.
+        9. Generates individual bar plots for each sample, showing the probability of being in each class.
+        10. Selects and scales probabilities for decision making.
+        11. Generates a report of selected and scaled probability combinations and exports it to CSV.
+        12. Generates bar plots for each sample showing selected and scaled probabilities for further analysis.
 
-        Args:
-            all_year (bool, optional): If True, includes data from all months.
-            winter (bool, optional): If True, filters the dataset for winter months only.
+    Args:
+        all_year (bool, optional): If True, includes data from all months.
+        winter (bool, optional): If True, filters the dataset for winter months only.
             
-        Inputs:
-            - `inference_test_file`: CSV file with test data.
-            - `MODELS_FOLDER`: Folder to pre-trained XGBoost model.
-            - Other output paths: CSV, image, and plot directories.
+    Inputs:
+        - `inference_test_file`: CSV file with test data.
+        - `MODELS_FOLDER`: Folder to pre-trained XGBoost model.
+        - Other output paths: CSV, image, and plot directories.
 
-        Outputs:
-            - CSV file with predicted condition labels per sample.
-            - CSV file with predicted probabilities per sample.
-            - Summary report CSV with counts of each predicted class.
-            - Distribution plot of predicted conditions.
-            - Individual bar plots of predicted probabilities for each sample.
-            - Selected and scaled probabilities CSV per sample.
-            - Report CSV of selected and scaled probability combinations sorted by combination size and count.
-            - Bar plots of selected and scaled probabilities for each sample.
+    Outputs:
+        - CSV file with predicted condition labels per sample.
+        - CSV file with predicted probabilities per sample.
+        - Summary report CSV with counts of each predicted class.
+        - Distribution plot of predicted conditions.
+        - Individual bar plots of predicted probabilities for each sample.
+        - Selected and scaled probabilities CSV per sample.
+        - Report CSV of selected and scaled probability combinations sorted by combination size and count.
+        - Bar plots of selected and scaled probabilities for each sample.
     """
+    
     # Determine the active season, its corresponding months, and a formatted name for file usage
     season_name, _, season_name_file = determine_season(all_year, winter)
     
+    # ===============================================
+    # INITIALIZATION
+    # ===============================================
     # INPUT FILE
     # Pretrained Model
     xgb_model_path = f"{MODELS_FOLDER}/xgb_best_model_{season_name_file}.joblib"
@@ -66,6 +70,9 @@ def inference(all_year=False, winter=False):
     print(f"PERFORMING INFERENCE, TRAINING SEASON: {season_name.upper()} ...")
     print("=" * 60)
     
+    # ===============================================
+    # LOAD PRE-TRAINED XGBOOST MODEL
+    # ===============================================
     # Raise an exception if the model file does not exist
     xgb_model_file_path = Path(xgb_model_path)
     if not os.path.exists(xgb_model_file_path):
@@ -86,17 +93,18 @@ def inference(all_year=False, winter=False):
             f"\tPlease create the inference test set first for {season_name} (--{season_name_file}).\n"
         )
         exit()
-        
+
+    # ===============================================
+    # INFERENCE
+    # ===============================================
     # Load input dataset
     df_inference = pd.read_csv(inference_test_file)
 
     # Select features used by the model
     X_inference = df_inference[xgb_classifier.feature_names_in_]
-
-    # ===============================================
-    # INFERENCE
-    # ===============================================
+    
     print("\nPerforming inference on the dataset...")
+    # Predict condition labels for each sample in the inference set
     y_inference_pred = xgb_classifier.predict(X_inference)
     df_inference['predicted_condition'] = y_inference_pred.astype(int)
 

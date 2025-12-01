@@ -5,10 +5,10 @@ from globals import *
 
 def safe_std(arr):
     """
-        Calculate the standard deviation safely.
+    Calculate the standard deviation safely.
 
-        Returns 0.0 if the array has fewer than 2 elements or all values are identical,
-        avoiding invalid or meaningless results.
+    Returns 0.0 if the array has fewer than 2 elements or all values are identical,
+    avoiding invalid or meaningless results.
     """
 
     if len(arr) < 2 or np.all(arr == arr[0]):
@@ -18,10 +18,10 @@ def safe_std(arr):
 
 def safe_var(arr):
     """
-        Calculate the variance safely.
+    Calculate the variance safely.
 
-        Returns 0.0 if the array has fewer than 2 elements or all values are identical,
-        preventing invalid variance computation.
+    Returns 0.0 if the array has fewer than 2 elements or all values are identical,
+    preventing invalid variance computation.
     """
 
     if len(arr) < 2 or np.all(arr == arr[0]):
@@ -31,10 +31,10 @@ def safe_var(arr):
 
 def safe_mean(arr):
     """
-        Calculate the mean safely.
+    Calculate the mean safely.
 
-        Returns np.nan if the array is empty or contains only NaN values,
-        ensuring a meaningful result.
+    Returns np.nan if the array is empty or contains only NaN values,
+    ensuring a meaningful result.
     """
 
     if len(arr) == 0 or np.all(np.isnan(arr)):
@@ -44,10 +44,10 @@ def safe_mean(arr):
 
 def safe_corrcoef(arr1, arr2):
     """
-        Calculate the Pearson correlation coefficient safely.
+    Calculate the Pearson correlation coefficient safely.
 
-        Returns np.nan if arrays are too short, have constant values, or different lengths,
-        avoiding errors or meaningless correlations.
+    Returns np.nan if arrays are too short, have constant values, or different lengths,
+    avoiding errors or meaningless correlations.
     """
 
     if (len(arr1) < 2 or len(arr2) < 2 or
@@ -63,15 +63,15 @@ def safe_corrcoef(arr1, arr2):
 
 def extract_comprehensive_features(filtered_results):
     """
-        Extracts a comprehensive set of features from numerical columns of a DataFrame.
+    Extracts a comprehensive set of features from numerical columns of a DataFrame.
 
-        For each numeric column, the function calculates:
+    For each numeric column, the function calculates:
         - Basic statistics (mean, std, min, max, percentiles, variance, etc.)
         - Differences between consecutive values (diff features)
         - Rolling statistics (mean, std, range, volatility, correlation)
 
-        Returns a dictionary where keys are feature names and values are the computed metrics.
-        If the input DataFrame has no numeric data, returns None.
+    Returns a dictionary where keys are feature names and values are the computed metrics.
+    If the input DataFrame has no numeric data, returns None.
     """
 
     # Select numeric columns
@@ -98,8 +98,8 @@ def extract_comprehensive_features(filtered_results):
                 np.median(window),              # Median
                 safe_std(window),               # Standard deviation
                 safe_var(window),               # Variance
-                np.percentile(window, 25),   # 25th percentile
-                np.percentile(window, 75),   # 75th percentile
+                np.percentile(window, 25),      # 25th percentile
+                np.percentile(window, 75),      # 75th percentile
             ]
 
             # ===============================
@@ -192,21 +192,21 @@ def extract_comprehensive_features(filtered_results):
 
 def compute_store_daily_comprehensive_features(results_full, date, daily_features=[]):
     """
-        Compute daily statistical features for a store's numerical data.
+    Compute daily statistical features for a store's numerical data.
 
-        Args:
-            - results_full: DataFrame containing all store data for the day
-            - date: Date corresponding to the data
-            - daily_features: List to append the computed daily feature Series
+    Args:
+        - results_full: DataFrame containing all store data for the day
+        - date: Date corresponding to the data
+        - daily_features: List to append the computed daily feature Series
         
-        Steps:
-            1. Filter the data to the classification hours.
-            2. Extract the inverter state at the start of the period.
-            3. Compute comprehensive statistical features for all numeric columns.
-            4. Combine features and inverter state into a single Pandas Series.
-            5. Append the result to the daily_features list.
+    Steps:
+        1. Filter the data to the classification hours.
+        2. Extract the inverter state at the start of the period.
+        3. Compute comprehensive statistical features for all numeric columns.
+        4. Combine features and inverter state into a single Pandas Series.
+        5. Append the result to the daily_features list.
         
-        Returns the daily statistical features.
+    Returns the daily statistical features.
     """
     
     # Filter data within classification hours
@@ -239,18 +239,18 @@ def compute_store_daily_comprehensive_features(results_full, date, daily_feature
 
 def determine_season(all_year, winter):
     """
-        Determines which season is active based on the provided flags.
+    Determines which season is active based on the provided flags.
 
-        Args:
-            all_year (bool, optional): If True, includes all months of the year.
-            winter (bool, optional): If True, includes only the winter months.
+    Args:
+        all_year (bool, optional): If True, includes all months of the year.
+        winter (bool, optional): If True, includes only the winter months.
 
-        Returns:
-            tuple: A tuple containing:
-                - season_name (str): The name of the selected season ("All Year", "Winter", or "Summer").
-                - months (list[int]): The list of month numbers corresponding to the selected season.
-                - season_name_file (str): A lowercase, underscore-separated version of the season name,
-                  suitable for use in filenames.
+    Returns:
+        tuple: A tuple containing:
+            - season_name (str): The name of the selected season ("All Year", "Winter", or "Summer").
+            - months (list[int]): The list of month numbers corresponding to the selected season.
+            - season_name_file (str): A lowercase, underscore-separated version of the season name,
+              suitable for use in filenames.
     """
     
     # Define months corresponding to each season
@@ -272,14 +272,14 @@ def determine_season(all_year, winter):
 
 def class_accuracy(cm):
     """
-        Calculate accuracy for each class from a confusion matrix.
+    Calculate accuracy for each class from a confusion matrix.
 
-        Parameters:
-            - cm: 2D numpy array representing the confusion matrix, where
-                  cm[i, j] is the number of instances of class i predicted as class j.
+    Parameters:
+        - cm: 2D numpy array representing the confusion matrix, where
+              cm[i, j] is the number of instances of class i predicted as class j.
 
-        Returns:
-            - 1D numpy array containing per-class accuracy in percentage, rounded to 1 decimal place.
+    Returns:
+        - 1D numpy array containing per-class accuracy in percentage, rounded to 1 decimal place.
     """
 
     # Compute true positives per class (diagonal of confusion matrix) # =====
@@ -297,20 +297,20 @@ def class_accuracy(cm):
 
 def adjust_and_scale_probabilities(proba_inference_df, delta=0.1, top=2):
     """
-        Adjusts class probabilities based on confidence threshold and proximity window (delta),
-        preserving at most the two top-ranked classes.
+    Adjusts class probabilities based on confidence threshold and proximity window (delta),
+    preserving at most the two top-ranked classes.
 
-        Logic: 
-            - If max probability >= 0.7 → set that class to 1.0 and others to 0.0.
-            - Else → select probabilities within (max - delta) <= p <= max,
-                    keep at most top 2, normalize them to sum to 1.0, others set to 0.
+    Logic: 
+        - If max probability >= 0.7 → set that class to 1.0 and others to 0.0.
+        - Else → select probabilities within (max - delta) <= p <= max,
+                keep at most top 2, normalize them to sum to 1.0, others set to 0.
         
-        Args: 
-            proba_inference_df (pd.DataFrame): DataFrame with columns [ID, date, predicted_condition, class probabilities...].
-            delta (float): Window below max prob to include similar classes for scaling (default=0.05).
+    Args: 
+        proba_inference_df (pd.DataFrame): DataFrame with columns [ID, date, predicted_condition, class probabilities...].
+        delta (float): Window below max prob to include similar classes for scaling (default=0.05).
 
-        Returns:
-            pd.DataFrame: Adjusted probability DataFrame with [ID, date, predicted_condition, adjusted class probabilities...].
+    Returns:
+        pd.DataFrame: Adjusted probability DataFrame with [ID, date, predicted_condition, adjusted class probabilities...].
     """
 
     # Identify class probability columns
@@ -354,15 +354,15 @@ def adjust_and_scale_probabilities(proba_inference_df, delta=0.1, top=2):
 
 def generate_adjusted_probabilities_report(adjusted_df):
     """
-        Generates a CSV report with counts of each unique combination of selected classes.
-        Each row may contribute a combination of 1 or more classes.
-        Combinations are grouped first by number of classes (1, 2, ...), then sorted by count descending.
+    Generates a CSV report with counts of each unique combination of selected classes.
+    Each row may contribute a combination of 1 or more classes.
+    Combinations are grouped first by number of classes (1, 2, ...), then sorted by count descending.
 
-        Args:
-            adjusted_df (pd.DataFrame): Adjusted probability DataFrame with [ID, date, predicted_condition, class probabilities...].
+    Args:
+        adjusted_df (pd.DataFrame): Adjusted probability DataFrame with [ID, date, predicted_condition, class probabilities...].
 
-        Returns:
-            pd.DataFrame: Report DataFrame with columns ['Combination', 'Count'], sorted as described.
+    Returns:
+        pd.DataFrame: Report DataFrame with columns ['Combination', 'Count'], sorted as described.
     """
 
     # Identify class columns
@@ -403,19 +403,20 @@ def generate_adjusted_probabilities_report(adjusted_df):
 
 def ts_resampling(ts):
     """
-        Resample a time series DataFrame to daily frequency.
+    Resample a time series DataFrame to daily frequency.
         
-        Arg.:
-            - ts (pd.DataFrame): Time series data indexed by datetime, containing power, meteorological, 
-              and precipitation measurements.
+    Arg.:
+        - ts (pd.DataFrame): Time series data indexed by datetime, containing power, meteorological, 
+          and precipitation measurements.
         
-        Returns:
-            pd.DataFrame: Daily-resampled DataFrame with sums for energy-related columns and 
-            means for weather-related columns. Rows with all NaNs are dropped.
+    Returns:
+        pd.DataFrame: Daily-resampled DataFrame with sums for energy-related columns and 
+        means for weather-related columns. Rows with all NaNs are dropped.
     """
     
     # Columns to aggregate using daily sum
     sum_cols = ['precipitation']
+    
     # Columns to aggregate using daily mean
     mean_cols = [
         'mppt_power', 

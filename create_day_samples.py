@@ -12,22 +12,22 @@ from create_day_samples_6_diode import *
 # ==============================================================
 def create_day_samples(plot_samples=False):
     """
-        Generate synthetic PV fault samples for multiple scenarios in parallel.
+    Generate synthetic PV fault samples for multiple scenarios in parallel.
 
-        This function orchestrates the creation of photovoltaic (PV) system datasets under
-        different fault and normal operating conditions. It uses parallel processing to
-        accelerate sample generation across multiple fault simulation modules, each representing
-        a specific fault type (e.g., soiling, shading, cracks, ground faults, arc faults, diode failures).
+    This function orchestrates the creation of PV system datasets under
+    different anomaly/fault and normal operating conditions. It uses parallel processing to
+    accelerate sample generation across multiple anomaly/fault simulation modules, each representing
+    a specific anomaly/fault type (e.g., soiling, shading, cracks, ground faults, arc faults, diode failures).
 
-        Args:
-            plot_samples (bool): If True, each simulation module will generate plots for the created samples.
-                Default value: False.
+    Args:
+        plot_samples (bool): If True, each simulation module will generate plots for the created samples.
+            Default value: False.
 
-        Workflow:
-            1. For each dataset year (training: 2023, testing: 2024):
-                - Launch all sample creation modules in parallel using a ProcessPoolExecutor.
-                - Each module generates its respective fault scenario samples.
-            2. Handle exceptions gracefully and log progress for each module.
+    Workflow:
+        1. For each dataset year (training: 2023, testing: 2024):
+            - Launch all sample creation modules in parallel using a ProcessPoolExecutor.
+            - Each module generates its respective fault scenario samples.
+        2. Handle exceptions gracefully and log progress for each module.
     """
 
     print("\n" + "=" * 40)

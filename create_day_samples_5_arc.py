@@ -1,4 +1,3 @@
-import os
 import random
 from classes import *
 from plot_day_samples import *
@@ -9,33 +8,33 @@ from utils import *
 # ==============================================================
 def create_samples_5_arc(files_year, plot_samples=False):
     """
-        Runs the digital twin simulation for a photovoltaic system under sustained series arc fault (SAF) conditions.
+    Runs the digital twin simulation for a photovoltaic system under sustained series arc fault (SAF) conditions.
 
-        This function loads meteorological data for a specified year and simulates the PV system performance at 5-minute
-        intervals while introducing realistic arc fault patterns with voltage rises and current drops at a random hour,
-        including a shutdown after 1 hour to mimic protection mechanisms. It computes electrical and environmental
-        parameters throughout the day. Daily-level features are extracted for machine learning analysis, and plots
-        can optionally be produced.
+    This function loads meteorological data for a specified year and simulates the PV system performance at 5-minute
+    intervals while introducing realistic arc fault patterns with voltage rises and current drops at a random hour,
+    including a shutdown after 1 hour to mimic protection mechanisms. It computes electrical and environmental
+    parameters throughout the day. Daily-level features are extracted for machine learning analysis, and plots
+    can optionally be produced.
 
-        Args:
-            files_year (tuple): Tuple containing:
-                - input_file (str): Path to CSV file with meteorological data for a given year
-                  (e.g., "Weather/Vila_do_Conde_weather_2023.csv").
-                - output_folder (str): Directory to save output CSV and plots (e.g., "Samples_2023").
-            plot_samples (bool): If True, generates daily plots of simulation results. Default is False.
+    Args:
+        files_year (tuple): Tuple containing:
+            - input_file (str): Path to CSV file with meteorological data for a given year
+              (e.g., "Weather/Vila_do_Conde_weather_2023.csv").
+            - output_folder (str): Directory to save output CSV and plots (e.g., "Samples_2023").
+        plot_samples (bool): If True, generates daily plots of simulation results. Default is False.
 
-        Workflow:
-            1. Load and preprocess meteorological data.
-            2. Define PVPlant, InverterTwin, and DigitalTwin classes.
-            3. Randomly select arc start time, voltage rise, and current drop.
-            4. Simulate PV system performance with arc fault conditions, including shutdown after 1 hour.
-            5. Aggregate and export daily-level features for machine learning.
-            6. Optionally generate diagnostic plots for visualization.
-            7. Export results to CSV.
+     Workflow:
+        1. Load and preprocess meteorological data.
+        2. Define PVPlant, InverterTwin, and DigitalTwin classes.
+        3. Randomly select arc start time, voltage rise, and current drop.
+        4. Simulate PV system performance with arc fault conditions, including shutdown after 1 hour.
+        5. Aggregate and export daily-level features for machine learning.
+        6. Optionally generate diagnostic plots for visualization.
+        7. Export results to CSV.
 
-        Output:
-            Saves a CSV file named "5_arc_samples.csv" containing
-            daily aggregated simulation results in the specified output folder.
+    Output:
+        Saves a CSV file named "5_arc_samples.csv" containing
+        daily aggregated simulation results in the specified output folder.
     """
 
     # ==============================================================

@@ -3,9 +3,9 @@ from utils import *
 
 def create_preprocess_inference_set(smoothing=False, all_year=False, winter=False):
     """
-        Preprocesses inverter CSV data for inference by extracting daily features.
+     Preprocesses inverter CSV data for inference by extracting daily features.
 
-        Steps performed:
+    Steps performed:
         1. Reads all CSV files from the 'Inverters' folder.
         2. Converts 'collectTime' to datetime format.
         3. Extracts the inverter ID from the filename.
@@ -15,10 +15,10 @@ def create_preprocess_inference_set(smoothing=False, all_year=False, winter=Fals
         7. Combines all daily features into a single DataFrame.
         8. Exports the processed DataFrame to the specified output path.
 
-        Args:
-            smoothing (bool, optional): Whether to apply moving average smoothing to numeric features. Defaults to False.
-            all_year (bool, optional): If True, includes data from all months.
-            winter (bool, optional): If True, filters the dataset for winter months only.
+    Args:
+        smoothing (bool, optional): Whether to apply moving average smoothing to numeric features. Defaults to False.
+        all_year (bool, optional): If True, includes data from all months.
+        winter (bool, optional): If True, filters the dataset for winter months only.
     """
 
     # Determine the active season, its corresponding months, and a formatted name for file usage

@@ -1,4 +1,3 @@
-import os
 import random
 from classes import *
 from plot_day_samples import *
@@ -9,33 +8,33 @@ from utils import *
 # ==============================================================
 def create_samples_4_ground(files_year, plot_samples=False):
     """
-        Runs the digital twin simulation for a photovoltaic system under ground fault conditions.
+    Runs the digital twin simulation for a photovoltaic system under ground fault conditions.
 
-        This function loads meteorological data for a specified year and simulates the PV system performance
-        at 5-minute intervals while introducing realistic ground fault patterns by adjusting DC current
-        and voltage levels according to predefined factors. It computes electrical and environmental
-        parameters throughout the day. Daily-level features are extracted for machine learning analysis,
-        and plots can optionally be produced.
+    This function loads meteorological data for a specified year and simulates the PV system performance
+    at 5-minute intervals while introducing realistic ground fault patterns by adjusting DC current
+    and voltage levels according to predefined factors. It computes electrical and environmental
+    parameters throughout the day. Daily-level features are extracted for machine learning analysis,
+    and plots can optionally be produced.
 
-        Args:
-            files_year (tuple): Tuple containing:
-                - input_file (str): Path to CSV file with meteorological data for a given year
-                  (e.g., "Weather/Vila_do_Conde_weather_2023.csv").
-                - output_folder (str): Directory to save output CSV and plots (e.g., "Samples_2023").
-            plot_samples (bool): If True, generates daily plots of simulation results. Default is False.
+    Args:
+        files_year (tuple): Tuple containing:
+            - input_file (str): Path to CSV file with meteorological data for a given year
+              (e.g., "Weather/Vila_do_Conde_weather_2023.csv").
+            - output_folder (str): Directory to save output CSV and plots (e.g., "Samples_2023").
+        plot_samples (bool): If True, generates daily plots of simulation results. Default is False.
 
-        Workflow:
-            1. Load and preprocess meteorological data.
-            2. Define PVPlant, InverterTwin, and DigitalTwin classes.
-            3. Randomly assign ground fault degradation factors for voltage and current.
-            4. Simulate PV system performance with degraded conditions.
-            5. Aggregate and export daily-level features for machine learning.
-            6. Optionally generate diagnostic plots for visualization.
-            7. Export results to CSV.
+    Workflow:
+        1. Load and preprocess meteorological data.
+        2. Define PVPlant, InverterTwin, and DigitalTwin classes.
+        3. Randomly assign ground fault degradation factors for voltage and current.
+        4. Simulate PV system performance with degraded conditions.
+        5. Aggregate and export daily-level features for machine learning.
+        6. Optionally generate diagnostic plots for visualization.
+        7. Export results to CSV.
 
-        Output:
-            Saves a CSV file named "4_ground_samples.csv" containing
-            daily aggregated simulation results in the specified output folder.
+    Output:
+        Saves a CSV file named "4_ground_samples.csv" containing
+        daily aggregated simulation results in the specified output folder.
     """
 
     # ==============================================================

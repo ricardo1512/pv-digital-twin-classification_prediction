@@ -1,4 +1,3 @@
-import os
 import random
 from classes import *
 from plot_day_samples import *
@@ -9,32 +8,32 @@ from utils import *
 # =============================================================
 def create_samples_2_shading(files_year, plot_samples=False):
     """
-        Runs the digital twin simulation for a photovoltaic system under shading conditions.
+    Runs the digital twin simulation for a photovoltaic system under shading conditions.
 
-        This function loads meteorological data for a specified year and simulates the PV system
-        performance at 5-minute intervals while modeling daily power losses caused by shading,
-        applying a random daily shading factor to represent variability. It computes electrical
-        and environmental parameters throughout the day. Daily-level features are extracted for
-        machine learning analysis, and plots can optionally be produced.
+    This function loads meteorological data for a specified year and simulates the PV system
+    performance at 5-minute intervals while modeling daily power losses caused by shading,
+    applying a random daily shading factor to represent variability. It computes electrical
+    and environmental parameters throughout the day. Daily-level features are extracted for
+    machine learning analysis, and plots can optionally be produced.
 
-        Args:
-            files_year (tuple): Tuple containing:
-                - input_file (str): Path to CSV file with meteorological data for a given year.
-                - output_folder (str): Directory to save output CSV and plots.
-            plot_samples (bool): If True, generates daily plots of simulation results. Default is False.
+    Args:
+        files_year (tuple): Tuple containing:
+            - input_file (str): Path to CSV file with meteorological data for a given year.
+            - output_folder (str): Directory to save output CSV and plots.
+        plot_samples (bool): If True, generates daily plots of simulation results. Default is False.
 
-        Workflow:
-            1. Load and preprocess meteorological data.
-            2. Define PVPlant, InverterTwin, and DigitalTwin classes.
-            3. Randomly select a shading scenario for each day.
-            4. Simulate PV system for each day, including soiling losses.
-            5. Aggregate daily statistics and compute ML features.
-            6. Optionally generate plots for each day.
-            7. Export results to CSV.
+    Workflow:
+        1. Load and preprocess meteorological data.
+        2. Define PVPlant, InverterTwin, and DigitalTwin classes.
+        3. Randomly select a shading scenario for each day.
+        4. Simulate PV system for each day, including soiling losses.
+        5. Aggregate daily statistics and compute ML features.
+        6. Optionally generate plots for each day.
+        7. Export results to CSV.
 
-        Output:
-            CSV file named "2_shading_samples.csv" with daily aggregated featurescontaining
-            daily aggregated simulation results in the specified output folder.
+    Output:
+        CSV file named "2_shading_samples.csv" with daily aggregated featurescontaining
+        daily aggregated simulation results in the specified output folder.
     """
 
     # ==============================================================

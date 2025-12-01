@@ -4,31 +4,27 @@ import matplotlib.dates as mdates
 import matplotlib.lines as mlines
 from globals import *
 
-# Time limits
-TIME_INIT = "05:00" 
-TIME_END = "21:00"
-
 
 def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soiling=False):
     """
-        Plots MPPT powers (reference and effective), irradiances (GTI & DHI), air temperature, wind speed and precipitation
-        on the same graph using multiple Y-axes.
+    Plots MPPT powers (reference and effective), irradiances (GTI & DHI), air temperature, wind speed and precipitation
+    on the same graph using multiple Y-axes.
 
-        Args:
-            - df (pd.DataFrame): DataFrame containing the PV plant measurements with datetime index.
-            - date (str): Date of the plot (used in title).
-            - condition_title (str): Condition name to display in the plot title.
-            - output_folder (str): Folder where the figure will be saved.
-            - filename (str): Base filename for the saved figure.
-            - soiling (bool): If True, adds precipitation axis.
+    Args:
+        - df (pd.DataFrame): DataFrame containing the PV plant measurements with datetime index.
+        - date (str): Date of the plot (used in title).
+        - condition_title (str): Condition name to display in the plot title.
+        - output_folder (str): Folder where the figure will be saved.
+        - filename (str): Base filename for the saved figure.
+        - soiling (bool): If True, adds precipitation axis.
             
-        Notes:
-            - MPPT powers is plotted on the primary Y-axis (left).
-            - Global Tilted Irradiance (GTI) and Diffuse Horizontal Irradiance (DHI)
-              are plotted on secondary and tertiary Y-axes respectively (right).
-            - Air temperature and wind speed are plotted on quaternary and quinary Y-axes (right).
-            - If soiling is True, Precipitation is plotted on senary Y-axes (right).
-            - The figure is saved as a high-resolution PNG file in the specified folder.
+    Notes:
+        - MPPT powers is plotted on the primary Y-axis (left).
+        - Global Tilted Irradiance (GTI) and Diffuse Horizontal Irradiance (DHI)
+          are plotted on secondary and tertiary Y-axes respectively (right).
+        - Air temperature and wind speed are plotted on quaternary and quinary Y-axes (right).
+        - If soiling is True, Precipitation is plotted on senary Y-axes (right).
+        - The figure is saved as a high-resolution PNG file in the specified folder.
     """
 
     # Filter data by time
@@ -36,6 +32,7 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
     
     # Check if the DataFrame contains the column for reference MPPT power measurements
     mppt_clean = 'mppt_power_clean' in df.columns
+    
     # Ensure output folder exists
     os.makedirs(plot_folder, exist_ok=True)
 
@@ -59,14 +56,13 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
     # Adjust Y-axis limits for MPPT
     ax1.set_ylim(0, df['mppt_power_clean'].max() * 1.1 if mppt_clean else df['mppt_power'].max() * 1.1)
     
-    
     # Create legend only for MPPT lines
     if mppt_clean:
         ax1.legend(handles=[line1, line2], fontsize=10, loc='upper left')
         
-    # -------------------------
+    # ------------------------------------------
     # Global Tilted Irradiance (secondary axis)
-    # -------------------------
+    # ------------------------------------------
     ax2 = ax1.twinx()
     color_gti = MPPT_PALETTE['global_tilted_irradiance']
     ax2.plot(df.index, df['global_tilted_irradiance'], color=color_gti,
@@ -74,9 +70,9 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
     ax2.set_ylabel("GTI (W/m²)", color=color_gti)
     ax2.tick_params(axis='y', labelcolor=color_gti)
 
-    # -------------------------
+    # ----------------------------------------------
     # Diffuse Horizontal Irradiance (tertiary axis)
-    # -------------------------
+    # ----------------------------------------------
     ax3 = ax1.twinx()
     ax3.spines['right'].set_position(('outward', 50))
     color_dr = MPPT_PALETTE['diffuse_radiation']
@@ -90,9 +86,9 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
     ax2.set_ylim(0, max_rad)
     ax3.set_ylim(0, max_rad)
 
-    # -------------------------
+    # ----------------------------------
     # Air Temperature (quaternary axis)
-    # -------------------------
+    # ----------------------------------
     ax4 = ax1.twinx()
     ax4.spines['right'].set_position(('outward', 100))
     color_temp = MPPT_PALETTE['temperature_2m']
@@ -100,9 +96,9 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
     ax4.set_ylabel("Air Temp (°C)", color=color_temp)
     ax4.tick_params(axis='y', labelcolor=color_temp)
 
-    # -------------------------
+    # --------------------------
     # Wind Speed (quinary axis)
-    # -------------------------
+    # --------------------------
     ax5 = ax1.twinx()
     ax5.spines['right'].set_position(('outward', 150))
     color_wind = MPPT_PALETTE['wind_speed_10m']
@@ -113,9 +109,9 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
     # Adjust Y-axis limits for wind spead
     ax5.set_ylim(0, df['wind_speed_10m'].max() * 1.1)
 
-    # -------------------------
+    # ----------------------------------------
     # Precipitation, if soiling (senary axis)
-    # -------------------------
+    # ----------------------------------------
     if soiling:
         ax6 = ax1.twinx()
         ax6.spines['right'].set_position(('outward', 200))
@@ -167,18 +163,18 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
 
 def plot_currents(df_original, date, condition_title, output_folder, filename, soiling=False):
     """
-        Plot reference and effective PV string DC (pv1_i), as well as Precipitation if soiling is True.
+    Plot reference and effective PV string DC (pv1_i), as well as Precipitation if soiling is True.
 
-        Args:
-            - df_original (pd.DataFrame): DataFrame containing current measurements with a datetime index.
-            - date (str): Date string to display in the plot title.
-            - condition_title (str): Condition name to display in the plot title.
-            - output_folder (str): Folder path where the plot image will be saved.
-            - filename (str): Base name for the saved plot image.
-            - soiling (bool): If True, adds precipitation axis.
+    Args:
+        - df_original (pd.DataFrame): DataFrame containing current measurements with a datetime index.
+        - date (str): Date string to display in the plot title.
+        - condition_title (str): Condition name to display in the plot title.
+        - output_folder (str): Folder path where the plot image will be saved.
+        - filename (str): Base name for the saved plot image.
+        - soiling (bool): If True, adds precipitation axis.
             
-        Notes:
-            - The figure is saved as a high-resolution PNG file in the specified folder.
+    Notes:
+        - The figure is saved as a high-resolution PNG file in the specified folder.
     """
 
     # Filter data by time
@@ -226,9 +222,8 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
     
     # Initialize a list to store legend handles
     handles = []
-    # -------------------------
+    
     # Precipitation axis (right)
-    # -------------------------
     if soiling:
         # Set plot title
         # plt.title(f"PV and Phase Currents, and Precipitation, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='black')
@@ -281,17 +276,17 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
 
 def plot_voltage(df_original, date, condition_title, output_folder, filename):
     """
-        Plot PV string reference and effective DC (pv1_u).
+    Plot PV string reference and effective DC (pv1_u).
 
-        Args:
-            - df_original (pd.DataFrame): DataFrame containing voltage measurements with a datetime index.
-            - date (str): Date string to display in the plot title.
-            - condition_title (str): Condition name to display in the plot title.
-            - output_folder (str): Folder path where the plot image will be saved.
-            - filename (str): Base name for the saved plot image.
+    Args:
+        - df_original (pd.DataFrame): DataFrame containing voltage measurements with a datetime index.
+        - date (str): Date string to display in the plot title.
+        - condition_title (str): Condition name to display in the plot title.
+        - output_folder (str): Folder path where the plot image will be saved.
+        - filename (str): Base name for the saved plot image.
         
-        Notes:
-            - The figure is saved as a high-resolution PNG file in the specified folder.
+    Notes:
+        - The figure is saved as a high-resolution PNG file in the specified folder.
     """
 
     # Filter data by time
@@ -362,18 +357,18 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
     # Close figure to free memory
     plt.close()
     
-        # Confirm saving
+    # Confirm saving
     print(f"Voltages plot saved to {image_path}")
     
     
 def plot_scatter_iv(df_plot, output_folder, filename):
     """
-        Scatter plot of pv1_u_mean (x) vs pv1_i_mean (y), colored by inverter_state.
+    Scatter plot of pv1_u_mean (x) vs pv1_i_mean (y), colored by inverter_state.
 
-        Args:
-            df_plot (pd.DataFrame): Must contain ['pv1_u_mean', 'pv1_i_mean', 'inverter_state'].
-            output_folder (str): Folder where to save the figure.
-            filename (str): Base name for the saved image (without extension).
+    Args:
+        df_plot (pd.DataFrame): Must contain ['pv1_u_mean', 'pv1_i_mean', 'inverter_state'].
+        output_folder (str): Folder where to save the figure.
+        filename (str): Base name for the saved image (without extension).
     """
     
     # Ensure folder exists
