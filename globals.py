@@ -26,8 +26,6 @@ MODELS_FOLDER = "Models"                        # Folder to the trained models
 IMAGE_FOLDER = "Images"                         # Folder for saving images
 PLOT_FOLDER = "Plots"                           # Folder for saving plots
 REPORT_FOLDER = "Reports"                       # Folder for saving reports
-TIME_INIT = "05:00"                             # Start time for plots
-TIME_END = "21:00"                              # End time for plots
 
 # ==============================
 # Data File Paths
@@ -93,6 +91,8 @@ EXPORT_COLUMNS = [
 CLASSIFICATION_HOUR_INIT = '04:00'  # Start hour for classification
 CLASSIFICATION_HOUR_END = '22:00'   # End hour for classification
 TOP_FEATURES = 20                   # Number of top features to consider for classification
+CLASS_PLOT_TIME_INIT = "05:00"      # Start time for plots
+CLASS_PLOT_TIME_END = "21:00"       # End time for plots
 PREDICTION_HOUR_INIT = '04:00'      # Start hour for prediction
 PREDICTION_HOUR_END = '22:00'       # End hour for prediction
 

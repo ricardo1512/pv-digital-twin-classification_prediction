@@ -7,6 +7,9 @@ from globals import *
 from utils import *
 from plot_ts_samples import *
 
+# =================================================================
+# Digital Twin Simulation - Soiling Condition, Time Series Samples
+# =================================================================
 def create_ts_samples_1_soiling(plot_samples=False):
     """
     Runs the digital twin simulation for photovoltaic systems under soiling conditions
@@ -80,39 +83,45 @@ def create_ts_samples_1_soiling(plot_samples=False):
             self.soiling_factor = initial_soiling_factor
                 
         def run(self):
-            """
-            Simulate the PV system operation under soling conditions for the given meteorological data.
-            """
-        
             # Run PVLib ModelChain Simulation
             self.mc.run_model(self.weather)
             dc = self.mc.results.dc
             ac = self.mc.results.ac
 
-            # === Soiling simulation
+            # Time-dependent soiling simulation
             soiling_levels = []
-            growth_rate = random.uniform(0.002, 0.006)  # fraction per day
+            growth_rate = random.uniform(0.002, 0.006)  # Daily soiling growth fraction
 
             dt_seconds = (self.df.index[1] - self.df.index[0]).total_seconds()
-            dt_days = dt_seconds / (24 * 3600)
+            dt_days = dt_seconds / (24 * 3600) # Convert timestep to fraction of a day
 
             for i, _ in enumerate(self.df.index):
                 rain = self.df['precipitation'].iloc[i]
 
                 if rain > rain_threshold_mm:
+                    # Rain partially cleans accumulated soiling
                     self.soiling_factor *= (1 - cleaning_efficiency)
                 else:
+                    # Gradual soiling accumulation
                     self.soiling_factor += growth_rate * dt_days * (soiling_max - self.soiling_factor)
                 
+                # Clip to physical limits
                 self.soiling_factor = np.clip(self.soiling_factor, 0.001, 1.0)
 
                 soiling_levels.append(self.soiling_factor)
             
+            # Store soiling info in dataframe
             self.df['soiling_fraction'] = soiling_levels
             self.df['soiling_factor'] = 1 - self.df['soiling_fraction']
 
             # Initialize output DataFrame for storing simulation results
             output = pd.DataFrame(index=self.df.index)
+            
+            # Current, voltage, and power under normal (unaffected) conditions
+            output['pv1_i_clean'] = dc['i_mp']
+            output['pv1_u_clean'] = dc['v_mp']
+            output['mppt_power_clean'] = dc['p_mp'] / 1000  # W to kW
+            output['a_i_clean'] = ac / (400 * np.sqrt(3))
             
             # Set inverter_state to indicate anomaly condition
             output['inverter_state'] = self.condition_nr 
@@ -137,13 +146,7 @@ def create_ts_samples_1_soiling(plot_samples=False):
             # Estimate inverter temperature as ambient + 35°C
             output['inv_temperature'] = self.df['temp_air'] + 35
 
-            # Current, voltage, and power under normal (unaffected) conditions
-            output['pv1_i_clean'] = dc['i_mp']
-            output['pv1_u_clean'] = dc['v_mp']
-            output['mppt_power_clean'] = dc['p_mp'] / 1000  # W to kW
-            output['a_i_clean'] = ac / (400 * np.sqrt(3))
-
-            # Prepare meteorological DataFrame for merging
+            # Prepare meteorological variables for merging
             df_merge = self.df.copy()
             df_merge['temperature_2m'] = df_merge['temp_air']
             df_merge['diffuse_radiation'] = df_merge['dhi']
@@ -151,43 +154,47 @@ def create_ts_samples_1_soiling(plot_samples=False):
             df_merge['wind_speed_10m'] = df_merge['wind_speed']
             df_merge = df_merge[METEOROLOGICAL_COLUMNS]
 
-            # Merge meteorological DataFrame with simulation output
+            # Merge simulation output and environmental data
             output_full = output.merge(df_merge, left_index=True, right_index=True)
             output_full = output_full.clip(lower=0).fillna(0)
             
+            # Remove helper columns
             cols_to_export = [c for c in output_full.columns if c not in ['soiling_fraction', 'soiling_factor']]
 
             return output_full[cols_to_export]
 
-    # Loop through all files in the folder
+    # ==============================================================
+    # Main Simulation Loop (Per File/Location)
+    # ==============================================================
     for file in os.listdir(WEATHER_FOLDER_PRED):
         print(f"\n{condition_name.title()} | {file}:")
         
-        # Collect information from file name
+        # Extract location identifier
         local = file.removeprefix("weather_").removesuffix(".csv")
         
-        # Instantiate location
+        # Instantiate geographic location
         latitude, longitude = COORDINATES[local.replace('_', ' ')]
         location = Location(latitude=latitude, longitude=longitude, tz="Europe/Lisbon")
         
-        # Read the CSV file
+        # Read meteorological CSV
         df_input = pd.read_csv(os.path.join(WEATHER_FOLDER_PRED, file))
         
-        # Convert 'date' column to datetime with UTC timezone
+        # Convert timestamp to timezone-aware datetime
         df_input['date'] = pd.to_datetime(df_input['timestamp']).dt.tz_localize('UTC')
         
-        # Sort by date
+        # Ensure chronological order
         df_input = df_input.sort_values('date')
         
         for year in YEARS:
             print(f"\tYear {year}")
-            # Extract the year
+            
+            # Filter data by year 
             ts_df = df_input[df_input['date'].dt.year == year]
             
-            # Restrict to April–September
+            # Restrict to April–September months (Summer period)
             ts_df = ts_df[ts_df['date'].dt.month.isin([4, 5, 6, 7, 8, 9])]
 
-            # Filter hours between 04:00 and 22:00
+            # Time-of-day filtering
             ts_df = ts_df.set_index('date').between_time(PREDICTION_HOUR_INIT, PREDICTION_HOUR_END)
             if ts_df.empty:
                 continue
