@@ -5,6 +5,206 @@ import matplotlib.lines as mlines
 from globals import *
 
 
+def plot_voltage(df_original, date, condition_title, output_folder, filename):
+    """
+    Plot PV string reference and effective DC (pv1_u).
+
+    Args:
+        - df_original (pd.DataFrame): DataFrame containing voltage measurements with a datetime index.
+        - date (str): Date string to display in the plot title.
+        - condition_title (str): Condition name to display in the plot title.
+        - output_folder (str): Folder path where the plot image will be saved.
+        - filename (str): Base name for the saved plot image.
+        
+    Notes:
+        - The figure is saved as a high-resolution PNG file in the specified folder.
+    """
+
+    # Filter data by time
+    df = df_original.between_time(TIME_INIT, TIME_END)
+    
+    # Check if the DataFrame contains the column for reference MPPT power measurements
+    pv1_u_clean = 'pv1_u_clean' in df.columns
+
+    # Ensure output folder exists
+    os.makedirs(output_folder, exist_ok=True)
+
+    # Create figure and axis
+    _, ax = plt.subplots(figsize=(12, 6))
+
+    # Plot voltage
+    color_volt = CURR_VOLT_PALETTE['pv1_u']
+    if pv1_u_clean:
+        line1, = ax.plot(df.index, df['pv1_u_clean'], color=CURR_VOLT_PALETTE['pv1_u_clean'], label='Reference pv1_u', linewidth=1.5, linestyle=':')
+    line2, = ax.plot(df.index, df['pv1_u'], label='Effective pv1_u', color=color_volt, linewidth=2)
+    
+    # Create legend only for MPPT lines
+    if pv1_u_clean:
+        ax.legend(handles=[line1, line2], fontsize=10, loc='upper left')
+
+    # Horizontal grid lines
+    ax.grid(True, axis='y', linestyle='--', alpha=0.6)
+    
+    # Adjust Y-axis limits for voltage
+    max_y = df['pv1_u_clean'].max() * 1.1 if pv1_u_clean else df['pv1_u'].max() * 1.1
+    ax.set_ylim(0, max_y)
+    
+    # Configure tick labels
+    plt.xticks(rotation=0, ha='center', color='black', fontsize=8)
+    plt.yticks(color='black', fontsize=8)
+    
+    # Axis labels and tick colors
+    ax.set_xlabel("Time")
+    ax.set_ylabel("Voltage (V)", color=color_volt)
+    ax.tick_params(axis='x', colors='black', labelsize=8)
+    ax.tick_params(axis='y', labelcolor=color_volt, labelsize=8)
+
+    # Format x-axis as HH:MM
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+    plt.setp(ax.get_xticklabels(), rotation=0)
+    
+    # Draw vertical dashed lines for a specific inverter_state value
+    if condition_title == "Real Data":
+        for i, state in enumerate(df[LABEL]):
+            if state == 768:
+                ax.axvline(df.index[i], color='red', linestyle='--', linewidth=0.5)
+
+        # Create the vertical line legend manually
+        line_red = mlines.Line2D([], [], color='red', linestyle='--', linewidth=0.5, label='is 768')
+
+        # Add the lines to the legend
+        ax.legend(handles=[line_red], loc='upper left')
+
+    # Title and legend
+    # plt.title(f"PV and Phase Voltages, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='black')
+
+    # Adjust layout
+    plt.tight_layout()
+
+    # Save figure
+    image_path = os.path.join(output_folder, f"{filename}_pv_phase_voltages.png")
+    plt.savefig(image_path, dpi=300, bbox_inches='tight')
+
+    # Close figure to free memory
+    plt.close()
+    
+    # Confirm saving
+    print(f"Voltages plot saved to {image_path}")
+    
+
+def plot_currents(df_original, date, condition_title, output_folder, filename, soiling=False):
+    """
+    Plot reference and effective PV string DC (pv1_i), as well as Precipitation if soiling is True.
+
+    Args:
+        - df_original (pd.DataFrame): DataFrame containing current measurements with a datetime index.
+        - date (str): Date string to display in the plot title.
+        - condition_title (str): Condition name to display in the plot title.
+        - output_folder (str): Folder path where the plot image will be saved.
+        - filename (str): Base name for the saved plot image.
+        - soiling (bool): If True, adds precipitation axis.
+            
+    Notes:
+        - The figure is saved as a high-resolution PNG file in the specified folder.
+    """
+
+    # Filter data by time
+    df = df_original.between_time(TIME_INIT, TIME_END)
+    
+    # Check if the DataFrame contains the column for reference MPPT power measurements
+    pv1_i_clean = 'pv1_i_clean' in df.columns
+
+    # Ensure output folder exists; create it if necessary
+    os.makedirs(output_folder, exist_ok=True)
+
+    # Create figure and axis objects with defined size
+    fig, ax1 = plt.subplots(figsize=(12, 6))
+
+    # Plot each current with a predefined color and line width
+    color_curr = CURR_VOLT_PALETTE['pv1_i']
+    if pv1_i_clean:
+        line1, = ax1.plot(df.index, df['pv1_i_clean'], color=CURR_VOLT_PALETTE['pv1_i_clean'], label='Reference pv1_i', linewidth=1.5, linestyle=':')
+    pv1_i_label = 'Effective pv1_i' if pv1_i_clean else 'pv1_i'
+    line2, = ax1.plot(df.index, df['pv1_i'], color=color_curr, label=pv1_i_label, linewidth=2)
+    
+    # Adjust Y-axis limits for currents
+    max_y = df['pv1_i_clean'].max() * 1.1 if pv1_i_clean else df['pv1_i'].max() * 1.1
+    ax1.set_ylim(0, max_y)
+    
+    # Configure tick labels
+    plt.xticks(rotation=0, ha='center', color='black', fontsize=8)
+    plt.yticks(color='black', fontsize=8)
+
+    # Label axes and set tick colors
+    ax1.set_xlabel("Date")
+    ax1.set_ylabel("Current (A)", color=color_curr)
+    ax1.tick_params(axis='x', colors='black', labelsize=8)
+    ax1.tick_params(axis='y', labelcolor=color_curr, labelsize=8)
+
+    # Add horizontal grid lines with light transparency
+    ax1.grid(True, axis='y', linestyle='--', alpha=0.6)
+
+    # Format x-axis as HH:MM
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+    plt.setp(ax1.get_xticklabels(), rotation=0)
+
+    # Set plot title
+    # plt.title(f"PV and Phase Currents, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='black')
+    
+    # Initialize a list to store legend handles
+    handles = []
+    
+    # Precipitation axis (right)
+    if soiling:
+        # Set plot title
+        # plt.title(f"PV and Phase Currents, and Precipitation, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='black')
+        if condition_title != "Real Data":
+            ax2 = ax1.twinx()
+            ax2.plot(df.index, df['precipitation'], color=CURR_VOLT_PALETTE['precipitation'],
+                    linewidth=0.5, label='Precipitation (mm/h)')
+            ax2.set_ylabel("Precipitation (mm/h)", color=CURR_VOLT_PALETTE['precipitation'])
+            ax2.tick_params(axis='y', labelcolor=CURR_VOLT_PALETTE['precipitation'])
+            # Normalize y-axis for small precipitation values
+            max_precip = df['precipitation'].max()
+            if max_precip < 1:
+                ax2.set_ylim(0, 1)
+            else:
+                ax2.set_ylim(0, max_precip * 1.1)
+
+    # Add MPPT lines to the handles
+    if pv1_i_clean:
+        handles.extend([line1, line2])
+    
+    # Draw vertical dashed lines for a specific inverter_state value
+    if condition_title == "Real Data":
+        for i, state in enumerate(df[LABEL]):
+            if state == 768:
+                ax1.axvline(df.index[i], color='red', linestyle='--', linewidth=0.5)
+
+        # Create the vertical line legend manually
+        line_red = mlines.Line2D([], [], color='red', linestyle='--', linewidth=0.5, label='is 768')
+
+        # Add the lines to the legend
+        ax1.legend(handles=[line_red], loc='upper left')
+        handles.append(line_red)
+        
+    # Create a single combined legend for all handles
+    ax1.legend(handles=handles, fontsize=10, loc='upper left')
+        
+    # Adjust layout to avoid clipping of labels
+    plt.tight_layout()
+
+    # Construct full output path and save figure with high resolution
+    image_path = os.path.join(output_folder, f"{filename}_pv_phase_currents.png")
+    plt.savefig(image_path, dpi=300, bbox_inches='tight')
+
+    # Close figure to free memory
+    plt.close()
+    
+    # Confirm saving
+    print(f"Currents plot saved to {image_path}")
+
+
 def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soiling=False):
     """
     Plots MPPT powers (reference and effective), irradiances (GTI & DHI), air temperature, wind speed and precipitation
@@ -159,206 +359,6 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
     
     # Confirm saving
     print(f"MPPT plot saved to {image_path}")
-
-
-def plot_currents(df_original, date, condition_title, output_folder, filename, soiling=False):
-    """
-    Plot reference and effective PV string DC (pv1_i), as well as Precipitation if soiling is True.
-
-    Args:
-        - df_original (pd.DataFrame): DataFrame containing current measurements with a datetime index.
-        - date (str): Date string to display in the plot title.
-        - condition_title (str): Condition name to display in the plot title.
-        - output_folder (str): Folder path where the plot image will be saved.
-        - filename (str): Base name for the saved plot image.
-        - soiling (bool): If True, adds precipitation axis.
-            
-    Notes:
-        - The figure is saved as a high-resolution PNG file in the specified folder.
-    """
-
-    # Filter data by time
-    df = df_original.between_time(TIME_INIT, TIME_END)
-    
-    # Check if the DataFrame contains the column for reference MPPT power measurements
-    pv1_i_clean = 'pv1_i_clean' in df.columns
-
-    # Ensure output folder exists; create it if necessary
-    os.makedirs(output_folder, exist_ok=True)
-
-    # Create figure and axis objects with defined size
-    fig, ax1 = plt.subplots(figsize=(12, 6))
-
-    # Plot each current with a predefined color and line width
-    color_curr = CURR_VOLT_PALETTE['pv1_i']
-    if pv1_i_clean:
-        line1, = ax1.plot(df.index, df['pv1_i_clean'], color=CURR_VOLT_PALETTE['pv1_i_clean'], label='Reference pv1_i', linewidth=1.5, linestyle=':')
-    pv1_i_label = 'Effective pv1_i' if pv1_i_clean else 'pv1_i'
-    line2, = ax1.plot(df.index, df['pv1_i'], color=color_curr, label=pv1_i_label, linewidth=2)
-    
-    # Adjust Y-axis limits for currents
-    max_y = df['pv1_i_clean'].max() * 1.1 if pv1_i_clean else df['pv1_i'].max() * 1.1
-    ax1.set_ylim(0, max_y)
-    
-    # Configure tick labels
-    plt.xticks(rotation=0, ha='center', color='black', fontsize=8)
-    plt.yticks(color='black', fontsize=8)
-
-    # Label axes and set tick colors
-    ax1.set_xlabel("Date")
-    ax1.set_ylabel("Current (A)", color=color_curr)
-    ax1.tick_params(axis='x', colors='black', labelsize=8)
-    ax1.tick_params(axis='y', labelcolor=color_curr, labelsize=8)
-
-    # Add horizontal grid lines with light transparency
-    ax1.grid(True, axis='y', linestyle='--', alpha=0.6)
-
-    # Format x-axis as HH:MM
-    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-    plt.setp(ax1.get_xticklabels(), rotation=0)
-
-    # Set plot title
-    # plt.title(f"PV and Phase Currents, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='black')
-    
-    # Initialize a list to store legend handles
-    handles = []
-    
-    # Precipitation axis (right)
-    if soiling:
-        # Set plot title
-        # plt.title(f"PV and Phase Currents, and Precipitation, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='black')
-        if condition_title != "Real Data":
-            ax2 = ax1.twinx()
-            ax2.plot(df.index, df['precipitation'], color=CURR_VOLT_PALETTE['precipitation'],
-                    linewidth=0.5, label='Precipitation (mm/h)')
-            ax2.set_ylabel("Precipitation (mm/h)", color=CURR_VOLT_PALETTE['precipitation'])
-            ax2.tick_params(axis='y', labelcolor=CURR_VOLT_PALETTE['precipitation'])
-            # Normalize y-axis for small precipitation values
-            max_precip = df['precipitation'].max()
-            if max_precip < 1:
-                ax2.set_ylim(0, 1)
-            else:
-                ax2.set_ylim(0, max_precip * 1.1)
-
-    # Add MPPT lines to the handles
-    if pv1_i_clean:
-        handles.extend([line1, line2])
-    
-    # Draw vertical dashed lines for a specific inverter_state value
-    if condition_title == "Real Data":
-        for i, state in enumerate(df[LABEL]):
-            if state == 768:
-                ax1.axvline(df.index[i], color='red', linestyle='--', linewidth=0.5)
-
-        # Create the vertical line legend manually
-        line_red = mlines.Line2D([], [], color='red', linestyle='--', linewidth=0.5, label='is 768')
-
-        # Add the lines to the legend
-        ax1.legend(handles=[line_red], loc='upper left')
-        handles.append(line_red)
-        
-    # Create a single combined legend for all handles
-    ax1.legend(handles=handles, fontsize=10, loc='upper left')
-        
-    # Adjust layout to avoid clipping of labels
-    plt.tight_layout()
-
-    # Construct full output path and save figure with high resolution
-    image_path = os.path.join(output_folder, f"{filename}_pv_phase_currents.png")
-    plt.savefig(image_path, dpi=300, bbox_inches='tight')
-
-    # Close figure to free memory
-    plt.close()
-    
-    # Confirm saving
-    print(f"Currents plot saved to {image_path}")
-
-
-def plot_voltage(df_original, date, condition_title, output_folder, filename):
-    """
-    Plot PV string reference and effective DC (pv1_u).
-
-    Args:
-        - df_original (pd.DataFrame): DataFrame containing voltage measurements with a datetime index.
-        - date (str): Date string to display in the plot title.
-        - condition_title (str): Condition name to display in the plot title.
-        - output_folder (str): Folder path where the plot image will be saved.
-        - filename (str): Base name for the saved plot image.
-        
-    Notes:
-        - The figure is saved as a high-resolution PNG file in the specified folder.
-    """
-
-    # Filter data by time
-    df = df_original.between_time(TIME_INIT, TIME_END)
-    
-    # Check if the DataFrame contains the column for reference MPPT power measurements
-    pv1_u_clean = 'pv1_u_clean' in df.columns
-
-    # Ensure output folder exists
-    os.makedirs(output_folder, exist_ok=True)
-
-    # Create figure and axis
-    _, ax = plt.subplots(figsize=(12, 6))
-
-    # Plot voltage
-    color_volt = CURR_VOLT_PALETTE['pv1_u']
-    if pv1_u_clean:
-        line1, = ax.plot(df.index, df['pv1_u_clean'], color=CURR_VOLT_PALETTE['pv1_u_clean'], label='Reference pv1_u', linewidth=1.5, linestyle=':')
-    line2, = ax.plot(df.index, df['pv1_u'], label='Effective pv1_u', color=color_volt, linewidth=2)
-    
-    # Create legend only for MPPT lines
-    if pv1_u_clean:
-        ax.legend(handles=[line1, line2], fontsize=10, loc='upper left')
-
-    # Horizontal grid lines
-    ax.grid(True, axis='y', linestyle='--', alpha=0.6)
-    
-    # Adjust Y-axis limits for voltage
-    max_y = df['pv1_u_clean'].max() * 1.1 if pv1_u_clean else df['pv1_u'].max() * 1.1
-    ax.set_ylim(0, max_y)
-    
-    # Configure tick labels
-    plt.xticks(rotation=0, ha='center', color='black', fontsize=8)
-    plt.yticks(color='black', fontsize=8)
-    
-    # Axis labels and tick colors
-    ax.set_xlabel("Time")
-    ax.set_ylabel("Voltage (V)", color=color_volt)
-    ax.tick_params(axis='x', colors='black', labelsize=8)
-    ax.tick_params(axis='y', labelcolor=color_volt, labelsize=8)
-
-    # Format x-axis as HH:MM
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-    plt.setp(ax.get_xticklabels(), rotation=0)
-    
-    # Draw vertical dashed lines for a specific inverter_state value
-    if condition_title == "Real Data":
-        for i, state in enumerate(df[LABEL]):
-            if state == 768:
-                ax.axvline(df.index[i], color='red', linestyle='--', linewidth=0.5)
-
-        # Create the vertical line legend manually
-        line_red = mlines.Line2D([], [], color='red', linestyle='--', linewidth=0.5, label='is 768')
-
-        # Add the lines to the legend
-        ax.legend(handles=[line_red], loc='upper left')
-
-    # Title and legend
-    # plt.title(f"PV and Phase Voltages, {condition_title}, {LOCAL}, {date}", fontsize=18, verticalalignment='bottom', color='black')
-
-    # Adjust layout
-    plt.tight_layout()
-
-    # Save figure
-    image_path = os.path.join(output_folder, f"{filename}_pv_phase_voltages.png")
-    plt.savefig(image_path, dpi=300, bbox_inches='tight')
-
-    # Close figure to free memory
-    plt.close()
-    
-    # Confirm saving
-    print(f"Voltages plot saved to {image_path}")
     
     
 def plot_scatter_iv(df_plot, output_folder, filename):
