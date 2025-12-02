@@ -58,7 +58,7 @@ def create_samples_0_normal(files_year, plot_samples=False):
     daily_groups = df_input.groupby(df_input['date'].dt.date)
 
     print(f"{condition_name.upper()}: Starting simulation...\n")
-    for i, (date, group) in enumerate(daily_groups):
+    for _, (date, group) in enumerate(daily_groups):
         print(f"{condition_name.replace('_', ' ').title():<8} | Running simulation for {date}...\n")
 
         # Prepare daily data

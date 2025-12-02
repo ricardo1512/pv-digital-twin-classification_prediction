@@ -46,23 +46,6 @@ def create_samples_3_cracks(files_year, plot_samples=False):
     output_file = f"{output_folder}/{condition_nr}_{train_test}_{condition_name}_samples.csv"
     plot_folder = f"{PLOT_FOLDER}/Day_samples/Plots_{condition_nr}_{condition_name}_samples"
 
-    # ==============================================================
-    # Define realistic crack degradation scenarios
-    # Each tuple: (current_degradation, voltage_degradation, power_degradation)
-    # ==============================================================
-    degradation_scenarios = [   # for random
-        (0.980, 0.990, 0.970),  # light: -2% current, -1% voltage, -3% power
-        (0.960, 0.980, 0.940),  # moderate: -4% current, -2% voltage, -6% power
-        (0.949, 0.956, 0.850),  # reference case: -5.1% current, -4.4% voltage, -15% power
-        (0.970, 0.960, 0.930),  # -3% current, -4% voltage, -7% power
-        (0.930, 0.950, 0.800),  # -7% current, -5% voltage, -20% power
-        (0.990, 0.970, 0.960),  # -1% current, -3% voltage, -4% power
-        (0.910, 0.940, 0.750),  # -9% current, -6% voltage, -25% power
-        (0.940, 0.930, 0.810),  # -6% current, -7% voltage, -19% power
-        (0.925, 0.965, 0.780),  # -7.5% current, -3.5% voltage, -22% power
-        (0.970, 0.985, 0.950),  # -3% current, -1.5% voltage, -5% power
-    ]
-
     # =============================================================
     # Subclass Digital Twin with Cracks
     # =============================================================
@@ -149,7 +132,7 @@ def create_samples_3_cracks(files_year, plot_samples=False):
     daily_groups = df_input.groupby(df_input['date'].dt.date)
 
     print(f"{condition_name.upper()}: Starting simulation...\n")
-    for i, (date, group) in enumerate(daily_groups):
+    for _, (date, group) in enumerate(daily_groups):
         print(f"{condition_name.title():<8} | Running simulation for {date}...")
 
         # Prepare daily data
@@ -159,7 +142,7 @@ def create_samples_3_cracks(files_year, plot_samples=False):
         # Instantiate PV system components
         plant = PVPlant(module_data, inverter_data)
         inverter = InverterTwin(inverter_data)
-        current_degradation, voltage_degradation, power_degradation = random.choice(degradation_scenarios)
+        current_degradation, voltage_degradation, power_degradation = random.choice(CRACKS_DEGRADATION_SCENARIOS)
         print(
             f"\tCurrent degradation: {current_degradation:.3f}\n"
             f"\tVoltage degradation: {voltage_degradation:.3f}\n"

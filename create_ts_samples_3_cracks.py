@@ -12,7 +12,32 @@ from plot_ts_samples import *
 # =================================================================
 def create_ts_samples_3_cracks(plot_samples=False):
     """
-        ?????????
+    Runs the digital twin simulation for photovoltaic systems under cracks
+    conditions using time-series meteorological data.
+
+    This function processes multi-location weather datasets, interpolates
+    measurements to a uniform 5-minute resolution, and simulates PV system
+    behaviour while modeling gradually increasing cracks degradation. The
+    degradation factors evolve over time, reducing photocurrent and slightly
+    affecting module voltage.
+
+    Args:
+        plot_samples (bool): If True, generates time-series plots of the simulated electrical
+            quantities. Default is False.
+
+    Workflow:
+        1. Initialize parameters and iterate through all available weather files.
+        2. Load meteorological datasets and extract time-series for selected months.
+        3. Interpolate measurements to a uniform 5-minute timestep.
+        4. Instantiate PVPlant, InverterTwin, and a DigitalTwin subclass with cracks.
+        5. Simulate system behaviour while applying gradually increasing cracks degradation over time.
+        6. Merge simulated electrical quantities with meteorological variables.
+        7. Optionally produce plots for power, currents, and voltage.
+        8. Export final time-series results for machine learning analysis.
+
+    Output:
+        CSV files saved in the TS_SAMPLES directory, containing time-series features
+        with simulated PV behavior under shading conditions for each location and year.
     """
     
     # ==============================================================
@@ -22,22 +47,6 @@ def create_ts_samples_3_cracks(plot_samples=False):
     condition_name = LABELS_MAP[condition_nr][0].lower().replace(' ', '_')
     plot_folder = f"{PLOT_FOLDER}/TS_samples/Plots_{condition_nr}_{condition_name}_samples"
     
-    # ==============================================================
-    # Parameters for Degradation / Cracks scenarios
-    # ==============================================================
-    DEGRADATION_SCENARIOS = [
-        (0.980, 0.990, 0.970),
-        (0.960, 0.980, 0.940),
-        (0.949, 0.956, 0.850),
-        (0.970, 0.960, 0.930),
-        (0.930, 0.950, 0.800),
-        (0.990, 0.970, 0.960),
-        (0.910, 0.940, 0.750),
-        (0.940, 0.930, 0.810),
-        (0.925, 0.965, 0.780),
-        (0.970, 0.985, 0.950),
-    ]
-
     # ==============================================================
     # Subclass Time Series Digital Twin with Cracks
     # ==============================================================
@@ -69,26 +78,19 @@ def create_ts_samples_3_cracks(plot_samples=False):
             self.power_degradation = power_degradation
 
         def run(self):
-            """
-            Simulate the PV system operation under crack conditions for the given meteorological data.
-            """
-        
             # Run PVLib ModelChain Simulation
             self.mc.run_model(self.weather)
             dc = self.mc.results.dc
             ac = self.mc.results.ac
 
-            # === Crack simulation ===
-            # === Progressive degradation throughout the full time series ===
-            n_steps = len(self.df)
-
             # Create factor arrays evolving smoothly from 1.0 to the final degradation factors
+            n_steps = len(self.df)
             curr_factors = np.ones(n_steps)
             volt_factors = np.ones(n_steps)
             power_factors = np.ones(n_steps)
 
             # Smooth exponential degradation progression (0 → 1 normalized)
-            for i, t in enumerate(self.df.index):
+            for i, _ in enumerate(self.df.index):
                 progress = i / (n_steps - 1)
                 # Smooth exponential curve (starts slowly, then accelerates)
                 smooth_factor = 1 - np.exp(-3 * progress)
@@ -189,7 +191,7 @@ def create_ts_samples_3_cracks(plot_samples=False):
             plant = PVPlant(module_data, inverter_data)
             inverter = InverterTwin(inverter_data)
             # Randomly select a degradation scenario for this timeseries
-            current_degradation, voltage_degradation, power_degradation = random.choice(DEGRADATION_SCENARIOS)
+            current_degradation, voltage_degradation, power_degradation = random.choice(CRACKS_DEGRADATION_SCENARIOS)
             print(
                 f"\t\tCurrent degradation: {current_degradation:.3f}\n"
                 f"\t\tVoltage degradation: {voltage_degradation:.3f}\n"
