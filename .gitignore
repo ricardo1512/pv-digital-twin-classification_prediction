@@ -12,8 +12,6 @@ naive_bayes_classifier.py
 models_comparison.py
 h0_rf_xgb.py
 
-
-create_ts_samples_2_shading.py
 create_ts_samples_3_cracks.py
 
 prediction.py

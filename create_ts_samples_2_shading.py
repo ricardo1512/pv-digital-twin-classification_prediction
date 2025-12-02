@@ -8,60 +8,57 @@ from utils import *
 from plot_ts_samples import *
 
 # =================================================================
-# Digital Twin Simulation - Soiling Condition, Time Series Samples
+# Digital Twin Simulation - Shading Condition, Time Series Samples
 # =================================================================
-def create_ts_samples_1_soiling(plot_samples=False):
+def create_ts_samples_2_shading(plot_samples=False):
     """
-    Runs the digital twin simulation for photovoltaic systems under soiling conditions
-    using time-series meteorological data.
+    Runs the digital twin simulation for photovoltaic systems under shading
+    conditions using time-series meteorological data.
 
-    This function processes multi-location weather files, interpolates data to 5-minute
-    resolution, and simulates PV system performance while modeling gradual soiling
-    accumulation and cleaning from rainfall. The simulation extends the DigitalTwin
-    core by incorporating time-dependent soiling factors that evolve throughout the
-    day. Electrical, thermal, and environmental parameters are computed at each
-    timestep, and clean (unaffected) quantities are preserved for reference.
+    This function processes multi-location weather datasets, interpolates
+    measurements to a uniform 5-minute resolution, and simulates PV system
+    behaviour while modeling gradually increasing shading fractions. The
+    shading factor evolves over time, reducing photocurrent and slightly
+    affecting module voltage.
 
     Args:
-        plot_samples (bool): If True, generates time-series plots of simulation results.
-            Default is False.
+        plot_samples (bool): If True, generates time-series plots of the simulated electrical
+            quantities. Default is False.
 
     Workflow:
         1. Initialize parameters and iterate through all available weather files.
         2. Load meteorological datasets and extract time-series for selected months.
         3. Interpolate measurements to a uniform 5-minute timestep.
-        4. Instantiate PVPlant, InverterTwin, and a DigitalTwin subclass with soiling.
-        5. Simulate system behaviour while applying continuous soiling accumulation
-           and partial cleaning during rain events.
+        4. Instantiate PVPlant, InverterTwin, and a DigitalTwin subclass with shading.
+        5. Simulate system behaviour while applying gradually increasing shading fractions over time.
         6. Merge simulated electrical quantities with meteorological variables.
         7. Optionally produce plots for power, currents, and voltage.
         8. Export final time-series results for machine learning analysis.
 
     Output:
         CSV files saved in the TS_SAMPLES directory, containing time-series features
-        with simulated PV behavior under soiling conditions for each location and year.
+        with simulated PV behavior under shading conditions for each location and year.
     """
     
     # ==============================================================
     # Initialization
     # ==============================================================
-    condition_nr = 1
+    condition_nr = 2
     condition_name = LABELS_MAP[condition_nr][0].lower().replace(' ', '_')
     plot_folder = f"{PLOT_FOLDER}/TS_samples/Plots_{condition_nr}_{condition_name}_samples"
     
     # ==============================================================
-    # Parameters for soiling accumulation and cleaning
+    # Parameters for shading growth
     # ==============================================================
-    soiling_min, soiling_max = 0.05, 0.3  # Daily soiling range, for random
-    rain_threshold_mm = 1                 # Minimum rainfall to partially clean PV modules
-    cleaning_efficiency = 0.4             # Fraction of soiling removed per rain event
+    shading_min, shading_max = 0.0, 0.4  # Minimum and maximum shading fraction
+    shading_growth_rate = 0.000006       # Fraction increase per timestep
 
     # ==============================================================
-    # Subclass Time Series Digital Twin with Soiling
+    # Subclass Time Series Digital Twin with Shading
     # ==============================================================
-    class DigitalTwinSoilingTS(DigitalTwin):
+    class DigitalTwinShadingTS(DigitalTwin):
         """
-        Extends DigitalTwin core by including soiling losses in the simulation.
+        Extends DigitalTwin core by including shading losses in the simulation.
         """
 
         def __init__(
@@ -71,16 +68,16 @@ def create_ts_samples_1_soiling(plot_samples=False):
                 df,
                 condition_nr,
                 location,
-                initial_soiling_factor
+                initial_shading_fraction,
         ):
             super().__init__(
                 pvplant,
                 inverter,
                 df,
                 condition_nr,
-                location
+                location,
             )
-            self.soiling_factor = initial_soiling_factor
+            self.initial_shading_fraction = initial_shading_fraction
                 
         def run(self):
             # Run PVLib ModelChain Simulation
@@ -88,30 +85,21 @@ def create_ts_samples_1_soiling(plot_samples=False):
             dc = self.mc.results.dc
             ac = self.mc.results.ac
 
-            # Time-dependent soiling simulation
-            soiling_levels = []
-            growth_rate = random.uniform(0.002, 0.006)  # Daily soiling growth fraction
-            dt_seconds = (self.df.index[1] - self.df.index[0]).total_seconds()
-            dt_days = dt_seconds / (24 * 3600) # Convert timestep to fraction of a day
-
-            for i, _ in enumerate(self.df.index):
-                rain = self.df['precipitation'].iloc[i]
-
-                if rain > rain_threshold_mm:
-                    # Rain partially cleans accumulated soiling
-                    self.soiling_factor *= (1 - cleaning_efficiency)
-                else:
-                    # Gradual soiling accumulation
-                    self.soiling_factor += growth_rate * dt_days * (soiling_max - self.soiling_factor)
-                
-                # Clip to physical limits
-                self.soiling_factor = np.clip(self.soiling_factor, 0.001, 1.0)
-
-                soiling_levels.append(self.soiling_factor)
+            # Time-dependent shading simulation
+            shading_fraction = self.initial_shading_fraction
+            shading_levels = []
             
-            # Store soiling info in dataframe
-            self.df['soiling_fraction'] = soiling_levels
-            self.df['soiling_factor'] = 1 - self.df['soiling_fraction']
+            # Incrementally increase shading at each timestep
+            for _ in self.df.index:
+                shading_levels.append(min(1.0, shading_fraction))
+                shading_fraction += shading_growth_rate
+
+            # Store shading fraction in dataframe
+            self.df['shading_fraction'] = shading_levels
+
+            # Apply shading to current and voltage
+            current_factor = 1 - self.df['shading_fraction']
+            voltage_factor = 1 - self.df['shading_fraction'] * 0.2  # smaller voltage drop
 
             # Initialize output DataFrame for storing simulation results
             output = pd.DataFrame(index=self.df.index)
@@ -126,18 +114,18 @@ def create_ts_samples_1_soiling(plot_samples=False):
             output['inverter_state'] = self.condition_nr 
             
             # Compute DC current and voltage
-            output['pv1_i'] = dc['i_mp'] * self.df['soiling_factor']
-            output['pv1_u'] = dc['v_mp']
+            output['pv1_i'] = dc['i_mp'] * current_factor
+            output['pv1_u'] = dc['v_mp'] * voltage_factor
             
             # Compute Power Quantities
-            output['mppt_power'] = (dc['p_mp'] * self.df['soiling_factor']) / 1000 # W to kW
-            output['active_power'] = (ac * self.df['soiling_factor']) / 1000 # W to kW
+            output['mppt_power'] = (dc['p_mp'] * current_factor * voltage_factor) / 1000 # W to kW
+            output['active_power'] = (ac * current_factor * voltage_factor) / 1000 # W to kW
             output['efficiency'] = (output['active_power'] / output['mppt_power'].replace(0, np.nan)) * 100 # Fraction to percentage
 
             # Compute AC phase currents (balanced assumption)
-            output['a_i'] = output['active_power'] * 1000 / (400 * np.sqrt(3))
+            output['a_i'] = output['active_power'] * 1000 / (400 * np.sqrt(3)) * current_factor
             output = output.assign(b_i=output['a_i'], c_i=output['a_i'])
-
+            
             # Compute AC Voltages per phase and line (balanced assumption)
             output.loc[:, ['a_u', 'b_u', 'c_u']] = 230
             output.loc[:, ['ab_u', 'bc_u', 'ca_u']] = 400
@@ -156,9 +144,9 @@ def create_ts_samples_1_soiling(plot_samples=False):
             # Merge simulation output and environmental data
             output_full = output.merge(df_merge, left_index=True, right_index=True)
             output_full = output_full.clip(lower=0).fillna(0)
-            
+
             # Remove helper columns
-            cols_to_export = [c for c in output_full.columns if c not in ['soiling_fraction', 'soiling_factor']]
+            cols_to_export = [c for c in output_full.columns if c not in ['shading_fraction']]
 
             return output_full[cols_to_export]
 
@@ -186,7 +174,7 @@ def create_ts_samples_1_soiling(plot_samples=False):
         
         for year in YEARS:
             print(f"\tYear {year}")
-            
+           
             # Filter data by year
             ts_df = df_input[df_input['date'].dt.year == year]
             
@@ -202,24 +190,24 @@ def create_ts_samples_1_soiling(plot_samples=False):
             for col in ts_df.columns:
                 ts_df[col] = pd.to_numeric(ts_df[col], errors='coerce').astype('float64')
             ts_df = ts_df.resample('5min').interpolate(method='linear').reset_index()
-            
+
             # Instantiate plant and inverter
             plant = PVPlant(module_data, inverter_data)
             inverter = InverterTwin(inverter_data)
-            initial_soiling_factor = random.uniform(soiling_min, soiling_min + 0.02)  # Start with some dirt
-            print(f"\t\tInitial soiling factor: {initial_soiling_factor:.3f}")
-            twin = DigitalTwinSoilingTS(plant, inverter, ts_df, condition_nr, location, initial_soiling_factor)
+            initial_shading_fraction = random.uniform(shading_min, shading_max)
+            print(f"\t\tInitial shading fraction: {initial_shading_fraction:.3f}")
+            twin = DigitalTwinShadingTS(plant, inverter, ts_df, condition_nr, location, initial_shading_fraction)
 
             # Run simulation
             results = twin.run()
-            
-            # Generate Plots with soiling
+
+            # Generate Plots with shading
             if plot_samples:
                 results_plot = ts_resampling(results.between_time(TIME_INIT, TIME_END))
                 condition_title = LABELS_MAP[condition_nr][0]
-                output_image = f"{condition_nr}_{condition_name}_samples_{year}_{local}"
-                plot_mppt_ts(results_plot, local, plot_folder, output_image, condition_title=condition_title, soiling=True)
-                plot_currents_ts(results_plot, local, plot_folder, output_image, condition_title=condition_title, soiling=True)
+                output_image = f"{condition_nr}_{condition_name}_ts_samples_{year}_{local}"
+                plot_mppt_ts(results_plot, local, plot_folder, output_image, condition_title=condition_title)
+                plot_currents_ts(results_plot, local, plot_folder, output_image, condition_title=condition_title)
                 plot_voltage_ts(results, local, plot_folder, output_image, condition_title=condition_title)
 
             # Export CSV without clean features columns
