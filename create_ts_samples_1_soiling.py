@@ -208,7 +208,14 @@ def create_ts_samples_1_soiling(plot_samples=False):
             inverter = InverterTwin(inverter_data)
             initial_soiling_factor = random.uniform(soiling_min, soiling_min + 0.02)  # Start with some dirt
             print(f"\t\tInitial soiling factor: {initial_soiling_factor:.3f}")
-            twin = DigitalTwinSoilingTS(plant, inverter, ts_df, condition_nr, location, initial_soiling_factor)
+            twin = DigitalTwinSoilingTS(
+                plant, 
+                inverter, 
+                ts_df, 
+                condition_nr, 
+                location, 
+                initial_soiling_factor
+            )
 
             # Run simulation
             results = twin.run()

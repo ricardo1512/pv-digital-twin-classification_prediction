@@ -12,7 +12,4 @@ h0_rf_xgb.py
 
 prediction.py
 
-plot_ts_samples.py
-plot_ts_prediction.py
-
 requirements.txt

@@ -123,7 +123,7 @@ def create_ts_samples_2_shading(plot_samples=False):
             output['efficiency'] = (output['active_power'] / output['mppt_power'].replace(0, np.nan)) * 100 # Fraction to percentage
 
             # Compute AC phase currents (balanced assumption)
-            output['a_i'] = output['active_power'] * 1000 / (400 * np.sqrt(3)) * current_factor
+            output['a_i'] = output['active_power'] * 1000 / (400 * np.sqrt(3))
             output = output.assign(b_i=output['a_i'], c_i=output['a_i'])
             
             # Compute AC Voltages per phase and line (balanced assumption)
@@ -196,7 +196,14 @@ def create_ts_samples_2_shading(plot_samples=False):
             inverter = InverterTwin(inverter_data)
             initial_shading_fraction = random.uniform(shading_min, shading_max)
             print(f"\t\tInitial shading fraction: {initial_shading_fraction:.3f}")
-            twin = DigitalTwinShadingTS(plant, inverter, ts_df, condition_nr, location, initial_shading_fraction)
+            twin = DigitalTwinShadingTS(
+                plant, 
+                inverter, 
+                ts_df, 
+                condition_nr, 
+                location, 
+                initial_shading_fraction
+            )
 
             # Run simulation
             results = twin.run()
