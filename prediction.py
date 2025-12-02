@@ -11,7 +11,7 @@ from plot_ts_prediction import *
 from utils import *
 
 
-def ts_daily_classification(csv_path, output_csv_path, model_path="Models/xgb_best_model_summer.joblib"):
+def ts_daily_classification(csv_path, output_csv_path, real_tag=False, model_path="Models/xgb_best_model_summer.joblib"):
     """
     Performs daily classification of time-series data using a pre-trained model.
     
@@ -28,7 +28,7 @@ def ts_daily_classification(csv_path, output_csv_path, model_path="Models/xgb_be
         None: Saves the daily probabilities CSV to the specified path.
     """
     
-    print(f"Performing time series daily classification for {csv_path}...")
+    print(f"\nPerforming time series daily classification for {csv_path}...")
     
     # Load the pre-trained model
     model_file_path = Path(model_path)
@@ -37,13 +37,24 @@ def ts_daily_classification(csv_path, output_csv_path, model_path="Models/xgb_be
         return  # Stop the function if model is not found
     classifier = joblib.load(model_file_path)
     
-    # Load input time-series CSV
-    df = pd.read_csv(csv_path, parse_dates=['date'])
-    
+    # Load CSV normally first
+    df = pd.read_csv(csv_path)
+
+    # Detect and normalize the time column to 'date'
+    if 'date' in df.columns:
+        pass  # nothing to change
+    elif 'collectTime' in df.columns:
+        df = df.rename(columns={'collectTime': 'date'})
+    else:
+        raise ValueError(f"No valid time column found in {csv_path}. Expected 'date' or 'collectTime'.")
+
+    # Parse 'date'
+    df['date'] = pd.to_datetime(df['date'])
+
     # Group data by day
     df['day'] = df['date'].dt.date
     daily_groups = df.groupby('day')
-    
+
     # Initialize list to store daily probabilities
     daily_prob_list = []
     
@@ -53,6 +64,22 @@ def ts_daily_classification(csv_path, output_csv_path, model_path="Models/xgb_be
         
         # Set 'date' as index for time-based operations
         group = group.set_index('date')
+        
+        # Smooth numeric features with moving average if real data
+        if real_tag:
+            # Select only numeric columns except 'inverter_state' and weather features
+            cols_to_smooth = [
+                col for col in df.select_dtypes(include='number').columns
+                if col not in ["inverter_state", "diffuse_radiation", "global_tilted_irradiance", "wind_speed_10m",
+                                    "precipitation"]
+            ]
+
+            # Apply moving average smoothing only to those columns
+            group[cols_to_smooth] = (
+                group[cols_to_smooth]
+                .rolling(window=48, min_periods=1)
+                .mean()
+            )
 
         # Compute daily features for the current day
         daily_df = compute_store_daily_comprehensive_features(group, day)
@@ -117,7 +144,7 @@ def ts_predict_days(input_csv_path, output_csv_path,
     last_day_index = len(df_daily_probs) - 1 # Last valid index for prediction
 
     # Iterate over rolling window
-    print(f"Performing predictions on daily probabilities with "
+    print(f"\nPerforming predictions on daily probabilities with "
           f"threshold_start={threshold_start}, threshold_target={threshold_target}, "
           f"threshold_class={threshold_class}, window={window}...")
     for i in range(window, len(df_daily_probs)):
@@ -236,6 +263,9 @@ def multiple_ts_daily_classification():
     
     base_folder = Path(TS_SAMPLES_FOLDER)
     for subfolder in [f for f in base_folder.iterdir() if f.is_dir()]:
+        real_tag = subfolder.name.startswith(('real_data'))
+        if not real_tag:
+            continue
         print(f"Processing subfolder: {subfolder.name}")
 
         # Iterate over all CSV files in the current subfolder
@@ -252,14 +282,14 @@ def multiple_ts_daily_classification():
 
             print(f"\tProcessing file: {file_path.name}")
             # Call the daily classification function
-            ts_daily_classification(str(file_path), str(output_csv_path))
+            ts_daily_classification(str(file_path), str(output_csv_path), real_tag=real_tag)
             
             output_image_prob = f"{PLOT_FOLDER}/TS_probabilities/{name}_daily_probabilities.png"
             plot_daily_class_probabilities(output_csv_path, output_image_prob)
             
-            exit()
+            # exit()
 
-# multiple_ts_daily_classification()
+multiple_ts_daily_classification()
 
 def multiple_ts_predict_days(threshold_start=0.5, threshold_target=0.8, threshold_class=0.2, window=30):
     """
@@ -271,6 +301,8 @@ def multiple_ts_predict_days(threshold_start=0.5, threshold_target=0.8, threshol
     # Iterate over each subfolder in the base folder
     base_folder = Path(PREDICTIONS_FOLDER)
     for subfolder in [f for f in base_folder.iterdir() if f.is_dir() and f.name.endswith('_probabilities')]:
+        if not subfolder.name.startswith(('real_data')):
+            continue
         print(f"\nProcessing subfolder: {subfolder.name}")
 
         # Iterate over all CSV files in the current subfolder
@@ -279,7 +311,8 @@ def multiple_ts_predict_days(threshold_start=0.5, threshold_target=0.8, threshol
             name = file_path.stem
 
             # Create corresponding output subfolder
-            subfolder_output = Path(PREDICTIONS_FOLDER) / (subfolder.name + "_predictions")
+            subfolder_name = subfolder.name.replace('probabilities', 'predictions')
+            subfolder_output = Path(PREDICTIONS_FOLDER) / subfolder_name
             os.makedirs(subfolder_output, exist_ok=True)
 
             # Construct output CSV path
@@ -300,30 +333,5 @@ def multiple_ts_predict_days(threshold_start=0.5, threshold_target=0.8, threshol
             plot_predictions_cleveland(df_predictions, output_image_prob)
             
     
-multiple_ts_predict_days()
+multiple_ts_predict_days(threshold_start=0.5, threshold_target=0.8, threshold_class=0.2, window=30)
     
-"""
-
-
-output_csv_pred_1 = "Predictions/1_soiling_2023_Albergaria-a-Velha_ts_samples_daily_predictions.csv"
-output_image_slope_1 = "Plots/TS_probabilities/1_soiling_2023_Albergaria-a-Velha_ts_samples_daily_probatilities_slope.png"
-# df_predictions_1 = ts_predict_days(output_csv_prob_1, output_csv_pred_1, threshold_start=0.2, threshold_target=0.6, threshold_class=0.2, window=60)
-
-plot_daily_class_probabilities(output_csv_prob_1, output_image_slope_1,
-                                   threshold_start=0.2, threshold_target=0.6,
-                                   regressions_df=df_predictions_1, nth_regression=11)
-
-output_csv_pred_2 = "Predictions/2_shading_2023_Albergaria-a-Velha_ts_samples_daily_predictions.csv"
-# df_predictions_2 = ts_predict_days(output_csv_prob_2, output_csv_pred_2, threshold_start=0.2, threshold_target=0.5, threshold_class=0.2, window=60)
-output_csv_pred_3 = "Predictions/3_cracks_2023_Albergaria-a-Velha_ts_samples_daily_predictions.csv"
-df_predictions_3 = ts_predict_days(output_csv_prob_3, output_csv_pred_3, threshold_start=0.2, threshold_target=0.6, threshold_class=0.2, window=80)
-
-
-
-output_image_1 = "Predictions/1_soiling_2023_Albergaria-a-Velha_ts_samples_daily_predictions_cleveland.png"
-# plot_predictions_cleveland(df_predictions_1, output_image_1)
-output_image_2 = "Predictions/2_shading_2023_Albergaria-a-Velha_ts_samples_daily_predictions_cleveland.png"
-# plot_predictions_cleveland(df_predictions_2, output_image_2)
-output_image_3 = "Predictions/3_cracks_2023_Albergaria-a-Velha_ts_samples_daily_predictions_cleveland.png"
-plot_predictions_cleveland(df_predictions_3, output_image_3)
-"""
