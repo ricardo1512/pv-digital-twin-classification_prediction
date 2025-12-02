@@ -9,7 +9,34 @@ from plot_ts_samples import *
 
 def create_ts_samples_1_soiling(plot_samples=False):
     """
-        ?????????
+    Runs the digital twin simulation for photovoltaic systems under soiling conditions
+    using time-series meteorological data.
+
+    This function processes multi-location weather files, interpolates data to 5-minute
+    resolution, and simulates PV system performance while modeling gradual soiling
+    accumulation and cleaning from rainfall. The simulation extends the DigitalTwin
+    core by incorporating time-dependent soiling factors that evolve throughout the
+    day. Electrical, thermal, and environmental parameters are computed at each
+    timestep, and clean (unaffected) quantities are preserved for reference.
+
+    Args:
+        plot_samples (bool): If True, generates time-series plots of simulation results.
+            Default is False.
+
+    Workflow:
+        1. Initialize parameters and iterate through all available weather files.
+        2. Load meteorological datasets and extract time-series for selected months.
+        3. Interpolate measurements to a uniform 5-minute timestep.
+        4. Instantiate PVPlant, InverterTwin, and a DigitalTwin subclass with soiling.
+        5. Simulate system behaviour while applying continuous soiling accumulation
+           and partial cleaning during rain events.
+        6. Merge simulated electrical quantities with meteorological variables.
+        7. Optionally produce plots for power, currents, and voltage.
+        8. Export final time-series results for machine learning analysis.
+
+    Output:
+        CSV files saved in the TS_SAMPLES directory, containing time-series features
+        with simulated PV behavior under soiling conditions for each location and year.
     """
     
     # ==============================================================

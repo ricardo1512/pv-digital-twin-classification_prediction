@@ -4,7 +4,7 @@ from plot_day_samples import *
 from utils import *
 
 # ==============================================================
-# Digital Twin Simulation - Normal Condition
+# Digital Twin Simulation - Normal Condition, Daily Samples
 # ==============================================================
 def create_samples_0_normal(files_year, plot_samples=False):
     """

@@ -4,7 +4,7 @@ from plot_day_samples import *
 from utils import *
 
 # ==============================================================
-# Digital Twin Simulation - Arc Fault Condition
+# Digital Twin Simulation - Arc Fault Condition, Daily Samples
 # ==============================================================
 def create_samples_5_arc(files_year, plot_samples=False):
     """

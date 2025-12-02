@@ -3,9 +3,9 @@ from classes import *
 from plot_day_samples import *
 from utils import *
 
-# ==============================================================
-# Digital Twin Simulation - Ground Fault Condition
-# ==============================================================
+# ================================================================
+# Digital Twin Simulation - Ground Fault Condition, Daily Samples
+# ================================================================
 def create_samples_4_ground(files_year, plot_samples=False):
     """
     Runs the digital twin simulation for a photovoltaic system under ground fault conditions.

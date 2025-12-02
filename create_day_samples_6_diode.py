@@ -3,9 +3,9 @@ from classes import *
 from plot_day_samples import *
 from utils import *
 
-# =============================================================
-# Digital Twin Simulation - Bypass Diode Fault Condition
-# =============================================================
+# ======================================================================
+# Digital Twin Simulation - Bypass Diode Fault Condition, Daily Samples
+# ======================================================================
 def create_samples_6_diode(files_year, plot_samples=False):
     """
     Runs the digital twin simulation for a photovoltaic system under bypass diode fault conditions.
