@@ -1,4 +1,5 @@
 import os
+
 from utils import *
 
 def create_preprocess_inference_set(smoothing=False, all_year=False, winter=False):

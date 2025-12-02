@@ -1,5 +1,6 @@
 import os
 import matplotlib.pyplot as plt
+
 from globals import *
 
 def plot_inference_condition_distribution(season_name, state_counts, output_inference_image):
