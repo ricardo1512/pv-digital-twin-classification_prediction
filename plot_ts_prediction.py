@@ -22,20 +22,23 @@ def plot_daily_class_probabilities(csv_path, output_image_path,
         regressions_df (pd.DataFrame, optional): DataFrame with ['date', 'class', 'slope', 'intercept'].
         nth_regression (int, optional): Index (0-based) of which regression line to draw from regressions_df.
     """
-    # --- Load the data ---
+    
+    # Load the data
     df = pd.read_csv(csv_path, parse_dates=['date'])
     
-    # --- Create figure and axis ---
+    # Create figure and axis
     fig, ax = plt.subplots(figsize=(20, 6))
 
-    # --- Plot probabilities per class ---
+    # Plot probabilities per class
     for _, (label, color) in LABELS_MAP.items():
         if label in df.columns:
             ax.plot(df['date'], df[label], label=label, color=color, linewidth=1)
 
-    # --- Plot only the Nth regression line (if available) ---
+    # Plot only the Nth regression line (if available)
     if regressions_df is not None and nth_regression is not None:
         Nth_regression = nth_regression - 1
+        
+        # Check if Nth_regression is valid
         if Nth_regression < len(regressions_df):
             row = regressions_df.iloc[Nth_regression]
             start_date = row['date']
@@ -63,13 +66,13 @@ def plot_daily_class_probabilities(csv_path, output_image_path,
                         color=class_color, linewidth=1.8,
                         label=f'Regression #{Nth_regression + 1}, {cls}')
 
-                # --- Colored threshold lines ---
+                # Colored threshold lines
                 ax.axhline(y=threshold_start, color=class_color, linestyle='--', linewidth=1.3,
                            label=f'Threshold Start ({threshold_start}), {cls}')
                 ax.axhline(y=threshold_target, color=class_pred_color, linestyle='--', linewidth=1.3,
                            label=f'Threshold Target ({threshold_target}), {pred_cls}')
         else:
-            print(f"[Warning] Nth_regression={Nth_regression} out of range (total regressions={len(regressions_df)})")
+            print(f"[Warning:] Nth_regression={Nth_regression} out of range (total regressions={len(regressions_df)})")
     else:
         # Default black thresholds if no regression selected
         ax.axhline(y=threshold_start, color='black', linestyle='--', linewidth=1.3,
@@ -77,7 +80,7 @@ def plot_daily_class_probabilities(csv_path, output_image_path,
         ax.axhline(y=threshold_target, color='black', linestyle='--', linewidth=1.3,
                    label=f'Threshold Target ({threshold_target})')
 
-    # --- Axis formatting ---
+    # Axis formatting
     ax.set_xlabel('Date', color='black', fontsize=10)
     ax.set_ylabel('Probability', color='black', fontsize=10)
     ax.tick_params(axis='x', colors='black', rotation=0)
@@ -87,29 +90,39 @@ def plot_daily_class_probabilities(csv_path, output_image_path,
     ax.grid(True, color='gray', linestyle='--', linewidth=0.5, axis='y')
     ax.legend(fontsize=9)
 
+    # Finalize and save plot
     plt.tight_layout()
     plt.savefig(output_image_path, dpi=300, facecolor=fig.get_facecolor())
-    plt.close()
     print(f"Daily condition probabilities plot saved to {output_image_path}")
+    
+    # Close plot to free memory
+    plt.close()
 
 
 def plot_predictions_cleveland(df_predictions, output_image_path):
     """
     Plots a compact horizontal Cleveland-style timeline of predictions:
-    - Each line connects prediction (colored circle) to actual (colored circle).
-    - Start ball = predicted class color.
-    - End ball = actual class color.
-    - Displays predicted_days_to_0.8 near the prediction ball.
-    - No Y-axis shown.
-    - Only legend for classes (no prediction outcome legend).
+        - Each line connects prediction (colored circle) to actual (colored circle).
+        - Start ball = predicted class color.
+        - End ball = actual class color.
+        - Displays predicted_days_to_X near the prediction ball.
+        - No Y-axis shown.
+        - Legend for classes.
+        
+    Args:
+        df_predictions (pd.DataFrame) with columns:
+            date, class, predicted_days_to_X, predicted_date, actual_class_at_predicted_day, slope, intercept.
+        output_image_path (str): Path to save the final plot.
     """
 
     if df_predictions is None or df_predictions.empty:
         print("Cleveland Plot: No predictions to plot.")
         return
     
+    # Create figure and axis
     fig, ax = plt.subplots(figsize=(14, 6))
 
+    # Parameters for layout
     bar_height = 0.2
     spacing_factor = 1.1
     spacing = bar_height * spacing_factor
@@ -135,6 +148,7 @@ def plot_predictions_cleveland(df_predictions, output_image_path):
                 layers[j] = end_date
                 placed = True
                 break
+            
         if not placed:
             layer_index = len(layers)
             layers.append(end_date)
@@ -146,7 +160,7 @@ def plot_predictions_cleveland(df_predictions, output_image_path):
         # Position
         y = layer_index * spacing
 
-        # Draw connecting thin  line
+        # Draw connecting thin line
         ax.plot(
             [start_date, end_date],
             [y, y],
@@ -193,6 +207,7 @@ def plot_predictions_cleveland(df_predictions, output_image_path):
     ax.set_xlabel('Date', color='black', fontsize=10)
     # ax.set_title('Prediction Timeline, Cleveland-style', color='black')
 
+    # Grid and ticks
     ax.xaxis.grid(True, linestyle='--', linewidth=0.4, color='gray')
     ax.set_axisbelow(True)
     plt.xticks(rotation=0, ha='center', color='black', fontsize=8)
@@ -201,24 +216,23 @@ def plot_predictions_cleveland(df_predictions, output_image_path):
     shift = timedelta(days=0.4)
     ax.set_xlim(df_predictions['date'].min() - 8 * shift, df_predictions['predicted_date'].max() + 3 * shift)
     
-    # ---------- DYNAMIC Y-LIMITS ----------
+    # Dynamic Y-limits based on number of layers
     num_layers = len(layers)
     if num_layers == 0:
-        # fallback: nenhuma previsão
+        # Fallback: no predictions
         ax.set_ylim(-bar_height / 2 - 0.1, bar_height / 2 + 0.1)
     else:
-        # y de índice máximo: (num_layers - 1) * spacing
+        # Maximum y for maximum index
         max_layer_y = (num_layers - 1) * spacing
-        # top e bottom com margens proporcionais ao spacing/bar_height
+        # Top and bottom with margins proportional to spacing/bar_height
         vertical_margin = spacing * 0.25
         bottom = -bar_height / 2 - vertical_margin
         top = max_layer_y + bar_height / 2 + vertical_margin
-        # offset para aproximar a primeira linha do zero
+        # Offset to approximate the first line to zero
         offset = - spacing * 0.1
         ax.set_ylim(bottom - offset, top - offset)
-    # --------------------------------------------------
     
-    # Legend only for classes
+    # Legend for classes
     class_patches = [
         Patch(facecolor=LABELS_MAP[k][1], edgecolor='none', label=LABELS_MAP[k][0])
         for k in LABELS_MAP
@@ -229,13 +243,14 @@ def plot_predictions_cleveland(df_predictions, output_image_path):
         fontsize=8,
     )
 
+    # Finalize and save plot
     fig.set_size_inches(14, max(4, num_layers * spacing))
     plt.tight_layout()
     plt.savefig(output_image_path, dpi=300)
-    plt.close()
-
     print(f"Saved Cleveland-style timeline to {output_image_path}")
-
+    
+    # Close plot to free memory
+    plt.close()
 
 def plot_arc_timeline_semicircle(df_predictions, output_image_path):
     """
