@@ -199,7 +199,7 @@ def create_ts_samples_1_soiling(plot_samples=False):
             if ts_df.empty:
                 continue
             
-            # --- Interpolate to 5-min timestep ---
+            # Interpolate to uniform 5-minute resolution
             for col in ts_df.columns:
                 ts_df[col] = pd.to_numeric(ts_df[col], errors='coerce').astype('float64')
             ts_df = ts_df.resample('5min').interpolate(method='linear').reset_index()
@@ -211,12 +211,11 @@ def create_ts_samples_1_soiling(plot_samples=False):
             print(f"\t\tInitial soiling factor: {initial_soiling_factor:.3f}")
             twin = DigitalTwinSoilingTS(plant, inverter, ts_df, condition_nr, location, initial_soiling_factor)
 
-            # --- Run simulation ---
+            # Run simulation
             results = twin.run()
             
-            # --- Generate Plots with soiling ---
+            # Generate Plots with soiling
             if plot_samples:
-                # Generate Plots
                 results_plot = ts_resampling(results.between_time(TIME_INIT, TIME_END))
                 condition_title = LABELS_MAP[condition_nr][0]
                 output_image = f"{condition_nr}_{condition_name}_samples_{year}_{local}"
@@ -224,15 +223,10 @@ def create_ts_samples_1_soiling(plot_samples=False):
                 plot_currents_ts(results_plot, local, plot_folder, output_image, condition_title=condition_title, soiling=True)
                 plot_voltage_ts(results, local, plot_folder, output_image, condition_title=condition_title)
 
-            # --- Export CSV without clean features columns ---
+            # Export CSV without clean features columns
             cols_to_export = [c for c in results.columns if c not in ['pv1_i_clean', 'pv1_u_clean', 'mppt_power_clean', 'a_i_clean']]
             results_to_export = results[cols_to_export]
             results_to_export.index.name = 'date'
             output_file = f"{TS_SAMPLES}/{condition_nr}_{condition_name}/{condition_nr}_{condition_name}_{year}_{local}_ts_samples.csv"
             results_to_export.to_csv(output_file)
             print(f"Exported timeseries: {output_file}")
-        
-            exit() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    
-create_ts_samples_1_soiling(plot_samples=True)
