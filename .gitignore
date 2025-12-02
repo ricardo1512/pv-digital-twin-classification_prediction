@@ -1,9 +1,3 @@
-Weather/Prediction
-TS_samples
-Plots/TS_samples
-Plots/TS_probabilities
-Predictions
-
 git.txt
 
 random_forest_classifier.py
@@ -12,7 +6,9 @@ naive_bayes_classifier.py
 models_comparison.py
 h0_rf_xgb.py
 
-create_ts_samples_3_cracks.py
+
+
+
 
 prediction.py
 
