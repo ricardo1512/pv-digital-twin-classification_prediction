@@ -26,6 +26,8 @@ MODELS_FOLDER = "Models"                        # Folder to the trained models
 IMAGE_FOLDER = "Images"                         # Folder for saving images
 PLOT_FOLDER = "Plots"                           # Folder for saving plots
 REPORT_FOLDER = "Reports"                       # Folder for saving reports
+TS_SAMPLES_FOLDER = "TS_samples"                # Folder for saving time series samples
+PREDICTIONS_FOLDER = "Predictions"              # Folder for saving predictions
 
 # ==============================
 # Data File Paths

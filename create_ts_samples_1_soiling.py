@@ -236,4 +236,4 @@ def create_ts_samples_1_soiling(plot_samples=False):
             results_to_export.index.name = 'date'
             output_file = f"{TS_SAMPLES}/{condition_nr}_{condition_name}/{condition_nr}_{condition_name}_{year}_{local}_ts_samples.csv"
             results_to_export.to_csv(output_file)
-            print(f"Exported timeseries: {output_file}")
+            print(f"Exported timeseries: {output_file}\n")
