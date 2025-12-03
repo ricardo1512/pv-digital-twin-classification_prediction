@@ -82,7 +82,7 @@ def plot_daily_class_probabilities(csv_path, output_image_path,
                    label=f'Threshold Target ({threshold_target})')
 
     # Axis formatting
-    ax.set_xlabel('Date', color='black', fontsize=10)
+    # ax.set_xlabel('Date', color='black', fontsize=10)
     ax.set_ylabel('Probability', color='black', fontsize=10)
     ax.tick_params(axis='x', colors='black', rotation=0)
     ax.tick_params(axis='y', colors='black')
@@ -205,7 +205,7 @@ def plot_predictions_cleveland(df_predictions, output_image_path):
     ax.get_yaxis().set_visible(False)
 
     # X-axis formatting
-    ax.set_xlabel('Date', color='black', fontsize=10)
+    # ax.set_xlabel('Date', color='black', fontsize=10)
     # ax.set_title('Prediction Timeline, Cleveland-style', color='black')
 
     # Grid and ticks
