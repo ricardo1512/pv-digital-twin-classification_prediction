@@ -1,0 +1,9 @@
+python >= 3.10
+pvlib
+numpy
+pandas
+matplotlib
+joblib
+argparse
+scikit-learn
+xgboost

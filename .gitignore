@@ -3,8 +3,6 @@ git.txt
 decision_trees_classifier.py
 random_forest_classifier.py
 naive_bayes_classifier.py
+
 models_comparison.py
 h0_rf_xgb.py
-
-
-requirements.txt

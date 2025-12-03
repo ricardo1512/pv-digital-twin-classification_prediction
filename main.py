@@ -40,8 +40,7 @@ def run(args):
     # -------------------------------------------------------------------------------
     # Block A.2.1: Create and Preprocess the Inference Test Set
     # -------------------------------------------------------------------------------
-    if (args.create_inference_set
-        or args.create_inference_set_smooth):
+    if args.create_inference_set or args.create_inference_set_smooth:
         create_preprocess_inference_set(
             smoothing=args.create_inference_set_smooth,
             all_year=args.all_year, 
@@ -51,11 +50,11 @@ def run(args):
     # -------------------------------------------------------------------------------
     # Block A.2.2: Perform Inference on Real Data
     # -------------------------------------------------------------------------------
-    if (args.inference_run or args.inference_run_file or args.delta or args.top):
+    if args.inference_run or args.delta or args.top:
         kwargs = {}
 
-        if args.inference_run_file is not None:
-            kwargs['inference_test_file'] = args.inference_run_file
+        if isinstance(args.inference_run, str):
+            kwargs['inference_test_file'] = args.inference_run
 
         if args.delta is not None:
             kwargs['delta'] = args.delta
@@ -85,9 +84,10 @@ def run(args):
     # -------------------------------------------------------------------------------
     # Block B.2.2: Perform Daily Classification in Real Time Series, with Plots
     # -------------------------------------------------------------------------------
-    if args.real_ts_daily_classification:
+    if args.real_ts_daily_classification or args.ts_smooth:
         ts_daily_classification(
-            input_file=args.real_ts_daily_classification
+            input_file=args.real_ts_daily_classification,
+            smooth=args.ts_smooth
         )
 
     # -------------------------------------------------------------------------------
@@ -130,8 +130,8 @@ def run(args):
         if args.real_window is not None:
             kwargs['window'] = args.real_window
             
-        single_ts_predict_days(
-            input_file=args.ts_predict_days,
+        ts_predict_days(
+            input_csv_path=args.ts_predict_days,
             **kwargs
         )
 
@@ -169,15 +169,14 @@ if __name__ == '__main__':
     # ------------------------------------------------------------------------------
     parser.add_argument('--create_inference_set', action='store_true', 
                         help="Create and preprocess inference test set.")
-    parser.add_argument('--create_inference_set_smooth', action='store_true', 
-                        help="Create and preprocess inference test set applying smoothing.")
+    parser.add_argument('--create_inference_set_smooth', type=int, default=48,
+                        help="Create and preprocess inference test set applying smoothing [Default: 48 (4 hours)].")
 
     # ------------------------------------------------------------------------------
     # Block A.2.2: Perform Inference on Real Data
     # ------------------------------------------------------------------------------
-    parser.add_argument('--inference_run', action='store_true', help="Run inference.")
-    parser.add_argument('--inference_run_file', type=str, 
-                        help="Run inference with path to the inference test set CSV file.")
+    parser.add_argument('--inference_run', type=str, 
+                        help="Run inference with option of the path to the inference test set CSV file.")
     parser.add_argument('--delta', type=float, help="Delta value for adjusting probabilities [Default: 0.2].")
     parser.add_argument('--top', type=int, help="Top N probabilities to consider for adjustment [Default: 2].")
     
@@ -200,6 +199,8 @@ if __name__ == '__main__':
     # ------------------------------------------------------------------------------
     parser.add_argument('--real_ts_daily_classification', type=str, 
                         help="Perform daily classification with path to real time series.")
+    parser.add_argument('--ts_smooth', type=int, 
+                        help="Apply smoothing to real time series [Default: 48 (4 hours)].")
     
     # ------------------------------------------------------------------------------
     # Block B.3.1: Predict Anomalies in Synthetic Time Series, with Plots

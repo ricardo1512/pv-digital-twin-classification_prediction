@@ -1,17 +1,18 @@
-# Photovoltaic Digital Twin Simulation Framework for Anomaly and Fault Classification
+# Photovoltaic Digital Twin Simulation Framework for Anomaly and Fault Classification and Prediction
 #### Ricardo Vicente, Lisbon, 2025
 
 ## Description / Overview
 This project implements a **Photovoltaic (PV) Digital Twin** for the simulation, monitoring, and analysis of a PV system under normal and multiple anomaly and fault conditions.
 The framework models the electrical, thermal, and environmental behaviour of a solar plant consisting of **Jinko JKM410M-72HL-V modules** and a **Huawei SUN2000-10KTL-USL0-240V inverter**.  
 
-It uses **pvlib** for irradiance, temperature, wind speed, precipitation, and power flow modeling, and integrates anomaly and fault-specific degradation models (e.g., cracks, shading, ground faults, arc faults). The system supports data aggregation, anomaly and fault classification dataset generation, Random Forest training, and inference on real data.
+It uses **pvlib** for irradiance, temperature, wind speed, precipitation, and power flow modeling, and integrates anomaly and fault-specific degradation models (e.g., cracks, shading, ground faults, arc faults). The system supports data aggregation, anomaly and fault classification dataset generation, XGBoosting training, and inference on real data.
 
 ---
 
 ## Features
-- Digital twin of a PV inverter system.
-- Realistic modeling of seven scenarios:
+### Classification
+- Digital twin for classification.
+- Realistic modelling of seven anomaly and fault scenarios:
   1. Normal  
   2. Soiling  
   3. Shading  
@@ -19,11 +20,22 @@ It uses **pvlib** for irradiance, temperature, wind speed, precipitation, and po
   5. Ground Fault  
   6. Arc Fault  
   7. Bypass Diode Fault
-- Parallel processing for anomaly and fault simulation.
-- ML-ready dataset generation with daily feature extraction.
-- Random Forest classifier for automated anomaly and fault classification.
+- Parallel processing of anomaly and fault simulation.
+- ML-ready daily dataset generation with daily feature extraction.
+- XGBoost classifier for automated anomaly and fault classification.
 - Command-line execution with modular pipeline control.
 
+### Prediction
+- Digital twin for prediction.
+- Realistic modelling of three anomaly scenarios:
+  1. Soiling  
+  2. Shading  
+  3. Cracks / Microcracks  
+- Processing of anomaly simulation.
+- Time series dataset generation.
+- Time series daily classification with pre-trained XGBoost model using feature extraction.
+- Anomaly prediction with Linear Regression.
+- Command-line execution with modular pipeline control.
 ---
 
 ## Installation / Requirements
@@ -36,6 +48,8 @@ pandas
 matplotlib
 joblib
 argparse
+scikit-learn
+xgboost
 ```
 **Install requirements:**
 ```bash
@@ -44,46 +58,124 @@ pip install -r requirements.txt
 
 ---
 
-## Pipeline Overview
+# Machine Learning Pipeline Overview
 
-This project includes all required datasets and scripts to execute each stage of the complete machine learning workflow, either individually or in sequence.  
-  
-The end-to-end pipeline covers the following steps:
+This project includes all required datasets and scripts to execute each stage of the complete machine learning workflow, either individually or in sequence.
+
+The end-to-end pipeline is divided into **Classification** and **Prediction** workflows and covers the following steps:
+
+---
+
+## A. Classification Workflow (Daily Samples)
 
 ### 1. Sample Generation
-Simulates photovoltaic operation, and anomaly and fault scenarios using the digital twin. Optionally generates plots for each scenario.
+- Simulates photovoltaic system operation under normal conditions and various anomaly and fault scenarios using a digital twin.
+- Optional plots can be generated to visualize each scenario and verify simulation quality.
+- **Script:** `create_day_samples.py`
+- **CLI Options:** `--create_samples`, `--create_samples_with_plots`
 
 ### 2. Dataset Consolidation
-Aggregates simulated data into unified training and testing sets.
+- Aggregates simulated samples into unified **training** and **testing** datasets.
+- Ensures proper temporal and seasonal coverage.
+- Handles splitting and formatting for supervised learning.
+- **Script:** `create_train_test_sets.py`
+- **CLI Option:** `--create_train_test`
 
 ### 3. Model Training and Evaluation
-Trains and evaluates a Random Forest classifier for anomaly and fault classification.
+- Trains and evaluates a **XGBoost classifier** for anomaly and fault detection.
+- Metrics include accuracy, precision, recall, F1-score.
+- Performance plots are generated.
+- **Script:** `xgboost_classifier.py`
+- **CLI Options:** `--xgboost_run`, `--all_year`, `--winter`
 
 ### 4. Inference Set Preparation
-Preprocesses inverter real data for model inference. It is recommended to apply smoothing to the input data, since real-world measurements may contain noise, like cloud transient effects.
+- Preprocesses real inverter data for model inference.
+- Recommended to apply smoothing to reduce noise from cloud transients or measurement fluctuations.
+- Supports configuration of smoothing window.
+- **Script:** `create_preprocess_inference_set.py`
+- **CLI Options:** `--create_inference_set`, `--create_inference_set_smooth`
 
 ### 5. Inference
-Performs final inference and generates diagnostic reports.
+- Performs model inference on the prepared dataset.
+- Generates diagnostic reports including probability distributions and anomaly recommendations.
+- **Delta (`--delta`) and Top (`--top`) options** are used for **probabilistic recommendation analysis**:
+  - `--top` selects the N most important class probabilities for inspection.
+  - `--delta` defines a tolerance value: if a class probability is within `delta` of the highest class probability, it will also be considered as a potential recommendation.
+- **Script:** `inference.py`
+- **CLI Options:** `--inference_run`, `--inference_run_file`, `--delta`, `--top`
+
+
+---
+
+## B. Prediction Workflow (Time-Series)
+
+### 1. Anomaly Sample Generation for Prediction
+- Generates synthetic time series representing anomalies (soiling, shading, and cracks).
+- Plots visualize anomaly patterns.
+- **Script:** `create_ts_samples.py`
+- **CLI Option:** `--create_ts_samples`
+
+### 2. Daily Classification
+
+#### 2.1 Synthetic Time Series
+- Performs daily classification on synthetic time series samples.
+- Generates plots showing classification results.
+- **Script:** `prediction.py`
+- **CLI Option:** `--synthetic_ts_daily_classification`
+
+#### 2.2 Real Time Series
+- Performs daily classification on real inverter time series data.
+- Optional smoothing can be applied to reduce measurement noise.
+- **Script:** `prediction.py`
+- **CLI Options:** `--real_ts_daily_classification`, `--ts_smooth`
+
+### 3. Time-Series Anomaly Prediction
+
+#### 3.1 Synthetic Time Series
+- Predicts future anomalies in synthetic time series using configurable thresholds and window sizes.
+- Generates visualizations of predicted anomaly days.
+- **Script:** `prediction.py`
+- **CLI Options:** `--synthetic_ts_predict_days`, `--synt_threshold_start`, `--synt_threshold_target`, `--synt_threshold_class`, `--synt_window`
+
+#### 3.2 Real Time Series
+- Predicts future anomalies in real inverter time series.
+- Supports configurable thresholds and rolling windows.
+- Generates plots of predicted anomalies.
+- **Script:** `prediction.py`
+- **CLI Options:** `--ts_predict_days`, `--real_threshold_start`, `--real_threshold_target`, `--real_threshold_class`, `--real_window`
+
+---
+
+## C. Notes
+- All CLI options can be combined to run multiple workflow stages in sequence.
+- Smoothing parameters are optional but recommended for real data.
+- Default behaviour assumes summer months; use `--all_year` or `--winter` to adjust seasonal coverage.
+- **Time-Series Prediction sensitivity analysis parameters:**
+  - `start` (`--*_threshold_start`): start percentage from which regression begins.
+  - `target` (`--*_threshold_target`): target percentage in the future that the regression aims to exceed.
+  - `class` (`--*_threshold_class`): class tolerance, allowing prediction to be considered correct if it is within this delta below the majority class probability.
+  - `window` (`--*_window`): number of past samples considered for regression.
+
 
 ---
 ## File Inputs and Outputs
 
 Each function receives specific inputs and generates standardized outputs used in subsequent stages.
 
-
-### 1. `create_samples()`
+### Classification Workflow
+#### 1. `create_samples()`
 
 **Inputs:**
 - Meteorological data
-  - `Weather/[LOCAL]_weather_2023.csv`
-  - `Weather/[LOCAL]_weather_2024.csv`
+  - `Weather/Classification/[LOCAL]_weather_2023.csv`
+  - `Weather/Classification/[LOCAL]_weather_2024.csv`
 
 **Outputs:**
 - Simulated sample data stored in `Samples_2023/` and `Samples_2024/`
 - Optional plots saved in `Plots/`
 
 
-### 2. `create_train_test_sets()`
+#### 2. `create_train_test_sets()`
 
 **Inputs:**
 - Simulated sample data stored in `Samples_2023/` and `Samples_2024/`
@@ -97,7 +189,7 @@ Each function receives specific inputs and generates standardized outputs used i
   - `testset_2024_scatter_iv.png`
 
 
-### 3. `random_forest()`
+#### 3. `xgboost_classifier()`
 
 **Inputs:**
 - Consolidated datasets in `Datasets/`  
@@ -105,29 +197,29 @@ Each function receives specific inputs and generates standardized outputs used i
   - `test_set.csv`
 
 **Outputs:**
-- Trained Random Forest model saved in `Models/rf_best_model_*.joblib`
+- Trained XGBoost model saved in `Models/xgb_best_model_*.joblib`
 - Classification reports and accuracy metrics in `Reports/`:
-  - `rf_validation_classification_report_*.csv`
-  - `rf_test_classification_report_*.csv`
-  - `rf_class_accuracies_*.csv`
-  - `rf_top_*_features_*.csv`
-  - `rf_cross_validation_raw_scores_*.csv`
-  - `rf_cross_validation_summary_*.csv`
-  - `rf_overall_performance.csv`
+  - `xgb_validation_classification_report_*.csv`
+  - `xgb_test_classification_report_*.csv`
+  - `xgb_class_accuracies_*.csv`
+  - `xgb_top_*_features_*.csv`
+  - `xgb_cross_validation_raw_scores_*.csv`
+  - `xgb_cross_validation_summary_*.csv`
+  - `xgb_overall_performance.csv`
 
 - Plots in `Images/`:
-  - `rf_confusion_matrix_validation_*.png`
-  - `rf_confusion_matrix_test_*.png`
-  - `rf_val_class_accuracy_*.png`
-  - `rf_test_class_accuracy_*.png`
-  - `rf_feature_importance_*.png`
-  - `rf_auc_val_precision_vs_recall_*.png`
-  - `rf_auc_test_precision_vs_recall_*.png`
-  - `rf_fp_tp_curve_validation_*.png`
-  - `rf_fp_tp_curve_test_*.png`
+  - `xgb_confusion_matrix_validation_*.png`
+  - `xgb_confusion_matrix_test_*.png`
+  - `xgb_val_class_accuracy_*.png`
+  - `xgb_test_class_accuracy_*.png`
+  - `xgb_feature_importance_*.png`
+  - `xgb_auc_val_precision_vs_recall_*.png`
+  - `xgb_auc_test_precision_vs_recall_*.png`
+  - `xgb_fp_tp_curve_validation_*.png`
+  - `xgb_fp_tp_curve_test_*.png`
 
 
-### 4. `create_inference_set()`
+#### 4. `create_inference_set()`
 
 **Inputs:**
 - Real inverter measurements: `Inverters/*.csv`
@@ -135,10 +227,10 @@ Each function receives specific inputs and generates standardized outputs used i
 **Outputs:**
 - Preprocessed inference dataset: `Datasets/inference_test_set_before_classification_*.csv`
 
-### 5. `inference()`
+#### 5. `inference()`
 
 **Inputs:**
-- Trained model: `Models/rf_best_model_*.joblib`
+- Trained model: `Models/xgb_best_model_*.joblib`
 - Inference dataset: `Datasets/inference_test_set_before_classification_*.csv`
 
 **Outputs:**:
@@ -156,28 +248,96 @@ Each function receives specific inputs and generates standardized outputs used i
   - `Plots/Probabilities/Plots_inference_probabilities_*/`
   - `Plots/Probabilities_scaled/Plots_inference_probabilities_*/`
 
+### Prediction Workflow
+
+#### 1. `create_ts_samples()`
+
+**Inputs:**
+- Meteorological data
+  - `Weather/Prediction/weather_*.csv`
+
+**Outputs:**
+- Simulated sample data stored in `TS_samples/*/`
+- Optional plots saved in `Plots/TS_samples/*/`
+
+#### 2. `ts_daily_classification()` (single) and `synthetic_ts_daily_classification()` (multiple)
+
+**Inputs:**
+- Single time-series CSV file:  
+  - `TS_samples/*/*.csv`    
+
+**Outputs:**
+- Daily classification probabilities CSV:  
+  - `Predictions/real_data_probabilities/*_daily_probabilities.csv`  
+- Daily probabilities plot:  
+  - `Plots/TS_probabilities/*_daily_probabilities.png`  
+
+#### 3. `ts_predict_days()` (single) and `synthetic_ts_predict_days()` (multiple)
+
+**Inputs:**
+- Daily probability CSV file:  
+  - `Predictions/real_data_probabilities/*.csv`   
+
+**Outputs:**
+- Predictions CSV with estimated days to reach target probability:  
+  - `Predictions/real_data_predictions/*_daily_predictions.csv`  
+- Prediction plot (Cleveland-style) for visualizing estimated days:  
+  - `Plots/TS_predictions/*_predictions_cleveland.png`  
 
 ---
 ## Usage / How to Run
 The complete pipeline can be executed using the command-line interface (`argparse`).
 
-By default, the training season is set to **Summer** (April to September) since the inverter data used for inference, stored in the `Inverters` folder, was collected during this period. However, if other datasets are used, the season can be changed to **Winter** (October to March) (`--winter`) or **All Year** (`--all_year`).
-### Example of full, recommended workflow
+By default, in the classification the training season is set to **Summer** (April to September) since the inverter data used for inference, stored in the `Inverters` folder, was collected during this period. However, if other datasets are used, the season can be changed to **Winter** (October to March) (`--winter`) or **All Year** (`--all_year`).
+
+### 1. Examples of full, recommended workflows
+
+#### 1.1. Classification:
 
 ```bash
-python main.py --create_samples --create_train_test --random_forest_run --create_inference_set_smooth --inference_run
+python main.py --create_samples --create_train_test --xgboost_run --create_inference_set_smooth --inference_run
+```
+#### 1.2. Prediction with synthetic time series:
+
+```bash
+python main.py --create_ts_samples --synthetic_ts_daily_classification --synthetic_ts_predict_days
+```
+#### 1.3. Prediction with real time series:
+```bash
+python main.py --real_ts_daily_classification "TS_samples/real_data/inverter_Aveiro_060.csv" --ts_smooth 36 --ts_predict_days "Predictions/real_data_probabilities/inverter_Aveiro_060_daily_probabilities.csv"
 ```
 
-### Individual blocks
+### 2. Individual blocks
+
+#### 2.1. Classification
 | Stage | Command |
 |--------|----------|
-| 1. Create synthetic samples | `python main.py --create_samples` |
-| 1. Create synthetic samples with plots | `python main.py --create_samples_with_plots` |
+| 1. Create synthetic day samples | `python main.py --create_samples` |
+| 1. Create synthetic day samples with plots | `python main.py --create_samples_with_plots` |
 | 2. Generate train/test datasets | `python main.py --create_train_test` |
-| 3. Train and evaluate Random Forest | `python main.py --random_forest_run` |
+| 3. Train and evaluate the XGBoost classifier | `python main.py --xgboost_run` |
 | 4. Create and preprocess inference dataset | `python main.py --create_inference_set` |
-| 4. Create and preprocess inference dataset with smoothing | `python main.py --create_inference_set_smooth` |
-| 5. Perform inference on real data | `python main.py --inference_run` |
+| 4. Create and preprocess inference dataset with smoothing | `python main.py --create_inference_set_smooth <N>` |
+| 5. Run inference on all preprocessed real data | `python main.py --inference_run` |
+| 5. Run inference on a specific file | `python main.py --inference_run <path>` |
+| 5. Adjust inference probabilities using delta | `python main.py --inference_run --delta <float>` |
+| 5. Adjust inference probabilities considering top-N classes | `python main.py --inference_run --top <N>` |
+| 5. Combine file + delta + top for inference | `python main.py --inference_run <path> --delta <float> --top <N>` |
+
+
+
+#### 2.2. Prediction
+
+| Stage | Command |
+|--------|----------|
+| 1. Create anomaly time-series samples | `python main.py --create_ts_samples` |
+| 2. Daily classification in synthetic time series | `python main.py --synthetic_ts_daily_classification` |
+| 3. Daily classification in real time series | `python main.py --real_ts_daily_classification <path>` |
+| 3. Daily classification in real time series with smoothing | `python main.py --real_ts_daily_classification <path> --ts_smooth <N>` |
+| 4. Predict anomalies in synthetic time series | `python main.py --synthetic_ts_predict_days` |
+| 4. Predict anomalies in synthetic time series with thresholds/windows | `python main.py --synthetic_ts_predict_days --synt_threshold_start <v> --synt_threshold_target <v> --synt_threshold_class <v> --synt_window <N>` |
+| 5. Predict anomalies in real time series | `python main.py --ts_predict_days <path>` |
+| 5. Predict anomalies in real time series with thresholds/windows | `python main.py --ts_predict_days <path> --real_threshold_start <v> --real_threshold_target <v> --real_threshold_class <v> --real_window <N>` |
 
 ---
 
@@ -185,29 +345,41 @@ python main.py --create_samples --create_train_test --random_forest_run --create
 ```
 📦 PV_Digital_Twin_Classification
 ├── main.py                                    # CLI entry point (argparse workflow)
+|
+├── globals.py                                 # Global constants and paths
+├── utils.py                                   # Feature extraction and helpers
+├── preprocess_weather_for_classification.py   # Row weather data for classification preprocessing
+├── real_data_visualisation.py                 # Visualizing real-world data using plots
+|
 ├── classes.py                                 # Core system and inverter models
 ├── create_day_samples_*.py                    # Normal, anomaly and fault-specific simulation modules
 ├── create_day_samples.py                      # Parallel orchestration of all scenarios
 ├── create_preprocess_inference_set.py         # Inverter data preprocessing
+├── create_ts_samples_*.py                     # Anomaly-specific time series simulation modules
 ├── create_train_test_sets.py                  # Simulation data aggregation
-├── globals.py                                 # Global constants and paths
+├── create_ts_samples.py                       # Time series anomaly sample generation
+|
+├── xgboost_classifier.py                      # ML model training and evaluation
 ├── inference.py                               # Anomaly and fault classification inference
-├── main.py                                    # Argparse commands
-├── preprocess_weather_for_classification.py   # Row weather data for classification preprocessing
-├── random_forest_classifier.py                # ML model training and evaluation
-├── real_data_visualisation.py                 # Visualizing real-world data using plots
+├── prediction.py                              # Time series daily classification and prediction
+|
 ├── plot_day_samples.py                        # Plotting utilities for sample creation
 ├── plot_inference.py                          # Plotting utilities for inference
 ├── plot_training.py                           # Plotting utilities for training
-├── utils.py                                   # Feature extraction and helpers
-├── Datasets/                                  # Aggregated datasets for training and inference
-├── Images/                                    # Training and testing plots
+├── plot_ts_samples.py                         # Plotting utilities for time series samples
+├── plot_ts_predictions.py                     # Plotting utilities for time series predictions
+|
 ├── Inverters/                                 # Real inverter data for inference
+├── Datasets/                                  # Aggregated datasets for training and inference
+├── Day_samples_train/                         # Training samples
+├── Day_samples_test/                          # Testing samples
+├── TS_samples/                                # Time series samples
+|
 ├── Models/                                    # Trained Random Forest models
-├── Plots/                                     # Sample plots
+├── Images/                                    # Training and testing plots
 ├── Reports/                                   # Performance reports
-├── Samples_2023/                              # Training samples
-├── Samples_2024/                              # Testing samples
+├── Predictions/                               # Time series prediction outputs
+├── Plots/                                     # Sample plots
 └── Weather/                                   # Meteorological input data
 
 ```
@@ -215,11 +387,19 @@ python main.py --create_samples --create_train_test --random_forest_run --create
 ---
 
 ## Configuration / Settings
-All adjustable parameters are located in **`globals.py`**:
-- Geographic coordinates (LATITUDE, LONGITUDE)
-- Module and inverter specifications
-- Anomaly and fault mappings and dataset paths
-- Output directories for samples and plots
+
+All adjustable parameters are in **`globals.py`**:
+
+- **Location**: `LOCAL`, `LATITUDE`, `LONGITUDE`  
+- **PV System**: `MODULES_PER_STRING`, `LABEL`, `YEARS`  
+- **Folders**: Weather, datasets, samples, models, images, plots, reports, predictions  
+- **Data Files**: Paths for train/test sets and pre-trained models  
+- **Meteorological Inputs**: `global_tilted_irradiance`, `diffuse_radiation`, `temperature_2m`, `wind_speed_10m`, `precipitation`  
+- **Classification & Prediction**: Hours (`CLASSIFICATION_HOUR_INIT/END`, `PREDICTION_HOUR_INIT/END`), `TOP_FEATURES`, plotting time range  
+- **Anomalies & Faults**: Crack degradation scenarios, `LABELS_MAP` for visualization  
+- **Plotting Defaults**: `MPPT_PALETTE`, `CURR_VOLT_PALETTE`  
+- **Optional Coordinates**: `COORDINATES` for multi-site setups
+
 
 ---
 
@@ -245,9 +425,13 @@ This project was developed as part of the research activities of [INESC-ID](http
 **Email:** ricardo.j.vicente@tecnico.ulisboa.pt
 
 Core frameworks:
-- [pvlib](https://pvlib-python.readthedocs.io/)
 - [pandas](https://pandas.pydata.org/)
 - [numpy](https://numpy.org/)
+- [pvlib](https://pvlib-python.readthedocs.io/)
+- [scikit-learn](https://scikit-learn.org/)
+- [matplotlib](https://matplotlib.org/)
+- [xgboost](https://xgboost.readthedocs.io/)
+
 
 ---
 
@@ -259,4 +443,5 @@ For technical issues or inquiries, please email the author.
 ## Version / Changelog
 | Version | Date | Description |
 |----------|------|-------------|
-| 1.0.0 | 2025-10-29 | Initial release with full CLI workflow, 7 anomaly and fault modes, and Random Forest integration. |
+| 1.0.0 | 2025-10-29 | Initial release with full CLI workflow, 7 anomaly and fault modes, XGBoost integration, and inference on real data. |
+| 2.0.0 | 2025-12-03 | Added functionality for creating time series with 3 types of anomalies, and prediction capabilities for synthetic and real data. |

@@ -9,7 +9,7 @@ from plot_ts_prediction import *
 from utils import *
 
 
-def ts_daily_classification(input_file, output_csv_path=None, smooth=False, model_path=XGB_BEST_MODEL_SUMMER):
+def ts_daily_classification(input_file, output_csv_path=None, smooth=None, model_path=XGB_BEST_MODEL_SUMMER):
     """
     Performs daily classification of time-series data using a pre-trained model
     and plots the resulting daily class probabilities.
@@ -97,12 +97,14 @@ def synthetic_ts_daily_classification():
     print("\nStarting multiple time-series daily classifications...")
 
     base_folder = Path(TS_SAMPLES_FOLDER)
+    output_base = Path(PREDICTIONS_FOLDER) / "real_data_probabilities"
     for subfolder in [f for f in base_folder.iterdir() if f.is_dir() and not f.name.startswith("real_data")]:
         print(f"\tProcessing subfolder: {subfolder.name}")
         
         for file_path in subfolder.glob("*.csv"):
             print(f"\t\tProcessing file: {file_path.name}")
-            ts_daily_classification(file_path, subfolder.name + "_probabilities")
+            output_csv_path = output_base / f"{file_path.stem}_daily_probabilities.csv"
+            ts_daily_classification(file_path, output_csv_path)
             
 
 def ts_predict_days(input_csv_path, output_csv_path=None, 
@@ -130,12 +132,14 @@ def ts_predict_days(input_csv_path, output_csv_path=None,
     """
     
     # Load daily probability CSV
+    input_csv_path = Path(input_csv_path)
     df_daily_probs = pd.read_csv(input_csv_path)
     
     # Generate default output CSV path if not provided
     if output_csv_path is None:
         output_csv_path = Path(PREDICTIONS_FOLDER) / "real_data_predictions" / f"{input_csv_path.stem}_daily_predictions.csv"
-    output_csv_path = Path(output_csv_path)
+    else:
+        output_csv_path = Path(output_csv_path)
     
     # Detect and normalize the time column to 'date'
     if 'date' in df_daily_probs.columns:
@@ -251,61 +255,6 @@ def ts_predict_days(input_csv_path, output_csv_path=None,
     print(f"Prediction plot saved to: {output_image_prob}")
     
     return df_predictions
-            
-
-
-def single_ts_predict_days(
-    input_file,
-    output_subfolder_name=None,
-    threshold_start=0.5,
-    threshold_target=0.8,
-    threshold_class=0.2,
-    window=30
-):
-    """
-    Applies daily time-series prediction to a single probability CSV file and
-    generates the corresponding prediction CSV and plot.
-
-    Args:
-        input_file (str or Path): Path to the probability CSV file.
-        output_subfolder_name (str): Optional subfolder name inside PREDICTIONS_FOLDER
-                                     where the predictions will be saved.
-        threshold_start (float): Start threshold for anomaly prediction.
-        threshold_target (float): Target threshold for anomaly prediction.
-        threshold_class (float): Class threshold for anomaly prediction.
-        window (int): Rolling window size.
-    """
-
-    # Convert to Path object
-    input_file = Path(input_file)
-    name = input_file.stem
-
-    # Determine output subfolder
-    if output_subfolder_name is None:
-        subfolder_output = Path(PREDICTIONS_FOLDER) / "real_data_predictions"
-    else:
-        subfolder_output = Path(PREDICTIONS_FOLDER) / output_subfolder_name
-
-    # Construct output CSV path for predictions
-    output_csv_path = subfolder_output / f"{name}_daily_predictions.csv"
-
-    print(f"Processing file: {input_file.name}")
-
-    # Run prediction
-    df_predictions = ts_predict_days(
-        str(input_file),
-        str(output_csv_path),
-        threshold_start=threshold_start,
-        threshold_target=threshold_target,
-        threshold_class=threshold_class,
-        window=window,
-    )
-
-    # Create output image path
-    output_image_prob = Path(PLOT_FOLDER) / "TS_predictions" / f"{name}_predictions_cleveland.png"
-
-    # Plot results
-    plot_predictions_cleveland(df_predictions, output_image_prob)
 
 
 def synthetic_ts_predict_days(
@@ -322,28 +271,25 @@ def synthetic_ts_predict_days(
     print("\nStarting multiple time-series daily predictions...")
 
     # Base folder where probability subfolders are stored
-    base_folder = Path(PREDICTIONS_FOLDER)
+    base_folder = Path(PREDICTIONS_FOLDER) / "real_data_probabilities"
+    output_base = Path(PREDICTIONS_FOLDER) / "real_data_predictions"
 
     # Iterate over subfolders that contain probability CSV files
     for subfolder in [f for f in base_folder.iterdir() if f.is_dir() and f.name.endswith('_probabilities') and not f.name.startswith("real_data")]:
 
         print(f"\tProcessing subfolder: {subfolder.name}")
 
-        # Replace 'probabilities' with 'predictions' to create the output subfolder
-        output_subfolder_name = subfolder.name.replace("probabilities", "predictions")
-
         # Iterate over all probability CSV files inside the subfolder
         for file_path in subfolder.glob("*.csv"):
             print(f"\t\tProcessing file: {file_path.name}")
-            
-            
-            print(f"\t\t\tThresholds: start={threshold_start}, target={threshold_target}, class={threshold_class}, window={window}")
-            exit() # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+            # Define output CSV path for predictions
+            output_csv_path = output_base / f"{file_path.stem}_daily_predictions.csv"
 
             # Call the single-file prediction function
-            single_ts_predict_days(
+            ts_predict_days(
                 file_path,
-                output_subfolder_name=output_subfolder_name,
+                output_csv_path=output_csv_path,
                 threshold_start=threshold_start,
                 threshold_target=threshold_target,
                 threshold_class=threshold_class,
