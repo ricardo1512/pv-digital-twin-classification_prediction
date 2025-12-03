@@ -1,16 +1,20 @@
 import sys
 import argparse
 
+# Classification
 from create_day_samples import *
 from create_train_test_sets import *
 from xgboost_classifier import *
 from create_preprocess_inference_set import *
 from inference import *
 
+# Prediction
+from create_ts_samples import *
+
 
 def run(args):
     # ------------------------------------------------------
-    # Block A.1.1: Create Samples
+    # Block A.1.1: Create Samples for Classification
     # ------------------------------------------------------
     if args.create_samples or args.create_samples_with_plots:
         create_day_samples(
@@ -64,6 +68,12 @@ def run(args):
             **kwargs
         )
 
+    # ------------------------------------------------------
+    # Block B.1: Create Anomaly Samples for Prediction
+    # ------------------------------------------------------
+    if args.create_ts_samples:
+        # Soiling, Shading, Cracks
+        create_ts_samples()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run the full ML workflow.")
@@ -73,7 +83,7 @@ if __name__ == '__main__':
     # ==========================================================
 
     # ----------------------------------------------------------
-    # Block A.1.1: Create Samples
+    # Block A.1.1: Create Samples for Classification
     # ----------------------------------------------------------
     parser.add_argument('--create_samples', action='store_true', help="Create sample dataset.")
     parser.add_argument('--create_samples_with_plots', action='store_true', help="Plot sample data.")
@@ -112,7 +122,16 @@ if __name__ == '__main__':
     # ==========================================================
     
     # ----------------------------------------------------------
-    # Block B1: ?????????
+    # Block B.1: Create Anomaly Samples for Prediction
+    # ----------------------------------------------------------
+    parser.add_argument('--create_ts_samples', action='store_true', help="Create anomaly time series samples.")
+    
+    # ----------------------------------------------------------
+    # Block B.2: Perform Daily Classification in Time Series
+    # ----------------------------------------------------------
+    
+    # ----------------------------------------------------------
+    # Block B.3: Predict Anomalies in Time Series
     # ----------------------------------------------------------
     
     args = parser.parse_args()

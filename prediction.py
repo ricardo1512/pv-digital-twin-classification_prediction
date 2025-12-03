@@ -1,17 +1,16 @@
+import os
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from pathlib import Path
 import joblib
 
-from create_ts_samples_1_soiling import *
-from create_ts_samples_2_shading import *
-from create_ts_samples_3_cracks import *
+from globals import *
 from plot_ts_prediction import *
 from utils import *
 
 
-def ts_daily_classification(csv_path, output_csv_path, real_tag=False, model_path="Models/xgb_best_model_summer.joblib"):
+def ts_daily_classification(csv_path, output_csv_path, real_tag=False, model_path=XGB_BEST_MODEL_SUMMER):
     """
     Performs daily classification of time-series data using a pre-trained model.
     
@@ -236,20 +235,6 @@ def ts_predict_days(input_csv_path, output_csv_path,
         print(f"Prediction success: {correct_preds}/{total_preds} ({success_pct:.2f}%)")
 
     return df_predictions
-
-
-def create_ts_samples(plot_samples=True):
-    """
-    Creates time-series samples for different anomaly conditions.
-
-    Args:
-        plot_samples (bool, optional): _description_. Defaults to True.
-    """
-    create_ts_samples_1_soiling(plot_samples)
-    create_ts_samples_2_shading(plot_samples)
-    create_ts_samples_3_cracks(plot_samples)
-
-# create_ts_samples()
 
 
 def multiple_ts_daily_classification():
