@@ -5,7 +5,7 @@ from pathlib import Path
 from utils import *
 from plot_inference import *
 
-def inference(all_year=False, winter=False):
+def inference(all_year=False, winter=False, inference_test_file=None, delta=0.2, top=2):
     """
     Run inference on a real dataset using a pre-trained XGBoost classifier.
 
@@ -49,11 +49,15 @@ def inference(all_year=False, winter=False):
     # ===============================================
     # INITIALIZATION
     # ===============================================
-    # INPUT FILE
+    # INPUT FILES
     # Pretrained Model
     xgb_model_path = f"{MODELS_FOLDER}/xgb_best_model_{season_name_file}.joblib"
+    
     # Preprocessed inference test set
-    inference_test_file = f"{DATASETS_FOLDER}/inference_test_set_before_classification_{season_name_file}.csv"
+    if inference_test_file is None:
+        test_file = f"{DATASETS_FOLDER}/inference_test_set_before_classification_{season_name_file}.csv"
+    else:
+        test_file = inference_test_file
     
     # OUTPUT FILES AND FOLDERS
     # Results
@@ -87,10 +91,10 @@ def inference(all_year=False, winter=False):
     xgb_classifier = joblib.load(xgb_model_path)
 
     # Raise an exception if the file does not exist, stopping the program
-    inference_test_file_path = Path(inference_test_file)
+    inference_test_file_path = Path(test_file)
     if not inference_test_file_path.exists():
         print(
-            f"\nInference test file not found: {inference_test_file}\n"
+            f"\nInference test file not found: {test_file}\n"
             f"\tPlease create the inference test set first for {season_name} (--{season_name_file}).\n"
         )
         exit()
@@ -99,7 +103,7 @@ def inference(all_year=False, winter=False):
     # INFERENCE
     # ===============================================
     # Load input dataset
-    df_inference = pd.read_csv(inference_test_file)
+    df_inference = pd.read_csv(test_file)
 
     # Select features used by the model
     X_inference = df_inference[xgb_classifier.feature_names_in_]
@@ -176,7 +180,7 @@ def inference(all_year=False, winter=False):
     
     # SELECTED AND SCALED PROBABILITIES FOR DECISION MAKING
     # Select and scale probabilities for decision making
-    adjusted_proba_df = adjust_and_scale_probabilities(proba_inference_df, delta=0.2, top=2)
+    adjusted_proba_df = adjust_and_scale_probabilities(proba_inference_df, delta=delta, top=top)
     # Create a report of adjusted probabilities
     report_adjusted_proba_df = generate_adjusted_probabilities_report(adjusted_proba_df)
     # Save the selected and scaled probabilities report to CSV
