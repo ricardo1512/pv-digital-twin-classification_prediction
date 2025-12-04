@@ -173,7 +173,7 @@ if __name__ == '__main__':
                         help="Create and preprocess inference test set applying smoothing [Default: 48 (4 hours)].")
 
     # ------------------------------------------------------------------------------
-    # Block A.2.2: Perform Inference on Real Data   
+    # Block A.2.2: Perform Inference on Real Data    
     # ------------------------------------------------------------------------------
     parser.add_argument('--inference_run', type=str, 
                         help="Run inference with option of the path to the inference test set CSV file.")
