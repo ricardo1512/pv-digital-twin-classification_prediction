@@ -50,12 +50,14 @@ def ts_daily_classification(input_file, output_csv_path=None, smooth=None, model
     else:
         raise ValueError(f"No valid time column found in {input_file}. Expected 'date' or 'collectTime'.")
 
+    # Ensure date column is datetime type
     df['date'] = pd.to_datetime(df['date'])
     df['day'] = df['date'].dt.date
     daily_groups = df.groupby('day')
 
     daily_prob_list = []
     
+    # Process each day
     for day, group in daily_groups:
         print(f"\tDay: {day}")
         group = group.set_index('date')
@@ -68,11 +70,13 @@ def ts_daily_classification(input_file, output_csv_path=None, smooth=None, model
                                "wind_speed_10m", "precipitation"]
             ]
             group[cols_to_smooth] = group[cols_to_smooth].rolling(window=48, min_periods=1).mean()
-
+            
+        # Compute daily comprehensive features
         daily_df = compute_store_daily_comprehensive_features(group, day)
         X_day = daily_df[classifier.feature_names_in_].to_frame().T
         probs = classifier.predict_proba(X_day)
         
+        # Store daily probabilities
         columns_names = [LABELS_MAP[c][0] for c in classifier.classes_]
         day_probs = pd.DataFrame(probs, columns=columns_names)
         day_probs.insert(0, 'date', day)
@@ -95,12 +99,16 @@ def synthetic_ts_daily_classification():
     Applies daily time-series classification to all raw synthetic CSV files in TS_SAMPLES_FOLDER.
     """
     print("\nStarting multiple time-series daily classifications...")
-
+    
+    # Base folder where raw synthetic CSV files are stored
     base_folder = Path(TS_SAMPLES_FOLDER)
     output_base = Path(PREDICTIONS_FOLDER) / "real_data_probabilities"
+    
+    # Iterate over subfolders that contain raw synthetic CSV files
     for subfolder in [f for f in base_folder.iterdir() if f.is_dir() and not f.name.startswith("real_data")]:
         print(f"\tProcessing subfolder: {subfolder.name}")
         
+        # Iterate over all raw synthetic CSV files inside the subfolder
         for file_path in subfolder.glob("*.csv"):
             print(f"\t\tProcessing file: {file_path.name}")
             output_csv_path = output_base / f"{file_path.stem}_daily_probabilities.csv"
@@ -155,7 +163,8 @@ def ts_predict_days(input_csv_path, output_csv_path=None,
     classes = [c for c in df_daily_probs.columns if c not in ['date', 'Normal']]
     predictions = []
 
-    last_day_index = len(df_daily_probs) - 1 # Last valid index for prediction
+    # Last valid index for prediction
+    last_day_index = len(df_daily_probs) - 1
 
     # Iterate over rolling window
     print(f"\nPerforming predictions on daily probabilities with "
@@ -165,6 +174,7 @@ def ts_predict_days(input_csv_path, output_csv_path=None,
         current_day = df_daily_probs.at[i, 'date']
         past_window = df_daily_probs.iloc[i - window:i]
 
+        # Iterate over each class
         for cls in classes:
             current_prob = df_daily_probs.at[i, cls]
 
@@ -191,7 +201,8 @@ def ts_predict_days(input_csv_path, output_csv_path=None,
             # Skip if prediction is invalid or in the past
             if relative_days <= 0 or predicted_index > last_day_index:
                 continue
-
+            
+            # Get predicted date and actual class at that date
             predicted_date = df_daily_probs.at[predicted_index, 'date']
             actual_probs = df_daily_probs.iloc[predicted_index].drop('date')
 
@@ -236,9 +247,11 @@ def ts_predict_days(input_csv_path, output_csv_path=None,
             'actual_class_at_predicted_day', 'slope', 'intercept'
         ])
 
+    # Create DataFrame from predictions
     df_predictions = pd.DataFrame(predictions)
     df_predictions.sort_values(by=['date', 'class'], inplace=True)
 
+    # Save predictions to CSV
     df_predictions.to_csv(output_csv_path, index=False)
     print(f"Predictions exported to: {output_csv_path}")
     
