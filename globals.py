@@ -46,7 +46,6 @@ FILE_YEAR_TEST = (
 )                                               # Weather 2024
 TRAIN_VALID_SET_FILE = f"{DATASETS_FOLDER}/trainset_2023.csv"  # Training + validation dataset
 TEST_SET_FILE = f"{DATASETS_FOLDER}/testset_2024.csv"          # Test dataset
-XGB_BEST_MODEL_SUMMER = f"{MODELS_FOLDER}/xgb_best_model_summer.joblib"  # Pretrained XGBoost model for summer
 
 # ==============================
 # Meteorological Data Columns

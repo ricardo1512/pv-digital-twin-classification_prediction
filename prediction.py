@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
@@ -9,7 +10,7 @@ from plot_ts_prediction import *
 from utils import *
 
 
-def ts_daily_classification(input_file, output_csv_path=None, smooth=None, model_path=XGB_BEST_MODEL_SUMMER):
+def ts_daily_classification(input_file, all_year=False, winter=False, output_csv_path=None, smoothing=48):
     """
     Performs daily classification of time-series data using a pre-trained model
     and plots the resulting daily class probabilities.
@@ -23,9 +24,12 @@ def ts_daily_classification(input_file, output_csv_path=None, smooth=None, model
     Returns:
         None
     """
-    
+    # Convert input paths to Path objects
     input_file = Path(input_file)
     print(f"Performing time series daily classification for {input_file}...")
+    
+    # Determine the active season, its corresponding months, and a formatted name for file usage
+    season_name, _, season_name_file = determine_season(all_year, winter)
 
     # Generate default output CSV path if not provided
     if output_csv_path is None:
@@ -33,11 +37,18 @@ def ts_daily_classification(input_file, output_csv_path=None, smooth=None, model
     output_csv_path = Path(output_csv_path)
     
     # Load the pre-trained model
-    model_file_path = Path(model_path)
-    if not model_file_path.exists():
-        print(f"Model file not found: {model_file_path}\n\tPlease, train a summer model first.")
-        return
-    classifier = joblib.load(model_file_path)
+    xgb_model_path = f"{MODELS_FOLDER}/xgb_best_model_{season_name_file}.joblib"
+        # Raise an exception if the model file does not exist
+    xgb_model_file_path = Path(xgb_model_path)
+    if not os.path.exists(xgb_model_file_path):
+        print(
+            f"\nXGBoost model file not found: {xgb_model_path}\n"
+            f"\tPlease train the model first for {season_name} (--{season_name_file}).\n"
+        )
+        exit()
+    
+    # Load pre-trained XGBoost model
+    classifier = joblib.load(xgb_model_file_path)
     
     # Load CSV
     df = pd.read_csv(input_file)
@@ -63,13 +74,13 @@ def ts_daily_classification(input_file, output_csv_path=None, smooth=None, model
         group = group.set_index('date')
         
         # Smooth numeric features if needed
-        if smooth:
+        if smoothing:
             cols_to_smooth = [
                 col for col in df.select_dtypes(include='number').columns
                 if col not in ["inverter_state", "diffuse_radiation", "global_tilted_irradiance", 
                                "wind_speed_10m", "precipitation"]
             ]
-            group[cols_to_smooth] = group[cols_to_smooth].rolling(window=48, min_periods=1).mean()
+            group[cols_to_smooth] = group[cols_to_smooth].rolling(window=smoothing, min_periods=1).mean()
             
         # Compute daily comprehensive features
         daily_df = compute_store_daily_comprehensive_features(group, day)

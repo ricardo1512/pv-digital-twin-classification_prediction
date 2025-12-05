@@ -110,7 +110,7 @@ The end-to-end pipeline is divided into **Classification** and **Prediction** wo
 ## B. Prediction Workflow (Time-Series)
 
 ### 1. Anomaly Sample Generation for Prediction
-- Generates synthetic time series representing anomalies (soiling, shading, and cracks).
+- Generates synthetic time series representing anomalies (soiling, shading, and cracks) for the summer season.
 - Plots visualize anomaly patterns.
 - **Script:** `create_ts_samples.py`
 - **CLI Option:** `--create_ts_samples`
@@ -118,7 +118,7 @@ The end-to-end pipeline is divided into **Classification** and **Prediction** wo
 ### 2. Daily Classification
 
 #### 2.1 Synthetic Time Series
-- Performs daily classification on synthetic time series samples.
+- Performs daily classification on synthetic summer time series samples.
 - Generates plots showing classification results.
 - **Script:** `prediction.py`
 - **CLI Option:** `--synthetic_ts_daily_classification`
@@ -288,7 +288,7 @@ Each function receives specific inputs and generates standardized outputs used i
 ## Usage / How to Run
 The complete pipeline can be executed using the command-line interface (`argparse`).
 
-By default, in the classification the training season is set to **Summer** (April to September) since the inverter data used for inference, stored in the `Inverters` folder, was collected during this period. However, if other datasets are used, the season can be changed to **Winter** (October to March) (`--winter`) or **All Year** (`--all_year`).
+By default, for classification and prediction the training season is set to **Summer** (April to September) since the inverter data used for inference, stored in the `Inverters` (Classification) and `TS_samples/real_data` (Prediction) folders, was collected during this period. However, if other datasets are used for inference or prediction, the season can be changed to **Winter** (October to March) (`--winter`) or **All Year** (`--all_year`).
 
 ### 1. Examples of full, recommended workflows
 
@@ -338,6 +338,14 @@ python main.py --real_ts_daily_classification "TS_samples/real_data/inverter_Ave
 | 4. Predict anomalies in synthetic time series with thresholds/windows | `python main.py --synthetic_ts_predict_days --synt_threshold_start <v> --synt_threshold_target <v> --synt_threshold_class <v> --synt_window <N>` |
 | 5. Predict anomalies in real time series | `python main.py --ts_predict_days <path>` |
 | 5. Predict anomalies in real time series with thresholds/windows | `python main.py --ts_predict_days <path> --real_threshold_start <v> --real_threshold_target <v> --real_threshold_class <v> --real_window <N>` |
+
+---
+
+## Real Data
+### Classification (inference)
+Se desejar run inference on a specific file with `python main.py --inference_run <path>`, optionally indicando season, é necessário que o file se encontre na pasta `Datasets/` e siga o formato de input esperado, ou seja, uma série de raws com as seguintes features.
+
+### Prediction
 
 ---
 

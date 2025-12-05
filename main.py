@@ -50,22 +50,14 @@ def run(args):
     # -------------------------------------------------------------------------------
     # Block A.2.2: Perform Inference on Real Data
     # -------------------------------------------------------------------------------
-    if args.inference_run or args.delta or args.top:
-        kwargs = {}
-
-        if isinstance(args.inference_run, str):
-            kwargs['inference_test_file'] = args.inference_run
-
-        if args.delta is not None:
-            kwargs['delta'] = args.delta
-
-        if args.top is not None:
-            kwargs['top'] = args.top
-
+    if args.inference_run or args.inference_smooth or args.inference_run_user or args.delta or args.top:
         inference(
             all_year=args.all_year,
             winter=args.winter,
-            **kwargs
+            inference_user=args.inference_run_user,
+            smoothing=args.inference_smooth,
+            delta=args.delta,
+            top=args.top,
         )
 
     # -------------------------------------------------------------------------------
@@ -87,7 +79,7 @@ def run(args):
     if args.real_ts_daily_classification or args.ts_smooth:
         ts_daily_classification(
             input_file=args.real_ts_daily_classification,
-            smooth=args.ts_smooth
+            smoothing=args.ts_smooth
         )
 
     # -------------------------------------------------------------------------------
@@ -95,44 +87,28 @@ def run(args):
     # -------------------------------------------------------------------------------
     if args.synthetic_ts_predict_days or args.synt_threshold_start \
         or args.synt_threshold_target or args.synt_threshold_class or args.synt_window:
-        kwargs = {}
-
-        if args.synt_threshold_start is not None:
-            kwargs['threshold_start'] = args.synt_threshold_start
-
-        if args.synt_threshold_target is not None:
-            kwargs['threshold_target'] = args.synt_threshold_target
-
-        if args.synt_threshold_class is not None:
-            kwargs['threshold_class'] = args.synt_threshold_class
-
-        if args.synt_window is not None:
-            kwargs['window'] = args.synt_window
-            
-        synthetic_ts_predict_days(**kwargs)
+      
+        synthetic_ts_predict_days(
+            all_year=args.all_year,
+            winter=args.winter,
+            threshold_start=args.synt_threshold_start,
+            threshold_target=args.synt_threshold_target,
+            threshold_class=args.synt_threshold_class,
+            window=args.synt_window,
+        )
 
     # ------------------------------------------------------------------------------
     # Block B.3.2: Predict Anomalies in Real Time Series, with Plots
     # ------------------------------------------------------------------------------
     if args.ts_predict_days or args.real_threshold_start \
         or args.real_threshold_target or args.real_threshold_class or args.real_window: 
-        kwargs = {}
-        
-        if args.real_threshold_start is not None:
-            kwargs['threshold_start'] = args.real_threshold_start  
-        
-        if args.real_threshold_target is not None:
-            kwargs['threshold_target'] = args.real_threshold_target
-        
-        if args.real_threshold_class is not None:
-            kwargs['threshold_class'] = args.real_threshold_class
-        
-        if args.real_window is not None:
-            kwargs['window'] = args.real_window
             
         ts_predict_days(
+            threshold_start=args.real_threshold_start,
+            threshold_target=args.real_threshold_target,
+            threshold_class=args.real_threshold_class,
+            window=args.real_window,
             input_csv_path=args.ts_predict_days,
-            **kwargs
         )
 
     
@@ -160,25 +136,34 @@ if __name__ == '__main__':
     parser.add_argument('--xgboost_run', action='store_true', help="Run XGBoost model.")
 
     # ------------------------------------------------------------------------------
-    # Block A.2: Inference Workflow Options
-    # ------------------------------------------------------------------------------
-    parser.add_argument('--all_year', action='store_true', help="Select all months [Default: Summer].")
-    parser.add_argument('--winter', action='store_true', help="Select winter months [Default: Summer].")
-    # ------------------------------------------------------------------------------
     # Block A.2.1: Create and Preprocess the Inference Test Set
     # ------------------------------------------------------------------------------
     parser.add_argument('--create_inference_set', action='store_true', 
                         help="Create and preprocess inference test set.")
-    parser.add_argument('--create_inference_set_smooth', type=int, default=48,
-                        help="Create and preprocess inference test set applying smoothing [Default: 48 (4 hours)].")
+    parser.add_argument('--create_inference_set_smooth', type=int, default=24,
+                        help="Create and preprocess inference test set applying smoothing [Default: 24 (2 hours)].")
 
     # ------------------------------------------------------------------------------
     # Block A.2.2: Perform Inference on Real Data
     # ------------------------------------------------------------------------------
-    parser.add_argument('--inference_run', type=str, 
-                        help="Run inference with option of the path to the inference test set CSV file.")
-    parser.add_argument('--delta', type=float, help="Delta value for adjusting probabilities [Default: 0.2].")
-    parser.add_argument('--top', type=int, help="Top N probabilities to consider for adjustment [Default: 2].")
+    parser.add_argument('--inference_run', action='store_true', 
+                        help="Run inference using the available real set.")
+    parser.add_argument('--inference_run_user', action='store_true', 
+                        help="Run inference providing new real data.")
+    parser.add_argument('--inference_smooth', type=int, default=24,
+                        help="Smoothing window for the new real data [Default: 24 (2 hours)].")
+    parser.add_argument('--delta', type=float, default=0.2,
+                        help="Delta value for adjusting probabilities [Default: 0.2].")
+    parser.add_argument('--top', type=int, default=2,
+                        help="Top N probabilities to consider for adjustment [Default: 2].")
+    
+    
+    # ------------------------------------------------------------------------------
+    # Classification, Inference and Prediction Season Options
+    # ------------------------------------------------------------------------------
+    parser.add_argument('--all_year', action='store_true', help="Select all months [Default: Summer].")
+    parser.add_argument('--winter', action='store_true', help="Select winter months [Default: Summer].")
+    
     
     # ==============================================================================
     # B. PREDICTION WORKFLOW OPTIONS
@@ -199,7 +184,7 @@ if __name__ == '__main__':
     # ------------------------------------------------------------------------------
     parser.add_argument('--real_ts_daily_classification', type=str, 
                         help="Perform daily classification with path to real time series.")
-    parser.add_argument('--ts_smooth', type=int, 
+    parser.add_argument('--ts_smooth', type=int, default=48,
                         help="Apply smoothing to real time series [Default: 48 (4 hours)].")
     
     # ------------------------------------------------------------------------------
@@ -207,13 +192,13 @@ if __name__ == '__main__':
     # ------------------------------------------------------------------------------
     parser.add_argument('--synthetic_ts_predict_days', action='store_true', 
                         help="Perform prediction in synthetic time series.")
-    parser.add_argument('--synt_threshold_start', type=float, 
+    parser.add_argument('--synt_threshold_start', type=float, default=0.5,
                         help="Threshold to start predicting an anomaly [Default: 0.5].")
-    parser.add_argument('--synt_threshold_target', type=float, 
+    parser.add_argument('--synt_threshold_target', type=float, default=0.8,
                         help="Target threshold for predicting an anomaly [Default: 0.8].")
-    parser.add_argument('--synt_threshold_class', type=float, 
+    parser.add_argument('--synt_threshold_class', type=float, default=0.2,
                         help="Class threshold for predicting an anomaly [Default: 0.2].")
-    parser.add_argument('--synt_window', type=int, 
+    parser.add_argument('--synt_window', type=int, default=30,
                         help="Window size for prediction [Default: 30].")
     
     # ------------------------------------------------------------------------------
@@ -221,13 +206,13 @@ if __name__ == '__main__':
     # ------------------------------------------------------------------------------
     parser.add_argument('--ts_predict_days', type=str, 
                         help="Perform prediction with path to real time series.")
-    parser.add_argument('--real_threshold_start', type=float, 
+    parser.add_argument('--real_threshold_start', type=float, default=0.5,
                         help="Threshold to start predicting an anomaly [Default: 0.5].")
-    parser.add_argument('--real_threshold_target', type=float, 
+    parser.add_argument('--real_threshold_target', type=float, default=0.8,
                         help="Target threshold for predicting an anomaly [Default: 0.8].")
-    parser.add_argument('--real_threshold_class', type=float, 
+    parser.add_argument('--real_threshold_class', type=float, default=0.2,
                         help="Class threshold for predicting an anomaly [Default: 0.2].")
-    parser.add_argument('--real_window', type=int, 
+    parser.add_argument('--real_window', type=int, default=30,
                         help="Window size for prediction [Default: 30].")
     
     args = parser.parse_args()

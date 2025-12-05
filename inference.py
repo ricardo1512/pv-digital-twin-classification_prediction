@@ -2,10 +2,11 @@ import pandas as pd
 import joblib
 from pathlib import Path
 
+from create_preprocess_inference_set import *
 from utils import *
 from plot_inference import *
 
-def inference(all_year=False, winter=False, inference_test_file=None, delta=0.2, top=2):
+def inference(all_year=False, winter=False, inference_user=False, smoothing=24, delta=0.2, top=2):
     """
     Run inference on a real dataset using a pre-trained XGBoost classifier.
 
@@ -54,10 +55,11 @@ def inference(all_year=False, winter=False, inference_test_file=None, delta=0.2,
     xgb_model_path = f"{MODELS_FOLDER}/xgb_best_model_{season_name_file}.joblib"
     
     # Preprocessed inference test set
-    if inference_test_file is None:
+    if inference_user is None:
         test_file = f"{DATASETS_FOLDER}/inference_test_set_before_classification_{season_name_file}.csv"
     else:
-        test_file = inference_test_file
+        
+        test_file = create_preprocess_inference_set(smoothing=smoothing, all_year=all_year, winter=winter, inference_user=True)
     
     # OUTPUT FILES AND FOLDERS
     # Results

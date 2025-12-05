@@ -2,7 +2,7 @@ import os
 
 from utils import *
 
-def create_preprocess_inference_set(smoothing=False, all_year=False, winter=False):
+def create_preprocess_inference_set(smoothing=24, all_year=False, winter=False, inference_user=False):
     """
      Preprocesses inverter CSV data for inference by extracting daily features.
 
@@ -25,11 +25,16 @@ def create_preprocess_inference_set(smoothing=False, all_year=False, winter=Fals
     # Determine the active season, its corresponding months, and a formatted name for file usage
     season_name, _, season_name_file = determine_season(all_year, winter)
     
-    # Input folder
-    input_folder = "Inverters"
-    
-    # Output file path
-    output_path = f"{DATASETS_FOLDER}/inference_test_set_before_classification_{season_name_file}.csv"
+    if inference_user:
+        # Input folder
+        input_folder = "Datasets/user"
+        # Output file path
+        output_path = f"{DATASETS_FOLDER}/user_inference_test_set_before_classification_{season_name_file}.csv"
+    else:
+        # Input folder
+        input_folder = "Inverters"
+        # Output file path
+        output_path = f"{DATASETS_FOLDER}/inference_test_set_before_classification_{season_name_file}.csv"
 
     # Get all CSV files in the input folder
     csv_files = [
@@ -54,8 +59,9 @@ def create_preprocess_inference_set(smoothing=False, all_year=False, winter=Fals
 
         # Process data grouped by each day
         for day, group in df.groupby(df['collectTime'].dt.date):
-            # Only consider days when the inverter was active (state 768)
-            if (group['inverter_state'] == 768).any():
+            # Only consider days when the inverter was 768 (high probability of abnormal operation)
+            # or all cases for user data
+            if (group['inverter_state'] == 768).any() or inference_user:
 
                 # Select numeric columns to smooth, excluding inverter_state and weather features
                 cols_to_smooth = [
@@ -68,7 +74,7 @@ def create_preprocess_inference_set(smoothing=False, all_year=False, winter=Fals
                     # Apply moving average smoothing to the selected columns
                     group[cols_to_smooth] = (
                         group[cols_to_smooth]
-                        .rolling(window=24, min_periods=1)
+                        .rolling(window=smoothing, min_periods=1)
                         .mean()
                     )
 
@@ -93,3 +99,5 @@ def create_preprocess_inference_set(smoothing=False, all_year=False, winter=Fals
     # Save the final processed DataFrame to CSV
     final_df.to_csv(output_path, index=False)
     print(f"Final results saved to {output_path}")
+
+    return output_path
