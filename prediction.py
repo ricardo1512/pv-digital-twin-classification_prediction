@@ -103,6 +103,8 @@ def ts_daily_classification(input_file, all_year=False, winter=False, output_csv
     output_image_prob.parent.mkdir(parents=True, exist_ok=True)
     plot_daily_class_probabilities(output_csv_path, output_image_prob)
     print(f"Daily probabilities plot saved to: {output_image_prob}")
+    
+    return output_csv_path
 
     
 def synthetic_ts_daily_classification():
