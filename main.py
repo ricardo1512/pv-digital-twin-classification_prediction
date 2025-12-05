@@ -116,7 +116,7 @@ def run(args):
         )
     
     
-if __name__ == '__main__': 
+if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Run the full ML workflow.")
     
     # ---------------------------------------------------------------------------------------
