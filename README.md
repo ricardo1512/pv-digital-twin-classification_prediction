@@ -70,20 +70,20 @@ The end-to-end pipeline is divided into **Classification** and **Prediction** wo
 
 ### 1. Training Workflow
 
-#### 1. Create Samples for Classification
+#### 1.1. Create Samples for Classification
 - Simulates photovoltaic system operation under normal conditions and various anomaly and fault scenarios using a digital twin.
 - Optional plots can be generated to visualize each scenario and verify simulation quality.
 - **Script:** `create_day_samples.py`
 - **CLI Options:** `--create_samples`, `--create_samples_with_plots`
 
-#### 2. Create Train and Test Sets
+#### 1.2. Create Train and Test Sets
 - Aggregates simulated samples into unified **training** and **testing** datasets.
 - Ensures proper temporal and seasonal coverage.
 - Handles splitting and formatting for supervised learning.
 - **Script:** `create_train_test_sets.py`
 - **CLI Option:** `--create_train_test`
 
-#### 3. Run the XGBoost Model
+#### 1.3. Run the XGBoost Model
 - Trains and evaluates a **XGBoost classifier** for anomaly and fault detection.
 - Metrics include accuracy, precision, recall, F1-score.
 - Performance plots are generated.
@@ -92,21 +92,21 @@ The end-to-end pipeline is divided into **Classification** and **Prediction** wo
 
 ### 2. Inference Workflow
 
-#### 1. Create and Preprocess the Inference Test Set
+#### 2.1. Create and Preprocess the Inference Test Set
 - Preprocesses real inverter data for model inference.
 - Recommended to apply smoothing to reduce noise from cloud transients or measurement fluctuations.
 - Supports configuration of smoothing window (12 for each hour).
 - **Script:** `create_preprocess_inference_set.py`
 - **CLI Options:** `--create_inference_set`, `--create_inference_set_smooth`, `--all_year`, `--winter`
 
-#### 2. Perform Inference on Real Data
+#### 2.2. Perform Inference on Real Data
 - Performs model inference on the prepared dataset.
 - Generates diagnostic reports including probability distributions and anomaly recommendations.
 - **Delta (`--delta`) and Top (`--top`) options** are used for **probabilistic recommendation analysis**:
   - `--top` selects the N most important class probabilities for inspection.
   - `--delta` defines a tolerance value: if a class probability is within `delta` of the highest class probability, it will also be considered as a potential recommendation.
 - **Script:** `inference.py`
-- **CLI Options:** `--inference_run`, `--inference_smooth`,`--inference_run_user`, `--delta`, `--top`
+- **CLI Options:** `--inference_run_user`, `--inference_smooth`,`--inference_run_user`, `--delta`, `--top`, `--all_year`, `--winter`
 
 
 ---
@@ -121,37 +121,37 @@ The end-to-end pipeline is divided into **Classification** and **Prediction** wo
 
 ### 2. Synthetic Time Series Prediction, with Plots
 
-#### 1 Perform Daily Classification
+#### 2.1. Perform Daily Classification
 - Performs daily classification on synthetic summer time series samples.
 - Generates plots showing classification results.
 - **Script:** `prediction.py`
 - **CLI Option:** `--synthetic_ts_daily_classification`
 
-#### 2 Predict Anomalies
+#### 2.2. Predict Anomalies
 - Predicts future anomalies in synthetic time series using configurable thresholds and window sizes.
 - Generates visualizations of predicted anomaly days.
 - **Script:** `prediction.py`
-- **CLI Options:** `--synthetic_ts_predict_days`, `--all_year`, `--winter`, `--synt_threshold_start`, `--synt_threshold_target`, `--synt_threshold_class`, `--synt_window`
+- **CLI Options:** `--synthetic_ts_predict_days`,`--synt_threshold_start`, `--synt_threshold_target`, `--synt_threshold_class`, `--synt_window`
 
 
-
-#### 3. Perform Daily Classification and Prediction in Real Time Series, with Plots
+### 3. Perform Daily Classification and Prediction in Real Time Series, with Plots
 - Performs daily classification on real inverter time series data.
 - Optional smoothing can be applied to reduce measurement noise.
 - **Script:** `prediction.py`
-- **CLI Options:** `--real_ts_prediction`, `--ts_smooth`, `real_threshold_start`, `--real_threshold_target`, `--real_threshold_class`, `--real_window`
+- **CLI Options:** `--real_ts_prediction`, `--ts_smooth`, `real_threshold_start`, `--real_threshold_target`, `--real_threshold_class`, `--real_window`, `--all_year`, `--winter`
 
----
-
-## C. Notes
-- All CLI options can be combined to run multiple workflow stages in sequence.
-- Smoothing parameters are optional but recommended for real data.
-- Default behaviour assumes summer months; use `--all_year` or `--winter` to adjust seasonal coverage.
-- **Time-Series Prediction sensitivity analysis parameters:**
+### Note: 
+**Time-Series Prediction sensitivity analysis parameters:**
   - `start` (`--*_threshold_start`): start percentage from which regression begins.
   - `target` (`--*_threshold_target`): target percentage in the future that the regression aims to exceed.
   - `class` (`--*_threshold_class`): class tolerance, allowing prediction to be considered correct if it is within this delta below the majority class probability.
   - `window` (`--*_window`): number of past samples considered for regression.
+---
+
+## C. Options
+- CLI options can be combined to run multiple workflow stages in sequence.
+- Smoothing parameters are optional but recommended for real data.
+- Default behaviour assumes summer months; use `--all_year` or `--winter` to adjust seasonal coverage.
 
 
 ---
@@ -159,25 +159,27 @@ The end-to-end pipeline is divided into **Classification** and **Prediction** wo
 
 Each function receives specific inputs and generates standardized outputs used in subsequent stages.
 
-### Classification Workflow
-#### 1. `create_samples()`
+### A. Classification Workflow (Daily Samples)
 
-**Inputs:**
+#### **1. Training Workflow**
+##### **1.1. Create Samples for Classification:** `create_samples()`
+
+Inputs:
 - Meteorological data
   - `Weather/Classification/[LOCAL]_weather_2023.csv`
   - `Weather/Classification/[LOCAL]_weather_2024.csv`
 
-**Outputs:**
+Outputs:
 - Simulated sample data stored in `Samples_2023/` and `Samples_2024/`
 - Optional plots saved in `Plots/`
 
 
-#### 2. `create_train_test_sets()`
+##### **1.2. Create Train and Test Sets:** `create_train_test_sets()`
 
-**Inputs:**
+Inputs:
 - Simulated sample data stored in `Samples_2023/` and `Samples_2024/`
 
-**Outputs:**
+Outputs:
 - Consolidated datasets in `Datasets/`  
   - `train_set.csv`  
   - `test_set.csv`
@@ -186,14 +188,14 @@ Each function receives specific inputs and generates standardized outputs used i
   - `testset_2024_scatter_iv.png`
 
 
-#### 3. `xgboost_classifier()`
+##### **1.3. Run the XGBoost Model:** `xgboost_classifier()`
 
-**Inputs:**
+Inputs:
 - Consolidated datasets in `Datasets/`  
   - `train_set.csv`  
   - `test_set.csv`
 
-**Outputs:**
+Outputs:
 - Trained XGBoost model saved in `Models/xgb_best_model_*.joblib`
 - Classification reports and accuracy metrics in `Reports/`:
   - `xgb_validation_classification_report_*.csv`
@@ -216,21 +218,23 @@ Each function receives specific inputs and generates standardized outputs used i
   - `xgb_fp_tp_curve_test_*.png`
 
 
-#### 4. `create_inference_set()`
+#### **2. Inference Workflow**
 
-**Inputs:**
+##### **2.1. Create and Preprocess the Inference Test Set:** `create_inference_set()`
+
+Inputs:
 - Real inverter measurements: `Inverters/*.csv`
 
-**Outputs:**
+Outputs:
 - Preprocessed inference dataset: `Datasets/inference_test_set_before_classification_*.csv`
 
-#### 5. `inference()`
+##### **2.2. Perform Inference on Real Data:** `inference()`
 
-**Inputs:**
+Inputs:
 - Trained model: `Models/xgb_best_model_*.joblib`
 - Inference dataset: `Datasets/inference_test_set_before_classification_*.csv`
 
-**Outputs:**:
+Outputs::
 - Classified data in `Datasets`: 
   - `inference_test_set_with_classification_*.csv`
 - Results in `Reports`:
@@ -245,37 +249,39 @@ Each function receives specific inputs and generates standardized outputs used i
   - `Plots/Probabilities/Plots_inference_probabilities_*/`
   - `Plots/Probabilities_scaled/Plots_inference_probabilities_*/`
 
-### Prediction Workflow
+### B. Prediction Workflow (Time-Series)
 
-#### 1. `create_ts_samples()`
+#### **1. Create Anomaly Samples for Prediction, with Plots:** `create_ts_samples()`
 
-**Inputs:**
+Inputs:
 - Meteorological data
   - `Weather/Prediction/weather_*.csv`
 
-**Outputs:**
+Outputs:
 - Simulated sample data stored in `TS_samples/*/`
 - Optional plots saved in `Plots/TS_samples/*/`
 
-#### 2. `ts_daily_classification()` (single) and `synthetic_ts_daily_classification()` (multiple)
+#### **2. Synthetic Time Series Prediction, with Plots**
 
-**Inputs:**
+##### **2.1. Perform Daily Classification:** `ts_daily_classification()` (synthetic or real, single files) and `synthetic_ts_daily_classification()` (synthetic, multiple files)
+
+Inputs:
 - Single time-series CSV file:  
   - `TS_samples/*/*.csv`    
 
-**Outputs:**
+Outputs:
 - Daily classification probabilities CSV:  
   - `Predictions/real_data_probabilities/*_daily_probabilities.csv`  
 - Daily probabilities plot:  
   - `Plots/TS_probabilities/*_daily_probabilities.png`  
 
-#### 3. `ts_predict_days()` (single) and `synthetic_ts_predict_days()` (multiple)
+##### **2.2. Predict Anomalies:** `ts_predict_days()` (synthetic or real, single files) and `synthetic_ts_predict_days()` (synthetic, multiple files)
 
-**Inputs:**
+Inputs:
 - Daily probability CSV file:  
   - `Predictions/real_data_probabilities/*.csv`   
 
-**Outputs:**
+Outputs:
 - Predictions CSV with estimated days to reach target probability:  
   - `Predictions/real_data_predictions/*_daily_predictions.csv`  
 - Prediction plot (Cleveland-style) for visualizing estimated days:  
@@ -342,10 +348,39 @@ python main.py --real_ts_prediction "TS_samples/real_data/inverter_Aveiro_060.cs
 
 ## Real Data
 ### 1. Classification
-Se desejar run inference on specific file(s) with `--inference_run_user` é necessário que o(s) file(s), em formato `.csv` se encontre(m) na pasta `Datasets/user` e siga(m) o formato de input esperado, ou seja, uma série de raws com as seguintes features:
+To run inference on specific file(s) using `--inference_run_user`, the file(s) in `.csv` format must be placed in the `Datasets/user` folder.
 
 ### 2. Prediction
-Se desejar run prediction on a specific file with `--real_ts_prediction` é necessário que o file, em formato `.csv` se encontre(m) na pasta `TS_samples/real_data` e siga(m) o formato de input esperado, ou seja, uma série de raws com as seguintes features:
+To run prediction on a specific file using `--real_ts_prediction`, the `.csv` file must be placed in the `TS_samples/real_data` folder.
+
+### 3. Features
+For both classification and prediction, the dataset is expected to represent a PV system with a single string and must follow the required input format, consisting of a series of rows with 5-minute intervals and the following features:
+
+
+| Name                     | Meaning                                               | Datatype | Unit        |
+|--------------------------|-------------------------------------------------------|----------|-------------|
+| `collectTime`              | Timestamp of the measurement (e.g., 2025-05-09 06:00:00)                          | datetime | str           |
+|
+| `pv1_u`                    | PV string voltage                                   | float    | V           |
+| `pv1_i`                    | PV string current                                   | float    | A           |
+| `a_u`                      | Phase A voltage                                       | float    | V           |
+| `b_u`                      | Phase B voltage                                       | float    | V           |
+| `c_u`                      | Phase C voltage                                       | float    | V           |
+| `ab_u`                     | Line voltage between phases A-B                       | float    | V           |
+| `bc_u`                     | Line voltage between phases B-C                       | float    | V           |
+| `ca_u`                     | Line voltage between phases C-A                       | float    | V           |
+| `a_i`                      | Phase A current                                       | float    | A           |
+| `b_i`                      | Phase B current                                       | float    | A           |
+| `c_i`                      | Phase C current                                       | float    | A           |
+| `mppt_power`               | MPPT output power                               | float    | kW           |
+| `active_power`             | Inverter active power                                 | float    | kW           |
+| `efficiency`               | Inverter instantaneous efficiency                     | float    | %           |
+| `inv_temperature`          | Inverter internal temperature                         | float    | °C          |
+| `temperature_2m`           | Ambient temperature at 2 meters                       | float    | °C          |
+| `diffuse_radiation`        | DHI: Diffuse solar radiation                               | float    | W/m²        |
+| `global_tilted_irradiance` | GTI: Global tilted solar irradiance                       | float    | W/m²        |
+| `wind_speed_10m`           | Wind speed at 10 meters                               | float    | m/s         |
+| `precipitation`            | Precipitation                                         | float    | mm/h  |
 
 ---
 
@@ -398,15 +433,15 @@ Se desejar run prediction on a specific file with `--real_ts_prediction` é nece
 
 All adjustable parameters are in **`globals.py`**:
 
-- **Location**: `LOCAL`, `LATITUDE`, `LONGITUDE`  
+- **Training Location**: `LOCAL`, `LATITUDE`, `LONGITUDE`  
 - **PV System**: `MODULES_PER_STRING`, `LABEL`, `YEARS`  
 - **Folders**: Weather, datasets, samples, models, images, plots, reports, predictions  
-- **Data Files**: Paths for train/test sets and pre-trained models  
+- **Data Files**: Paths for train and test  
 - **Meteorological Inputs**: `global_tilted_irradiance`, `diffuse_radiation`, `temperature_2m`, `wind_speed_10m`, `precipitation`  
-- **Classification & Prediction**: Hours (`CLASSIFICATION_HOUR_INIT/END`, `PREDICTION_HOUR_INIT/END`), `TOP_FEATURES`, plotting time range  
-- **Anomalies & Faults**: Crack degradation scenarios, `LABELS_MAP` for visualization  
-- **Plotting Defaults**: `MPPT_PALETTE`, `CURR_VOLT_PALETTE`  
-- **Optional Coordinates**: `COORDINATES` for multi-site setups
+- **Classification & Prediction**: Plotting, classification and prediction time range, `TOP_FEATURES`,  
+- **Anomalies**: Crack degradation scenarios
+- **Plotting Defaults**: `LABELS_MAP`, `MPPT_PALETTE`, `CURR_VOLT_PALETTE`  
+- **Optional Coordinates**: `COORDINATES` for time series generation in multi-site setups 
 
 
 ---

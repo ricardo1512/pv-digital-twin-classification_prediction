@@ -107,7 +107,7 @@ def ts_daily_classification(input_file, all_year=False, winter=False, output_csv
     return output_csv_path
 
     
-def synthetic_ts_daily_classification():
+def synthetic_ts_daily_classification(all_year=False, winter=False):
     """
     Applies daily time-series classification to all raw synthetic CSV files in TS_SAMPLES_FOLDER.
     """
@@ -125,7 +125,7 @@ def synthetic_ts_daily_classification():
         for file_path in subfolder.glob("*.csv"):
             print(f"\t\tProcessing file: {file_path.name}")
             output_csv_path = output_base / f"{file_path.stem}_daily_probabilities.csv"
-            ts_daily_classification(file_path, output_csv_path)
+            ts_daily_classification(file_path, output_csv_path, all_year=all_year, winter=winter)
             
 
 def ts_predict_days(input_csv_path, output_csv_path=None, 

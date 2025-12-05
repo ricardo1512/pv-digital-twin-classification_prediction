@@ -92,8 +92,8 @@ EXPORT_COLUMNS = [
 CLASSIFICATION_HOUR_INIT = '04:00'  # Start hour for classification
 CLASSIFICATION_HOUR_END = '22:00'   # End hour for classification
 TOP_FEATURES = 20                   # Number of top features to consider for classification
-TIME_INIT = "05:00"                 # Start time for classification and prediction plots
-TIME_END = "21:00"                  # End time for classification and prediction plots
+PLOT_TIME_INIT = "05:00"            # Start time for daily samples plots
+PLOT_TIME_END = "21:00"             # End time for daily samples plots
 PREDICTION_HOUR_INIT = '04:00'      # Start hour for prediction
 PREDICTION_HOUR_END = '22:00'       # End hour for prediction
 

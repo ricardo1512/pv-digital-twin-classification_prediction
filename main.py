@@ -87,8 +87,6 @@ def run(args):
         or args.synt_threshold_target or args.synt_threshold_class or args.synt_window:
       
         synthetic_ts_predict_days(
-            all_year=args.all_year,
-            winter=args.winter,
             threshold_start=args.synt_threshold_start,
             threshold_target=args.synt_threshold_target,
             threshold_class=args.synt_threshold_class,
@@ -103,6 +101,8 @@ def run(args):
         # Daily Classification
         output_path_classification = ts_daily_classification(
             input_file=args.real_ts_prediction,
+            all_year=args.all_year,
+            winter=args.winter,
             smoothing=args.ts_smooth
         )
         

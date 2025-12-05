@@ -22,7 +22,7 @@ def plot_voltage(df_original, date, condition_title, output_folder, filename):
     """
 
     # Filter data by time
-    df = df_original.between_time(TIME_INIT, TIME_END)
+    df = df_original.between_time(PLOT_TIME_INIT, PLOT_TIME_END)
     
     # Check if the DataFrame contains the column for reference MPPT power measurements
     pv1_u_clean = 'pv1_u_clean' in df.columns
@@ -110,7 +110,7 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
     """
 
     # Filter data by time
-    df = df_original.between_time(TIME_INIT, TIME_END)
+    df = df_original.between_time(PLOT_TIME_INIT, PLOT_TIME_END)
     
     # Check if the DataFrame contains the column for reference MPPT power measurements
     pv1_i_clean = 'pv1_i_clean' in df.columns
@@ -229,7 +229,7 @@ def plot_mppt(df_original, date, condition_title, plot_folder, output_image, soi
     """
 
     # Filter data by time
-    df = df_original.between_time(TIME_INIT, TIME_END)
+    df = df_original.between_time(PLOT_TIME_INIT, PLOT_TIME_END)
     
     # Check if the DataFrame contains the column for reference MPPT power measurements
     mppt_clean = 'mppt_power_clean' in df.columns
