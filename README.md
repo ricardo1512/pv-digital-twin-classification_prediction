@@ -68,81 +68,78 @@ The end-to-end pipeline is divided into **Classification** and **Prediction** wo
 
 ## A. Classification Workflow (Daily Samples)
 
-### 1. Sample Generation
+### 1. Training Workflow
+
+#### 1. Create Samples for Classification
 - Simulates photovoltaic system operation under normal conditions and various anomaly and fault scenarios using a digital twin.
 - Optional plots can be generated to visualize each scenario and verify simulation quality.
 - **Script:** `create_day_samples.py`
 - **CLI Options:** `--create_samples`, `--create_samples_with_plots`
 
-### 2. Dataset Consolidation
+#### 2. Create Train and Test Sets
 - Aggregates simulated samples into unified **training** and **testing** datasets.
 - Ensures proper temporal and seasonal coverage.
 - Handles splitting and formatting for supervised learning.
 - **Script:** `create_train_test_sets.py`
 - **CLI Option:** `--create_train_test`
 
-### 3. Model Training and Evaluation
+#### 3. Run the XGBoost Model
 - Trains and evaluates a **XGBoost classifier** for anomaly and fault detection.
 - Metrics include accuracy, precision, recall, F1-score.
 - Performance plots are generated.
 - **Script:** `xgboost_classifier.py`
 - **CLI Options:** `--xgboost_run`, `--all_year`, `--winter`
 
-### 4. Inference Set Preparation
+### 2. Inference Workflow
+
+#### 1. Create and Preprocess the Inference Test Set
 - Preprocesses real inverter data for model inference.
 - Recommended to apply smoothing to reduce noise from cloud transients or measurement fluctuations.
-- Supports configuration of smoothing window.
+- Supports configuration of smoothing window (12 for each hour).
 - **Script:** `create_preprocess_inference_set.py`
-- **CLI Options:** `--create_inference_set`, `--create_inference_set_smooth`
+- **CLI Options:** `--create_inference_set`, `--create_inference_set_smooth`, `--all_year`, `--winter`
 
-### 5. Inference
+#### 2. Perform Inference on Real Data
 - Performs model inference on the prepared dataset.
 - Generates diagnostic reports including probability distributions and anomaly recommendations.
 - **Delta (`--delta`) and Top (`--top`) options** are used for **probabilistic recommendation analysis**:
   - `--top` selects the N most important class probabilities for inspection.
   - `--delta` defines a tolerance value: if a class probability is within `delta` of the highest class probability, it will also be considered as a potential recommendation.
 - **Script:** `inference.py`
-- **CLI Options:** `--inference_run`, `--inference_run_file`, `--delta`, `--top`
+- **CLI Options:** `--inference_run`, `--inference_smooth`,`--inference_run_user`, `--delta`, `--top`
 
 
 ---
 
 ## B. Prediction Workflow (Time-Series)
 
-### 1. Anomaly Sample Generation for Prediction
+### 1. Create Anomaly Samples for Prediction, with Plots
 - Generates synthetic time series representing anomalies (soiling, shading, and cracks) for the summer season.
 - Plots visualize anomaly patterns.
 - **Script:** `create_ts_samples.py`
 - **CLI Option:** `--create_ts_samples`
 
-### 2. Daily Classification
+### 2. Synthetic Time Series Prediction, with Plots
 
-#### 2.1 Synthetic Time Series
+#### 1 Perform Daily Classification
 - Performs daily classification on synthetic summer time series samples.
 - Generates plots showing classification results.
 - **Script:** `prediction.py`
 - **CLI Option:** `--synthetic_ts_daily_classification`
 
-#### 2.2 Real Time Series
-- Performs daily classification on real inverter time series data.
-- Optional smoothing can be applied to reduce measurement noise.
-- **Script:** `prediction.py`
-- **CLI Options:** `--real_ts_daily_classification`, `--ts_smooth`
-
-### 3. Time-Series Anomaly Prediction
-
-#### 3.1 Synthetic Time Series
+#### 2 Predict Anomalies
 - Predicts future anomalies in synthetic time series using configurable thresholds and window sizes.
 - Generates visualizations of predicted anomaly days.
 - **Script:** `prediction.py`
-- **CLI Options:** `--synthetic_ts_predict_days`, `--synt_threshold_start`, `--synt_threshold_target`, `--synt_threshold_class`, `--synt_window`
+- **CLI Options:** `--synthetic_ts_predict_days`, `--all_year`, `--winter`, `--synt_threshold_start`, `--synt_threshold_target`, `--synt_threshold_class`, `--synt_window`
 
-#### 3.2 Real Time Series
-- Predicts future anomalies in real inverter time series.
-- Supports configurable thresholds and rolling windows.
-- Generates plots of predicted anomalies.
+
+
+#### 3. Perform Daily Classification and Prediction in Real Time Series, with Plots
+- Performs daily classification on real inverter time series data.
+- Optional smoothing can be applied to reduce measurement noise.
 - **Script:** `prediction.py`
-- **CLI Options:** `--ts_predict_days`, `--real_threshold_start`, `--real_threshold_target`, `--real_threshold_class`, `--real_window`
+- **CLI Options:** `--real_ts_prediction`, `--ts_smooth`, `real_threshold_start`, `--real_threshold_target`, `--real_threshold_class`, `--real_window`
 
 ---
 
@@ -292,37 +289,42 @@ By default, for classification and prediction the training season is set to **Su
 
 ### 1. Examples of full, recommended workflows
 
-#### 1.1. Classification:
+#### 1. Classification using default real data for inference
 
 ```bash
 python main.py --create_samples --create_train_test --xgboost_run --create_inference_set_smooth --inference_run
 ```
-#### 1.2. Prediction with synthetic time series:
+
+#### 2. Classification using user real data for inference
+
+```bash
+python main.py --create_samples --create_train_test --xgboost_run --inference_run_user
+```
+#### 3. Prediction with synthetic time series:
 
 ```bash
 python main.py --create_ts_samples --synthetic_ts_daily_classification --synthetic_ts_predict_days
 ```
-#### 1.3. Prediction with real time series:
+#### 4. Prediction with user real time series:
 ```bash
-python main.py --real_ts_daily_classification "TS_samples/real_data/inverter_Aveiro_060.csv" --ts_smooth 36 --ts_predict_days "Predictions/real_data_probabilities/inverter_Aveiro_060_daily_probabilities.csv"
+python main.py --real_ts_prediction "TS_samples/real_data/inverter_Aveiro_060.csv" --ts_smooth 36
 ```
 
-### 2. Individual blocks
+### 2. Examples of individual blocks
 
 #### 2.1. Classification
 | Stage | Command |
 |--------|----------|
-| 1. Create synthetic day samples | `python main.py --create_samples` |
-| 1. Create synthetic day samples with plots | `python main.py --create_samples_with_plots` |
-| 2. Generate train/test datasets | `python main.py --create_train_test` |
-| 3. Train and evaluate the XGBoost classifier | `python main.py --xgboost_run` |
-| 4. Create and preprocess inference dataset | `python main.py --create_inference_set` |
-| 4. Create and preprocess inference dataset with smoothing | `python main.py --create_inference_set_smooth <N>` |
-| 5. Run inference on all preprocessed real data | `python main.py --inference_run` |
-| 5. Run inference on a specific file | `python main.py --inference_run <path>` |
-| 5. Adjust inference probabilities using delta | `python main.py --inference_run --delta <float>` |
-| 5. Adjust inference probabilities considering top-N classes | `python main.py --inference_run --top <N>` |
-| 5. Combine file + delta + top for inference | `python main.py --inference_run <path> --delta <float> --top <N>` |
+| A.1.1. Create synthetic day samples | `python main.py --create_samples` |
+| A.1.1. Create synthetic day samples with plots | `python main.py --create_samples_with_plots` |
+| A.1.2. Generate train and test datasets | `python main.py --create_train_test` |
+| A.1.3. Train and evaluate the XGBoost classifier | `python main.py --xgboost_run` |
+| A.2.1. Create and preprocess inference dataset | `python main.py --create_inference_set` |
+| A.2.1. Create and preprocess inference dataset with smoothing | `python main.py --create_inference_set_smooth <N>` |
+| A.2.2. Run inference on provided real data | `python main.py --inference_run` |
+| A.2.2. Run inference on smoothed provided real data | `python main.py --inference_smooth <N>` |
+| A.2.2. Run inference on user real data files | `python main.py --inference_run_user` |
+| A.2.2. Combine delta + top for inference | `python main.py --inference_run --delta <float> --top <N>` |
 
 
 
@@ -330,22 +332,20 @@ python main.py --real_ts_daily_classification "TS_samples/real_data/inverter_Ave
 
 | Stage | Command |
 |--------|----------|
-| 1. Create anomaly time-series samples | `python main.py --create_ts_samples` |
-| 2. Daily classification in synthetic time series | `python main.py --synthetic_ts_daily_classification` |
-| 3. Daily classification in real time series | `python main.py --real_ts_daily_classification <path>` |
-| 3. Daily classification in real time series with smoothing | `python main.py --real_ts_daily_classification <path> --ts_smooth <N>` |
-| 4. Predict anomalies in synthetic time series | `python main.py --synthetic_ts_predict_days` |
-| 4. Predict anomalies in synthetic time series with thresholds/windows | `python main.py --synthetic_ts_predict_days --synt_threshold_start <v> --synt_threshold_target <v> --synt_threshold_class <v> --synt_window <N>` |
-| 5. Predict anomalies in real time series | `python main.py --ts_predict_days <path>` |
-| 5. Predict anomalies in real time series with thresholds/windows | `python main.py --ts_predict_days <path> --real_threshold_start <v> --real_threshold_target <v> --real_threshold_class <v> --real_window <N>` |
+| B.1. Create anomaly time-series samples | `python main.py --create_ts_samples` |
+| B.2.1. Daily classification in synthetic time series | `python main.py --synthetic_ts_daily_classification` |
+| B.2.2. Predict anomalies in synthetic time series | `python main.py --synthetic_ts_predict_days` |
+| B.2.2. Predict anomalies in synthetic time series with some parameters | `python main.py --synthetic_ts_predict_days --synt_threshold_start <v> --synt_window <N>` |
+| B.3.  Daily classification and prediction in real time series with some parameters | `python main.py --real_ts_prediction <path> --ts_smooth <N> --real_threshold_class <v>` |
 
 ---
 
 ## Real Data
-### Classification (inference)
-Se desejar run inference on a specific file with `python main.py --inference_run <path>`, optionally indicando season, é necessário que o file se encontre na pasta `Datasets/` e siga o formato de input esperado, ou seja, uma série de raws com as seguintes features.
+### 1. Classification
+Se desejar run inference on specific file(s) with `--inference_run_user` é necessário que o(s) file(s), em formato `.csv` se encontre(m) na pasta `Datasets/user` e siga(m) o formato de input esperado, ou seja, uma série de raws com as seguintes features:
 
-### Prediction
+### 2. Prediction
+Se desejar run prediction on a specific file with `--real_ts_prediction` é necessário que o file, em formato `.csv` se encontre(m) na pasta `TS_samples/real_data` e siga(m) o formato de input esperado, ou seja, uma série de raws com as seguintes features:
 
 ---
 
