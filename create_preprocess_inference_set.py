@@ -44,7 +44,7 @@ def create_preprocess_inference_set(smoothing, all_year=False, winter=False, inf
     results = []
 
     print("\n" + "=" * 70)
-    print(f"PREPROCESSING TEST SET FOR INFERENCE, TRAINING SEASON: {season_name.upper()} ...")
+    print(f"PREPROCESSING TEST SET FOR INFERENCE, TRAINING SEASON: {season_name.upper()}...")
     if smoothing:
         print(f"\tSmoothing window = {smoothing} ({smoothing/12} hours)")
     else:

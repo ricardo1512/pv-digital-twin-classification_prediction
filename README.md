@@ -340,8 +340,8 @@ python main.py --real_ts_prediction "TS_samples/real_data/inverter_Aveiro_060.cs
 | B.1. Create anomaly time-series samples | `python main.py --create_ts_samples` |
 | B.2.1. Daily classification in multiple synthetic time series | `python main.py --synthetic_ts_daily_classification` |
 | B.2.2. Predict anomalies in synthetic time series | `python main.py --synthetic_ts_prediction` |
-| B.2.2. Predict anomalies in synthetic time series with some parameters | `python main.py --synthetic_ts_prediction --synt_threshold_start <v> --synt_window <N>` |
-| B.3.  Daily classification and prediction in real time series with some parameters | `python main.py --real_ts_prediction <path> --ts_smooth <N> --real_threshold_class <v>` |
+| B.2.2. Predict anomalies in synthetic time series with all parameters | `python main.py --synthetic_ts_prediction --synt_threshold_start <v> --synt_threshold_target <v> --synt_threshold_class <v> --synt_window <N>` |
+| B.3.  Daily classification and prediction in real time series with all parameters | `python main.py --real_ts_prediction <path> --ts_smooth <N> --real_threshold_target <v> --real_threshold_class <v> --real_window <N>` |
 
 ---
 

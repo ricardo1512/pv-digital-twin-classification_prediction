@@ -14,6 +14,8 @@ def ts_daily_classification(input_file, all_year=False, winter=False, output_csv
     """
     Performs daily classification of time-series data using a pre-trained model
     and plots the resulting daily class probabilities.
+    
+    For synthetic or real, single files.
 
     Args:
         input_file (str or Path): Path to the CSV file containing time-series data.
@@ -22,11 +24,21 @@ def ts_daily_classification(input_file, all_year=False, winter=False, output_csv
         model_path (str): Path to the pre-trained model (joblib file).
 
     Returns:
-        None
+        output_csv_path (Path): Path to the CSV file with daily class probabilities.
     """
+    
+    # Determine the active season, its corresponding months, and a formatted name for file usage
+    season_name, _, season_name_file = determine_season(all_year, winter)
+    
     # Convert input paths to Path objects
     input_file = Path(input_file)
-    print(f"Performing time series daily classification for {input_file}...")
+    print("\n" + "-" * 70)
+    print(f"Performing time series daily classification for {input_file}: {season_name.upper()}...")
+    if smoothing:
+        print(f"\tSmoothing window = {smoothing} ({smoothing/12} hours)")
+    else:
+        print("\tNo smoothing applied.")
+    print("-" * 70)
     
     # Determine the active season, its corresponding months, and a formatted name for file usage
     season_name, _, season_name_file = determine_season(all_year, winter)
@@ -108,9 +120,28 @@ def ts_daily_classification(input_file, all_year=False, winter=False, output_csv
     
 def synthetic_ts_daily_classification(all_year=False, winter=False):
     """
-    Applies daily time-series classification to all raw synthetic CSV files in TS_SAMPLES_FOLDER.
+    Runs daily time-series classification on all synthetic CSV files inside
+    `TS_SAMPLES_FOLDER` (excluding folders starting with 'real_data').
+
+    For each CSV file found, the function generates a corresponding
+    `<name>_daily_probabilities.csv` file in `PREDICTIONS_FOLDER/real_data_probabilities`.
+
+    Parameters:
+        all_year : bool, optional
+            Use full-year data in the classification.
+        winter : bool, optional
+            Restrict classification to winter data.
+            
+    Returns:
+        None
     """
-    print("\nStarting multiple time-series daily classifications...")
+    
+    # Determine the active season, its corresponding months, and a formatted name for file usage
+    season_name, _, season_name_file = determine_season(all_year, winter)
+    
+    print("\n" + "=" * 70)
+    print(F"\nPERFORMING SYNTHETIC MULTIPLE TIME-SERIES DAILY CLASSIFICATIONS: {season_name.upper()}...")
+    print("=" * 70)
     
     # Base folder where raw synthetic CSV files are stored
     base_folder = Path(TS_SAMPLES_FOLDER)
@@ -179,9 +210,11 @@ def ts_predict_days(input_csv_path, output_csv_path=None,
     last_day_index = len(df_daily_probs) - 1
 
     # Iterate over rolling window
-    print(f"\nPerforming predictions on daily probabilities with "
+    print("\n" + "-" * 70)
+    print(f"Performing predictions on daily probabilities..."
           f"\n\tthreshold_start={threshold_start}, threshold_target={threshold_target}, "
-          f"\n\tthreshold_class={threshold_class}, window={window}...\n")
+          f"\n\tthreshold_class={threshold_class}, window={window}...")
+    print("-" * 70)
     for i in range(window, len(df_daily_probs)):
         current_day = df_daily_probs.at[i, 'date']
         past_window = df_daily_probs.iloc[i - window:i]
@@ -272,28 +305,24 @@ def ts_predict_days(input_csv_path, output_csv_path=None,
         correct_preds = (df_predictions['class'] == df_predictions['actual_class_at_predicted_day']).sum()
         total_preds = len(df_predictions)
         success_pct = correct_preds / total_preds * 100
-        print(f"\bPrediction success: {correct_preds}/{total_preds} ({success_pct:.2f}%)")
+        print(f"\tPrediction success: {correct_preds}/{total_preds} ({success_pct:.2f}%)\n")
 
     # Plot predictions
     output_image_prob = Path(PLOT_FOLDER) / "TS_predictions" / f"{input_csv_path.stem}_predictions_cleveland.png"
     plot_predictions_cleveland(df_predictions, output_image_prob)
-    print(f"Prediction plot saved to: {output_image_prob}")
     
     return df_predictions
 
 
-def synthetic_ts_prediction(
-        threshold_start=0.5,
-        threshold_target=0.8,
-        threshold_class=0.2,
-        window=30
-    ):
+def synthetic_ts_prediction(threshold_start=0.5, threshold_target=0.8, threshold_class=0.2, window=30):
     """
     Applies daily time-series prediction across all probability CSV files
     located inside subfolders ending with '_probabilities'.
     """
     
-    print("\nStarting multiple time-series daily predictions...")
+    print("\n" + "=" * 70)
+    print("\nPERFORMING MULTIPLE SYNTHETIC TIME-SERIES DAILY PREDICTIONS...")
+    print("=" * 70)
 
     # Base folder where probability subfolders are stored
     base_folder = Path(PREDICTIONS_FOLDER)

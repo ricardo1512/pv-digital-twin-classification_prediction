@@ -74,7 +74,7 @@ def inference(all_year=False, winter=False, inference_user=False, smoothing=24, 
     output_inference_scaled_prob_folder = f"{PLOT_FOLDER}/Inference_probabilities_scaled/Plots_inference_probabilities_scaled_{season_name_file}"
 
     print("\n" + "=" * 70)
-    print(f"PERFORMING INFERENCE, TRAINING SEASON: {season_name.upper()} ...")
+    print(f"PERFORMING INFERENCE, TRAINING SEASON: {season_name.upper()}...")
     print(f"\tdelta = {delta}, top = {top}")
     print("=" * 70)
     
