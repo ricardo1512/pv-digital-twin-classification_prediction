@@ -33,9 +33,9 @@ def ts_daily_classification(input_file, all_year=False, winter=False, output_csv
     # Convert input paths to Path objects
     input_file = Path(input_file)
     print("\n" + "-" * 70)
-    print(f"Performing time series daily classification for {input_file}: {season_name.upper()}...")
+    print(f"Performing time series daily classification for {input_file}: {season_name}...")
     if smoothing:
-        print(f"\tSmoothing window = {smoothing} ({smoothing/12} hours)")
+        print(f"\tSmoothing window = {smoothing} ({smoothing/12:.2f} hours)")
     else:
         print("\tNo smoothing applied.")
     print("-" * 70)
@@ -140,7 +140,7 @@ def synthetic_ts_daily_classification(all_year=False, winter=False):
     season_name, _, season_name_file = determine_season(all_year, winter)
     
     print("\n" + "=" * 70)
-    print(F"\nPERFORMING SYNTHETIC MULTIPLE TIME-SERIES DAILY CLASSIFICATIONS: {season_name.upper()}...")
+    print(f"PERFORMING SYNTHETIC MULTIPLE TIME-SERIES DAILY CLASSIFICATIONS: {season_name.upper()}...")
     print("=" * 70)
     
     # Base folder where raw synthetic CSV files are stored
@@ -211,7 +211,7 @@ def ts_predict_days(input_csv_path, output_csv_path=None,
 
     # Iterate over rolling window
     print("\n" + "-" * 70)
-    print(f"Performing predictions on daily probabilities..."
+    print(f"Performing predictions on daily probabilities for {input_csv_path}..."
           f"\n\tthreshold_start={threshold_start}, threshold_target={threshold_target}, "
           f"\n\tthreshold_class={threshold_class}, window={window}...")
     print("-" * 70)
@@ -286,7 +286,7 @@ def ts_predict_days(input_csv_path, output_csv_path=None,
 
     # Export predictions
     if not predictions:
-        print("No valid predictions were generated.")
+        print("No valid predictions were generated.\n")
         return pd.DataFrame(columns=[
             'date', 'class', 'predicted_days_to_0.8', 'predicted_date',
             'actual_class_at_predicted_day', 'slope', 'intercept'
@@ -321,7 +321,7 @@ def synthetic_ts_prediction(threshold_start=0.5, threshold_target=0.8, threshold
     """
     
     print("\n" + "=" * 70)
-    print("\nPERFORMING MULTIPLE SYNTHETIC TIME-SERIES DAILY PREDICTIONS...")
+    print("PERFORMING MULTIPLE SYNTHETIC TIME-SERIES DAILY PREDICTIONS...")
     print("=" * 70)
 
     # Base folder where probability subfolders are stored
@@ -335,7 +335,7 @@ def synthetic_ts_prediction(threshold_start=0.5, threshold_target=0.8, threshold
 
         # Iterate over all probability CSV files inside the subfolder
         for file_path in subfolder.glob("*.csv"):
-            print(f"\t\tProcessing file: {file_path.name}")
+            print(f"\n\t\tProcessing file: {file_path.name}")
 
             # Define output CSV path for predictions
             output_csv_path = base_folder / subfolder_name.replace("probabilities", "predictions") / f"{file_path.stem}_daily_predictions.csv"
