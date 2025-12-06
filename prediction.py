@@ -102,7 +102,6 @@ def ts_daily_classification(input_file, all_year=False, winter=False, output_csv
     output_image_prob = Path(PLOT_FOLDER) / "TS_probabilities" / f"{output_csv_path.stem}.png"
     output_image_prob.parent.mkdir(parents=True, exist_ok=True)
     plot_daily_class_probabilities(output_csv_path, output_image_prob)
-    print(f"Daily probabilities plot saved to: {output_image_prob}")
     
     return output_csv_path
 
@@ -119,13 +118,13 @@ def synthetic_ts_daily_classification(all_year=False, winter=False):
     
     # Iterate over subfolders that contain raw synthetic CSV files
     for subfolder in [f for f in base_folder.iterdir() if f.is_dir() and not f.name.startswith("real_data")]:
-        print(f"\tProcessing subfolder: {subfolder.name}")
+        print(f"\n\tProcessing subfolder: {subfolder.name}")
         
         # Iterate over all raw synthetic CSV files inside the subfolder
         for file_path in subfolder.glob("*.csv"):
-            print(f"\t\tProcessing file: {file_path.name}")
+            print(f"\n\t\tProcessing file: {file_path.name}")
             output_csv_path = output_base / f"{file_path.stem}_daily_probabilities.csv"
-            ts_daily_classification(file_path, output_csv_path, all_year=all_year, winter=winter)
+            ts_daily_classification(file_path, output_csv_path=output_csv_path, all_year=all_year, winter=winter)
             
 
 def ts_predict_days(input_csv_path, output_csv_path=None, 
@@ -273,7 +272,7 @@ def ts_predict_days(input_csv_path, output_csv_path=None,
         correct_preds = (df_predictions['class'] == df_predictions['actual_class_at_predicted_day']).sum()
         total_preds = len(df_predictions)
         success_pct = correct_preds / total_preds * 100
-        print(f"Prediction success: {correct_preds}/{total_preds} ({success_pct:.2f}%)")
+        print(f"\bPrediction success: {correct_preds}/{total_preds} ({success_pct:.2f}%)")
 
     # Plot predictions
     output_image_prob = Path(PLOT_FOLDER) / "TS_predictions" / f"{input_csv_path.stem}_predictions_cleveland.png"
@@ -297,20 +296,20 @@ def synthetic_ts_predict_days(
     print("\nStarting multiple time-series daily predictions...")
 
     # Base folder where probability subfolders are stored
-    base_folder = Path(PREDICTIONS_FOLDER) / "real_data_probabilities"
-    output_base = Path(PREDICTIONS_FOLDER) / "real_data_predictions"
+    base_folder = Path(PREDICTIONS_FOLDER)
 
     # Iterate over subfolders that contain probability CSV files
     for subfolder in [f for f in base_folder.iterdir() if f.is_dir() and f.name.endswith('_probabilities') and not f.name.startswith("real_data")]:
 
-        print(f"\tProcessing subfolder: {subfolder.name}")
+        subfolder_name = subfolder.name
+        print(f"\tProcessing subfolder: {subfolder_name}")
 
         # Iterate over all probability CSV files inside the subfolder
         for file_path in subfolder.glob("*.csv"):
             print(f"\t\tProcessing file: {file_path.name}")
 
             # Define output CSV path for predictions
-            output_csv_path = output_base / f"{file_path.stem}_daily_predictions.csv"
+            output_csv_path = base_folder / subfolder_name.replace("probabilities", "predictions") / f"{file_path.stem}_daily_predictions.csv"
 
             # Call the single-file prediction function
             ts_predict_days(
@@ -321,3 +320,5 @@ def synthetic_ts_predict_days(
                 threshold_class=threshold_class,
                 window=window
             )
+            
+            exit()

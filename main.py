@@ -79,7 +79,10 @@ def run(args):
     
     # B.2.1. Perform Daily Classification
     if args.synthetic_ts_daily_classification:
-        synthetic_ts_daily_classification()
+        synthetic_ts_daily_classification(
+            all_year=args.all_year,
+            winter=args.winter,
+        )
 
     # B.2.2. Predict Anomalies
     if args.synthetic_ts_predict_days:
