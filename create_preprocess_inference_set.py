@@ -2,7 +2,7 @@ import os
 
 from utils import *
 
-def create_preprocess_inference_set(smoothing=24, all_year=False, winter=False, inference_user=False):
+def create_preprocess_inference_set(smoothing, all_year=False, winter=False, inference_user=False):
     """
      Preprocesses inverter CSV data for inference by extracting daily features.
 
@@ -43,10 +43,14 @@ def create_preprocess_inference_set(smoothing=24, all_year=False, winter=False, 
 
     results = []
 
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 70)
     print(f"PREPROCESSING TEST SET FOR INFERENCE, TRAINING SEASON: {season_name.upper()} ...")
-    print("=" * 60)
-
+    if smoothing:
+        print(f"\tSmoothing window = {smoothing} ({smoothing/12} hours)")
+    else:
+        print("\tNo smoothing applied.")
+    print("=" * 70)
+    
     for file in csv_files:
         file_path = os.path.join(input_folder, file)
         print("Processing file:", file)

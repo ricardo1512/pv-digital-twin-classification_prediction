@@ -220,7 +220,7 @@ def create_ts_samples_3_cracks(plot_samples=False):
 
             # Generate Plots with crack degradation evolution
             if plot_samples:
-                results_plot = ts_resampling(results.between_time(TIME_INIT, TIME_END))
+                results_plot = ts_resampling(results.between_time(PREDICTION_HOUR_INIT, PREDICTION_HOUR_END))
                 condition_title = LABELS_MAP[condition_nr][0]
                 output_image = f"{condition_nr}_{condition_name}_ts_samples_{year}_{local}"
                 plot_mppt_ts(results_plot, local, plot_folder, output_image, condition_title=condition_title)

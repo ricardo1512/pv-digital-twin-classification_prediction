@@ -326,12 +326,11 @@ python main.py --real_ts_prediction "TS_samples/real_data/inverter_Aveiro_060.cs
 | A.1.2. Generate train and test datasets | `python main.py --create_train_test` |
 | A.1.3. Train and evaluate the XGBoost classifier | `python main.py --xgboost_run` |
 | A.2.1. Create and preprocess inference dataset | `python main.py --create_inference_set` |
-| A.2.1. Create and preprocess inference dataset with smoothing | `python main.py --create_inference_set_smooth <N>` |
+| A.2.1. Create and preprocess inference dataset with smoothing | `python main.py --create_inference_set --inference_set_smooth <N>` |
 | A.2.2. Run inference on provided real data | `python main.py --inference_run` |
-| A.2.2. Run inference on smoothed provided real data | `python main.py --inference_smooth <N>` |
+| A.2.2. Run inference on provided real data with delta and top | `python main.py --inference_run --delta <float> --top <N>` |
 | A.2.2. Run inference on user real data files | `python main.py --inference_run_user` |
-| A.2.2. Combine delta + top for inference | `python main.py --inference_run --delta <float> --top <N>` |
-
+| A.2.2. Run inference on user smoothed real data with delta and top | `python main.py --inference_run_user --inference_smooth <N> --delta <float> --top <N>` |
 
 
 #### 2.2. Prediction

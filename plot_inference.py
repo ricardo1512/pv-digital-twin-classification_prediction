@@ -139,4 +139,4 @@ def plot_inference_condition_probabilities(df, season_name_file, output_folder, 
         plt.close()
         
         # Confirmation message
-        print(f"Saved Inference Probabilities plot for {row['ID']}, {row['date']}\n\tat {save_path}")
+        print(f"Saved Inference Probabilities plot for {row['ID']}, {row['date']}\n\tat {save_path}\n")

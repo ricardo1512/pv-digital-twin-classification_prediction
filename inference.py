@@ -55,27 +55,28 @@ def inference(all_year=False, winter=False, inference_user=False, smoothing=24, 
     xgb_model_path = f"{MODELS_FOLDER}/xgb_best_model_{season_name_file}.joblib"
     
     # Preprocessed inference test set
-    if inference_user is None:
+    if not inference_user:
         test_file = f"{DATASETS_FOLDER}/inference_test_set_before_classification_{season_name_file}.csv"
     else:
-        
         test_file = create_preprocess_inference_set(smoothing=smoothing, all_year=all_year, winter=winter, inference_user=True)
     
     # OUTPUT FILES AND FOLDERS
+    user = "_user" if inference_user else ""
     # Results
-    output_results_path = f"{REPORT_FOLDER}/xgb_inference_results_{season_name_file}.csv"
+    output_results_path = f"{REPORT_FOLDER}/xgb_inference_results_{season_name_file}{user}.csv"
     # Inference classifications
-    output_inference_path = f"{DATASETS_FOLDER}/xgb_inference_test_set_with_classification_{season_name_file}.csv"
-    output_inference_image = f"{IMAGE_FOLDER}/xgb_inference_classification_distribution_{season_name_file}.png"
+    output_inference_path = f"{DATASETS_FOLDER}/xgb_inference_test_set_with_classification_{season_name_file}{user}.csv"
+    output_inference_image = f"{IMAGE_FOLDER}/xgb_inference_classification_distribution_{season_name_file}{user}.png"
     # Inference probabilities
-    output_inference_prob_path = f"{REPORT_FOLDER}/xgb_inference_test_set_with_prob_classification_{season_name_file}.csv"
+    output_inference_prob_path = f"{REPORT_FOLDER}/xgb_inference_test_set_with_prob_classification_{season_name_file}{user}.csv"
     output_inference_prob_folder = f"{PLOT_FOLDER}/Inference_probabilities/Plots_inference_probabilities_{season_name_file}"
-    output_inference_scaled_prob_path = f"{REPORT_FOLDER}/xgb_inference_adjusted_probabilities_report_{season_name_file}.csv"
+    output_inference_scaled_prob_path = f"{REPORT_FOLDER}/xgb_inference_adjusted_probabilities_report_{season_name_file}{user}.csv"
     output_inference_scaled_prob_folder = f"{PLOT_FOLDER}/Inference_probabilities_scaled/Plots_inference_probabilities_scaled_{season_name_file}"
 
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 70)
     print(f"PERFORMING INFERENCE, TRAINING SEASON: {season_name.upper()} ...")
-    print("=" * 60)
+    print(f"\tdelta = {delta}, top = {top}")
+    print("=" * 70)
     
     # ===============================================
     # LOAD PRE-TRAINED XGBOOST MODEL

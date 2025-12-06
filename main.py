@@ -44,16 +44,15 @@ def run(args):
     # ---------------------------------------------------------------------------------------
     
     # A.2.1. Create and Preprocess the Inference Test Set
-    if args.create_inference_set or args.create_inference_set_smooth:
+    if args.create_inference_set:
         create_preprocess_inference_set(
-            smoothing=args.create_inference_set_smooth,
+            smoothing=args.inference_set_smooth,
             all_year=args.all_year, 
             winter=args.winter,
         )
 
     # A.2.2. Perform Inference on Real Data
-    if args.inference_run or args.inference_smooth \
-        or args.inference_run_user or args.delta or args.top:
+    if args.inference_run or args.inference_run_user:
         inference(
             all_year=args.all_year,
             winter=args.winter,
@@ -83,9 +82,7 @@ def run(args):
         synthetic_ts_daily_classification()
 
     # B.2.2. Predict Anomalies
-    if args.synthetic_ts_predict_days or args.synt_threshold_start \
-        or args.synt_threshold_target or args.synt_threshold_class or args.synt_window:
-      
+    if args.synthetic_ts_predict_days:
         synthetic_ts_predict_days(
             threshold_start=args.synt_threshold_start,
             threshold_target=args.synt_threshold_target,
@@ -96,8 +93,7 @@ def run(args):
     # ----------------------------------------------------------------------------------------
     # B.3. Perform Daily Classification and Prediction in Real Time Series, with Plots
     # ----------------------------------------------------------------------------------------
-    if args.real_ts_prediction or args.ts_smooth or args.real_threshold_start \
-        or args.real_threshold_target or args.real_threshold_class or args.real_window:
+    if args.real_ts_prediction:
         # Daily Classification
         output_path_classification = ts_daily_classification(
             input_file=args.real_ts_prediction,
@@ -149,7 +145,7 @@ if __name__ == '__main__':
     # A.2.1. Create and Preprocess the Inference Test Set
     parser.add_argument('--create_inference_set', action='store_true', 
                         help="Create and preprocess inference test set.")
-    parser.add_argument('--create_inference_set_smooth', type=int, default=24,
+    parser.add_argument('--inference_set_smooth', type=int, default=24,
                         help="Create and preprocess inference test set applying smoothing [Default: 24 (2 hours)].")
 
     # A.2.2. Perform Inference on Real Data
@@ -212,3 +208,4 @@ if __name__ == '__main__':
     # Parse arguments and run
     args = parser.parse_args()
     run(args)
+

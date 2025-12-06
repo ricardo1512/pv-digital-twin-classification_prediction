@@ -1,9 +1,6 @@
 Combination,Count
-Normal,126
-Diode Fault,22
-Soiling,7
-Shading,1
-Ground Fault,1
-Shading + Soiling,5
-Normal + Soiling,1
-Diode Fault + Ground Fault,1
+Normal,70
+Soiling,22
+Normal + Shading,7
+Normal + Soiling,7
+Shading + Soiling,4
