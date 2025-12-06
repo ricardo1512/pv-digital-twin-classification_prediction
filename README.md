@@ -122,7 +122,7 @@ The end-to-end pipeline is divided into **Classification** and **Prediction** wo
 ### 2. Synthetic Time Series Prediction, with Plots
 
 #### 2.1. Perform Daily Classification
-- Performs daily classification on synthetic summer time series samples.
+- Performs daily classification on multiple synthetic summer time series samples.
 - Generates plots showing classification results.
 - **Script:** `prediction.py`
 - **CLI Option:** `--synthetic_ts_daily_classification`
@@ -131,7 +131,7 @@ The end-to-end pipeline is divided into **Classification** and **Prediction** wo
 - Predicts future anomalies in synthetic time series using configurable thresholds and window sizes.
 - Generates visualizations of predicted anomaly days.
 - **Script:** `prediction.py`
-- **CLI Options:** `--synthetic_ts_predict_days`,`--synt_threshold_start`, `--synt_threshold_target`, `--synt_threshold_class`, `--synt_window`
+- **CLI Options:** `--synthetic_ts_prediction`,`--synt_threshold_start`, `--synt_threshold_target`, `--synt_threshold_class`, `--synt_window`
 
 
 ### 3. Perform Daily Classification and Prediction in Real Time Series, with Plots
@@ -275,7 +275,7 @@ Outputs:
 - Daily probabilities plot:  
   - `Plots/TS_probabilities/*_daily_probabilities.png`  
 
-##### **2.2. Predict Anomalies:** `ts_predict_days()` (synthetic or real, single files) and `synthetic_ts_predict_days()` (synthetic, multiple files)
+##### **2.2. Predict Anomalies:** `ts_predict_days()` (synthetic or real, single files) and `synthetic_ts_prediction()` (synthetic, multiple files)
 
 Inputs:
 - Daily probability CSV file:  
@@ -309,7 +309,7 @@ python main.py --create_samples --create_train_test --xgboost_run --inference_ru
 #### 3. Prediction with synthetic time series:
 
 ```bash
-python main.py --create_ts_samples --synthetic_ts_daily_classification --synthetic_ts_predict_days
+python main.py --create_ts_samples --synthetic_ts_daily_classification --synthetic_ts_prediction
 ```
 #### 4. Prediction with user real time series:
 ```bash
@@ -338,9 +338,9 @@ python main.py --real_ts_prediction "TS_samples/real_data/inverter_Aveiro_060.cs
 | Stage | Command |
 |--------|----------|
 | B.1. Create anomaly time-series samples | `python main.py --create_ts_samples` |
-| B.2.1. Daily classification in synthetic time series | `python main.py --synthetic_ts_daily_classification` |
-| B.2.2. Predict anomalies in synthetic time series | `python main.py --synthetic_ts_predict_days` |
-| B.2.2. Predict anomalies in synthetic time series with some parameters | `python main.py --synthetic_ts_predict_days --synt_threshold_start <v> --synt_window <N>` |
+| B.2.1. Daily classification in multiple synthetic time series | `python main.py --synthetic_ts_daily_classification` |
+| B.2.2. Predict anomalies in synthetic time series | `python main.py --synthetic_ts_prediction` |
+| B.2.2. Predict anomalies in synthetic time series with some parameters | `python main.py --synthetic_ts_prediction --synt_threshold_start <v> --synt_window <N>` |
 | B.3.  Daily classification and prediction in real time series with some parameters | `python main.py --real_ts_prediction <path> --ts_smooth <N> --real_threshold_class <v>` |
 
 ---

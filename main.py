@@ -85,8 +85,8 @@ def run(args):
         )
 
     # B.2.2. Predict Anomalies
-    if args.synthetic_ts_predict_days:
-        synthetic_ts_predict_days(
+    if args.synthetic_ts_prediction:
+        synthetic_ts_prediction(
             threshold_start=args.synt_threshold_start,
             threshold_target=args.synt_threshold_target,
             threshold_class=args.synt_threshold_class,
@@ -181,7 +181,7 @@ if __name__ == '__main__':
                         help="Perform daily classification in synthetic time series.")
     
     # B.2.2. Predict Anomalies
-    parser.add_argument('--synthetic_ts_predict_days', action='store_true', 
+    parser.add_argument('--synthetic_ts_prediction', action='store_true', 
                         help="Perform prediction in synthetic time series.")
     parser.add_argument('--synt_threshold_start', type=float, default=0.5,
                         help="Threshold to start predicting an anomaly [Default: 0.5].")

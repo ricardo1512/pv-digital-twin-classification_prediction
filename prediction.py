@@ -180,8 +180,8 @@ def ts_predict_days(input_csv_path, output_csv_path=None,
 
     # Iterate over rolling window
     print(f"\nPerforming predictions on daily probabilities with "
-          f"threshold_start={threshold_start}, threshold_target={threshold_target}, "
-          f"threshold_class={threshold_class}, window={window}...")
+          f"\n\tthreshold_start={threshold_start}, threshold_target={threshold_target}, "
+          f"\n\tthreshold_class={threshold_class}, window={window}...\n")
     for i in range(window, len(df_daily_probs)):
         current_day = df_daily_probs.at[i, 'date']
         past_window = df_daily_probs.iloc[i - window:i]
@@ -282,7 +282,7 @@ def ts_predict_days(input_csv_path, output_csv_path=None,
     return df_predictions
 
 
-def synthetic_ts_predict_days(
+def synthetic_ts_prediction(
         threshold_start=0.5,
         threshold_target=0.8,
         threshold_class=0.2,
@@ -320,5 +320,3 @@ def synthetic_ts_predict_days(
                 threshold_class=threshold_class,
                 window=window
             )
-            
-            exit()
