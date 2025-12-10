@@ -4,6 +4,8 @@ from datetime import timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.patches import Patch
+import seaborn as sns
+from adjustText import adjust_text
 
 from globals import *
 
@@ -139,7 +141,7 @@ def plot_predictions_cleveland(df_predictions, output_image_path):
         predicted_cls = row['class']
         actual_cls = row['actual_class_at_predicted_day']
         correct = predicted_cls == actual_cls
-        days_ahead = int(row['predicted_days_to_0.8'])
+        days_ahead = int(row['predicted_days_to_target'])
 
         # Find free vertical layer (avoid overlap)
         placed = False
@@ -249,6 +251,54 @@ def plot_predictions_cleveland(df_predictions, output_image_path):
     plt.tight_layout()
     plt.savefig(output_image_path, dpi=300)
     print(f"Saved Cleveland-style timeline to {output_image_path}")
+    
+    # Close plot to free memory
+    plt.close()
+    
+
+def pareto_plot(df_pareto, df_all_results, input_csv_path, output_image_folder):
+    """
+    Plots the Pareto front of configurations based on mean predicted days to target vs accuracy.
+    
+    Args:
+        df_pareto (pd.DataFrame): DataFrame containing Pareto-optimal configurations.
+        df_all_results (pd.DataFrame): DataFrame containing all configurations.
+        input_csv_path (Path): Path object of the input CSV file.
+        output_image_folder (Path): Path object of the folder to save the output image.
+        
+    """
+    # Create figure and axis
+    plt.figure(figsize=(8,6))
+    ax = plt.gca()
+    
+    # Plot all configurations and Pareto front
+    sns.scatterplot(data=df_all_results, x='mean_predicted_days', y='accuracy', label='All configurations')
+    sns.lineplot(data=df_pareto, x='mean_predicted_days', y='accuracy', color='red', marker='o', label='Pareto front')
+
+    # Annotate Pareto points with parameter settings
+    texts = []
+    for _, row in df_pareto.iterrows():
+        param_text = f"ts={row['threshold_start']}, tt={row['threshold_target']}\n" \
+                    f"tc={row['threshold_class']}, w={int(row['window'])}"
+        texts.append(ax.text(row['mean_predicted_days'], row['accuracy'], param_text,
+                            fontsize=8, color='red'))
+
+    adjust_text(texts, arrowprops=dict(arrowstyle='->', color='gray', lw=0.5))
+    
+    # Axis labels and title
+    plt.xlabel("Mean Predicted Days to Target")
+    plt.ylabel("Accuracy (%)")
+    # plt.title("Pareto-optimal configurations")
+    
+    # Axis limits, grid, legend
+    plt.ylim(df_all_results['accuracy'].min()*0.95, 100.5)
+    plt.grid(True)
+    plt.legend()
+    plt.tight_layout()
+    
+    # Save plot
+    plt.savefig(output_image_folder / f"{input_csv_path.stem}_pareto_front.png")
+    print(f"Pareto front plot saved to {output_image_folder / f'{input_csv_path.stem}_pareto_front.png'}")
     
     # Close plot to free memory
     plt.close()

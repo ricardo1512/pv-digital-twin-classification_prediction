@@ -1,0 +1,4 @@
+date,class,predicted_days_to_target,predicted_date,actual_class_at_predicted_day,slope,intercept,threshold_start,threshold_target,threshold_class,window
+2023-05-16,Cracks,8,2023-05-24,Cracks,0.008892608452147566,0.03814721679719804,0.3,0.5,0.1,45
+2023-05-17,Cracks,6,2023-05-23,Cracks,0.009158946778432151,0.044713562730048256,0.3,0.5,0.1,45
+2023-05-18,Cracks,6,2023-05-24,Cracks,0.008911174611172598,0.058691365787536226,0.3,0.5,0.1,45

@@ -448,3 +448,31 @@ def ts_resampling(ts):
     ts_daily = ts_daily.dropna(how='all')
     
     return ts_daily
+
+
+def pareto_front(df, x_col='mean_predicted_days', y_col='accuracy'):
+    """
+    Returns the Pareto front points from a DataFrame.
+
+    A point is on the Pareto front if no other point has a higher y_col value 
+    for a lower or equal x_col value.
+
+    Parameters:
+        df (pd.DataFrame): Input data containing the points.
+        x_col (str): Column name for x-axis values (default 'mean_predicted_days').
+        y_col (str): Column name for y-axis values (default 'accuracy').
+
+    Returns:
+        pd.DataFrame: Points on the Pareto front.
+    """
+
+    df_sorted = df.sort_values(x_col, ascending=False)
+    pareto_points = []
+    max_y = -np.inf
+    
+    for _, row in df_sorted.iterrows():
+        if row[y_col] > max_y:
+            pareto_points.append(row)
+            max_y = row[y_col]
+    
+    return pd.DataFrame(pareto_points)

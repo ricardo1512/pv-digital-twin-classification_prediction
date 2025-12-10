@@ -1,3 +1,0 @@
-date,class,predicted_days_to_0.8,predicted_date,actual_class_at_predicted_day,slope,intercept
-2023-05-30,Cracks,108,2023-09-15,Shading,0.00578070166172269,-0.019171410899285715
-2023-06-09,Cracks,78,2023-08-26,Shading,0.007238781250070028,-0.013262773392619054

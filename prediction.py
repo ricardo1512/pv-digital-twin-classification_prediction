@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
+import itertools
 from sklearn.linear_model import LinearRegression
 from pathlib import Path
 import joblib
@@ -158,39 +159,28 @@ def synthetic_ts_daily_classification(all_year=False, winter=False):
             ts_daily_classification(file_path, output_csv_path=output_csv_path, all_year=all_year, winter=winter)
             
 
-def ts_predict_days(input_csv_path, output_csv_path=None, 
-                    threshold_start=0.5, threshold_target=0.8, threshold_class=0.2, window=30):
+def ts_predict_days(input_csv_path, output_folder=None, accuracy_threshold=75):
     """
-    Predicts, for each date and each non-'Normal' class, how many days it will take 
-    for the probability to reach a target threshold using linear regression 
-    over a rolling window of past data, and plots the results.
+???
+    """
     
-    This function iterates over a daily probability time series for each class,
-    applies a rolling-window linear regression, and estimates when the probability 
-    will reach the target threshold. It also determines the actual class at the 
-    predicted day using a threshold-based tie-breaking rule.
-
-    Args:
-        input_csv_path (str): Path to the CSV file containing daily probabilities.
-        output_csv_path (str): Path to save the predictions CSV.
-        threshold_start (float): Minimum probability to start regression (default=0.5).
-        threshold_target (float): Target probability to predict (default=0.8).
-        window (int): Number of previous days to use for regression (default=30).
-
-    Returns:
-        pd.DataFrame: Predictions with columns:
-            ['date', 'class', 'predicted_days_to_X', 'predicted_date', 'actual_class_at_predicted_day'].
-    """
+    # Parameter grid
+    threshold_start_grid = [0.2, 0.3, 0.4, 0.5]
+    threshold_target_grid = [0.5, 0.6, 0.7, 0.8]
+    threshold_class_grid = [0.1, 0.2, 0.3]
+    window_grid = [30, 45, 60, 80]
     
     # Load daily probability CSV
     input_csv_path = Path(input_csv_path)
     df_daily_probs = pd.read_csv(input_csv_path)
     
-    # Generate default output CSV path if not provided
-    if output_csv_path is None:
-        output_csv_path = Path(PREDICTIONS_FOLDER) / "real_data_predictions" / f"{input_csv_path.stem}_daily_predictions.csv"
+    # Define output base folder
+    if output_folder is None:
+        output_folder = Path(PREDICTIONS_FOLDER) / "real_data_predictions"
     else:
-        output_csv_path = Path(output_csv_path)
+        output_folder = Path(output_folder)
+        
+    output_image_folder = Path(PLOT_FOLDER) / "TS_predictions"
     
     # Detect and normalize the time column to 'date'
     if 'date' in df_daily_probs.columns:
@@ -204,117 +194,158 @@ def ts_predict_days(input_csv_path, output_csv_path=None,
 
     # Identify class probability columns (exclude 'date' and 'Normal')
     classes = [c for c in df_daily_probs.columns if c not in ['date', 'Normal']]
-    predictions = []
 
     # Last valid index for prediction
     last_day_index = len(df_daily_probs) - 1
 
     # Iterate over rolling window
     print("\n" + "-" * 70)
-    print(f"Performing predictions on daily probabilities for {input_csv_path}..."
-          f"\n\tthreshold_start={threshold_start}, threshold_target={threshold_target}, "
-          f"\n\tthreshold_class={threshold_class}, window={window}...")
+    print(f"Performing predictions on daily probabilities for {input_csv_path}...")
     print("-" * 70)
-    for i in range(window, len(df_daily_probs)):
-        current_day = df_daily_probs.at[i, 'date']
-        past_window = df_daily_probs.iloc[i - window:i]
+    
+    all_results = []
+    
+    # GRID SEARCH
+    for threshold_start, threshold_target, threshold_class, window in itertools.product(
+        threshold_start_grid,
+        threshold_target_grid,
+        threshold_class_grid,
+        window_grid
+    ):
+        print(f"\nthreshold_start={threshold_start}, threshold_target={threshold_target}, threshold_class={threshold_class},  window={window}")
+        
+        predictions = []
+        
+        # Skip invalid window cases
+        if window >= len(df_daily_probs):
+            print("Window larger than dataset. Skipping.")
+            continue
+        
+        # Rolling window loop
+        for i in range(window, len(df_daily_probs)):
+            current_day = df_daily_probs.at[i, "date"]
+            past_window = df_daily_probs.iloc[i - window : i]
 
-        # Iterate over each class
-        for cls in classes:
-            current_prob = df_daily_probs.at[i, cls]
+            for cls in classes:
+                current_prob = df_daily_probs.at[i, cls]
 
-            # Skip regression if current probability is below start threshold
-            if current_prob < threshold_start:
-                continue
+                if current_prob < threshold_start:
+                    continue
 
-            # Fit linear regression
-            X = np.arange(window).reshape(-1, 1)
-            y = past_window[cls].values
-            model = LinearRegression().fit(X, y)
-            slope = model.coef_[0]
-            intercept = model.intercept_
+                # Fit regression
+                X = np.arange(window).reshape(-1, 1)
+                y = past_window[cls].values
+                model = LinearRegression().fit(X, y)
+                slope = model.coef_[0]
+                intercept = model.intercept_
 
-            # Skip if no upward trend
-            if slope <= 0:
-                continue
+                if slope <= 0:
+                    continue
 
-            # Predict day when target probability is reached
-            day_to_target = (threshold_target - intercept) / slope
-            relative_days = int(round(day_to_target - (window - 1)))
-            predicted_index = i + relative_days
+                # Predict day where probability hits threshold_target
+                day_to_target = (threshold_target - intercept) / slope
+                relative_days = int(round(day_to_target - (window - 1)))
+                predicted_index = i + relative_days
 
-            # Skip if prediction is invalid or in the past
-            if relative_days <= 0 or predicted_index > last_day_index:
-                continue
-            
-            # Get predicted date and actual class at that date
-            predicted_date = df_daily_probs.at[predicted_index, 'date']
-            actual_probs = df_daily_probs.iloc[predicted_index].drop('date')
+                if relative_days <= 0 or predicted_index > last_day_index:
+                    continue
 
-            # Determine actual class at predicted day using threshold-based tie-breaking rule
-            sorted_probs = actual_probs.sort_values(ascending=False)
-            top_class = sorted_probs.index[0]
-            top_prob = sorted_probs.iloc[0]
+                predicted_date = df_daily_probs.at[predicted_index, "date"]
 
-            # Apply tie-breaking if second-highest class is close
-            if len(sorted_probs) > 1:
-                second_class = sorted_probs.index[1]
-                second_prob = sorted_probs.iloc[1]
+                actual_probs = df_daily_probs.iloc[predicted_index].drop("date")
+                sorted_probs = actual_probs.sort_values(ascending=False)
 
-                if (top_prob - second_prob) <= threshold_class and second_class == cls:
-                    actual_class = cls
+                top_class = sorted_probs.index[0]
+                top_prob = sorted_probs.iloc[0]
+
+                if len(sorted_probs) > 1:
+                    second_class = sorted_probs.index[1]
+                    second_prob = sorted_probs.iloc[1]
+
+                    if (top_prob - second_prob) <= threshold_class and second_class == cls:
+                        actual_class = cls
+                    else:
+                        actual_class = top_class
                 else:
                     actual_class = top_class
-                    
-            else:
-                actual_class = top_class
 
-            # Skip trivial predictions (less than 1 day)
-            if relative_days <= 1:
-                continue
-            
-            # Append prediction
-            predictions.append({
-                'date': current_day,
-                'class': cls,
-                'predicted_days_to_0.8': relative_days,
-                'predicted_date': predicted_date,
-                'actual_class_at_predicted_day': actual_class,
-                'slope': slope,
-                'intercept': intercept
-            })
+                if relative_days <= 1:
+                    continue
 
-    # Export predictions
-    if not predictions:
-        print("No valid predictions were generated.\n")
-        return pd.DataFrame(columns=[
-            'date', 'class', 'predicted_days_to_0.8', 'predicted_date',
-            'actual_class_at_predicted_day', 'slope', 'intercept'
-        ])
+                predictions.append({
+                    "date": current_day,
+                    "class": cls,
+                    "predicted_days_to_target": relative_days,
+                    "predicted_date": predicted_date,
+                    "actual_class_at_predicted_day": actual_class,
+                    "slope": slope,
+                    "intercept": intercept,
+                    "threshold_start": threshold_start,
+                    "threshold_target": threshold_target,
+                    "threshold_class": threshold_class,
+                    "window": window
+                })
 
-    # Create DataFrame from predictions
-    df_predictions = pd.DataFrame(predictions)
-    df_predictions.sort_values(by=['date', 'class'], inplace=True)
+        if not predictions:
+            print("No valid predictions. Skipping this configuration.")
+            continue
 
-    # Save predictions to CSV
-    df_predictions.to_csv(output_csv_path, index=False)
-    print(f"Predictions exported to: {output_csv_path}")
-    
-    # Print success rate
-    if not df_predictions.empty:
-        correct_preds = (df_predictions['class'] == df_predictions['actual_class_at_predicted_day']).sum()
+        df_predictions = pd.DataFrame(predictions)
+        df_predictions.sort_values(by=['date', 'class'], inplace=True)
+
+        correct_preds = (df_predictions["class"] == df_predictions["actual_class_at_predicted_day"]).sum()
         total_preds = len(df_predictions)
         success_pct = correct_preds / total_preds * 100
-        print(f"\tPrediction success: {correct_preds}/{total_preds} ({success_pct:.2f}%)\n")
 
-    # Plot predictions
-    output_image_prob = Path(PLOT_FOLDER) / "TS_predictions" / f"{input_csv_path.stem}_predictions_cleveland.png"
-    plot_predictions_cleveland(df_predictions, output_image_prob)
+        print(f"Accuracy = {success_pct:.2f}%    ({correct_preds}/{total_preds})")
+
+        # Only save results if accuracy >= 75%
+        if success_pct < accuracy_threshold:
+            print("Accuracy below threshold. Results not saved.")
+            continue
+
+        # Build file names with parameter values
+        param_suffix = (
+            f"ts_{threshold_start}_tt_{threshold_target}_tc_{threshold_class}_w_{window}_cp_{correct_preds}_acc_{int(success_pct)}"
+        )
+
+        output_csv = output_folder / f"{input_csv_path.stem}_predictions_{param_suffix}.csv"
+        output_png = output_image_folder / f"{input_csv_path.stem}_predictions_{param_suffix}.png"
+
+        df_predictions.to_csv(output_csv, index=False)
+        print(f"Predictions exported to: {output_csv}")
+
+        # Generate plot
+        plot_predictions_cleveland(df_predictions, output_png)
+        
+        successful_preds = df_predictions[df_predictions["class"] == df_predictions["actual_class_at_predicted_day"]]
+        mean_days_successful = successful_preds["predicted_days_to_target"].mean() if not successful_preds.empty else np.nan
+
+        all_results.append({
+            "threshold_start": threshold_start,
+            "threshold_target": threshold_target,
+            "threshold_class": threshold_class,
+            "window": window,
+            "correct_preds": correct_preds,
+            "accuracy": success_pct,
+            "mean_predicted_days": mean_days_successful
+        })
+        
+    df_all_results = pd.DataFrame(all_results)
+    if df_all_results.empty:
+        print("No configurations met the accuracy threshold. No summary generated.")
+        return
     
-    return df_predictions
+    # Generate Pareto front plot
+    df_pareto = pareto_front(df_all_results)
+    pareto_plot(df_pareto, df_all_results, input_csv_path, output_image_folder)
 
 
-def synthetic_ts_prediction(threshold_start=0.5, threshold_target=0.8, threshold_class=0.2, window=30):
+path = ts_daily_classification("TS_samples/real_data/inverter_Leiria_879.csv")
+ts_predict_days(path, accuracy_threshold=75)
+
+
+def synthetic_ts_prediction(accuracy_threshold=75):
     """
     Applies daily time-series prediction across all probability CSV files
     located inside subfolders ending with '_probabilities'.
@@ -329,7 +360,7 @@ def synthetic_ts_prediction(threshold_start=0.5, threshold_target=0.8, threshold
 
     # Iterate over subfolders that contain probability CSV files
     for subfolder in [f for f in base_folder.iterdir() if f.is_dir() and f.name.endswith('_probabilities') and not f.name.startswith("real_data")]:
-
+        
         subfolder_name = subfolder.name
         print(f"\tProcessing subfolder: {subfolder_name}")
 
@@ -338,14 +369,11 @@ def synthetic_ts_prediction(threshold_start=0.5, threshold_target=0.8, threshold
             print(f"\n\t\tProcessing file: {file_path.name}")
 
             # Define output CSV path for predictions
-            output_csv_path = base_folder / subfolder_name.replace("probabilities", "predictions") / f"{file_path.stem}_daily_predictions.csv"
+            output_folder = base_folder / subfolder_name.replace("probabilities", "predictions")
 
             # Call the single-file prediction function
             ts_predict_days(
                 file_path,
-                output_csv_path=output_csv_path,
-                threshold_start=threshold_start,
-                threshold_target=threshold_target,
-                threshold_class=threshold_class,
-                window=window
+                output_folder=output_folder,
+                accuracy_threshold=accuracy_threshold
             )

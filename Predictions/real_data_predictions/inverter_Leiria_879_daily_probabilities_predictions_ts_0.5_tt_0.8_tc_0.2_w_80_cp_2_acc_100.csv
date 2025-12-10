@@ -1,0 +1,3 @@
+date,class,predicted_days_to_target,predicted_date,actual_class_at_predicted_day,slope,intercept,threshold_start,threshold_target,threshold_class,window
+2025-08-19,Diode Fault,4,2025-08-23,Diode Fault,0.007843839294218237,0.14835832043962965,0.5,0.8,0.2,80
+2025-08-20,Diode Fault,2,2025-08-22,Diode Fault,0.007953026552167133,0.15556588602564814,0.5,0.8,0.2,80
