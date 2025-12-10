@@ -356,7 +356,7 @@ def synthetic_ts_prediction(accuracy_threshold=75):
     print("=" * 70) 
 
     # Base folder where probability subfolders are stored
-    base_folder = Path(PREDICTIONS_FOLDER)
+    base_folder = Path(PREDICTIONS_FOLDER) 
 
     # Iterate over subfolders that contain probability CSV files
     for subfolder in [f for f in base_folder.iterdir() if f.is_dir() and f.name.endswith('_probabilities') and not f.name.startswith("real_data")]:
