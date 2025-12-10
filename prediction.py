@@ -353,7 +353,7 @@ def synthetic_ts_prediction(accuracy_threshold=75):
     
     print("\n" + "=" * 70)
     print("PERFORMING MULTIPLE SYNTHETIC TIME-SERIES DAILY PREDICTIONS...")
-    print("=" * 70) 
+    print("=" * 70)
 
     # Base folder where probability subfolders are stored
     base_folder = Path(PREDICTIONS_FOLDER)
