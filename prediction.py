@@ -161,8 +161,32 @@ def synthetic_ts_daily_classification(all_year=False, winter=False):
 
 def ts_predict_days(input_csv_path, output_folder=None, accuracy_threshold=75):
     """
-???
+    Performs a time-series–based day-ahead prediction of class transitions using
+    rolling-window linear regression over daily class probabilities. The function
+    executes a full grid search across threshold and window parameters, generates
+    predictions of when each class is expected to reach a target probability,
+    validates them against actual future probabilities, computes accuracy, and
+    exports results (CSV and plots) for configurations meeting the minimum accuracy
+    threshold. Also generates a Pareto-front summary of all successful runs.
+
+    Parameters:
+        input_csv_path : str or Path
+            Path to the CSV file containing daily probabilities with a 'date' or
+            'collectTime' column and class-probability columns.
+        output_folder : str or Path, optional
+            Destination folder for exported prediction CSV files. Defaults to a standard
+            predictions directory if omitted.
+        accuracy_threshold : float, optional
+            Minimum accuracy (%) required for exporting a configuration’s results.
+
+    Returns:
+        None
+        
+    Outputs:
+        Prediction CSVs, visualization files, and a Pareto-front summary
+        when successful configurations exist.
     """
+
     
     # Parameter grid
     threshold_start_grid = [0.2, 0.3, 0.4, 0.5]
@@ -339,10 +363,6 @@ def ts_predict_days(input_csv_path, output_folder=None, accuracy_threshold=75):
     # Generate Pareto front plot
     df_pareto = pareto_front(df_all_results)
     pareto_plot(df_pareto, df_all_results, input_csv_path, output_image_folder)
-
-
-path = ts_daily_classification("TS_samples/real_data/inverter_Leiria_879.csv")
-ts_predict_days(path, accuracy_threshold=75)
 
 
 def synthetic_ts_prediction(accuracy_threshold=75):
