@@ -466,10 +466,12 @@ def pareto_front(df, x_col='mean_predicted_days', y_col='accuracy'):
         pd.DataFrame: Points on the Pareto front.
     """
 
+    # Sort DataFrame by x_col in descending order
     df_sorted = df.sort_values(x_col, ascending=False)
     pareto_points = []
     max_y = -np.inf
     
+    # Iterate through sorted DataFrame to find Pareto front points
     for _, row in df_sorted.iterrows():
         if row[y_col] > max_y:
             pareto_points.append(row)
