@@ -40,16 +40,16 @@ def plot_inference_condition_distribution(season_name, state_counts, output_infe
             bar.get_x() + bar.get_width() / 2,  # X-position: center of the bar
             height + 1,  # Y-position: slightly above the bar
             f"{int(count)}",  # Text: integer count
-            ha='center', va='bottom', color='black', fontsize=10
+            ha='center', va='bottom', color='black', fontsize=12
         )
 
     # Axis labels and title
-    ax.set_xlabel('Label', color='black')
-    ax.set_ylabel('Number of Entries', color='black')
+    ax.set_xlabel('Label', color='black', fontsize=13)
+    ax.set_ylabel('Number of Entries', color='black', fontsize=13)
     #ax.set_title(f"Predicted Condition Distribution, {season_name}", color='black')
 
     # Customize tick labels color and rotation
-    plt.xticks(rotation=0, ha='center', color='black', fontsize=8)
+    plt.xticks(rotation=0, ha='center', color='black', fontsize=12)
     plt.yticks(color='black', fontsize=8)
 
     # Add horizontal grid lines (gray, dashed)
@@ -104,12 +104,12 @@ def plot_inference_condition_probabilities(df, season_name_file, output_folder, 
                 bar.get_x() + bar.get_width() / 2,
                 prob + 2, # Position label slightly above the bar
                 f"{prob:.1f}",
-                ha='center', va='bottom', color='black', fontsize=9
+                ha='center', va='bottom', color='black', fontsize=12
             )
 
         # Set axis labels
-        ax.set_xlabel('Condition Type', color='black')
-        ax.set_ylabel('Probability (%)', color='black')
+        ax.set_xlabel('Label', color='black', fontsize=13)
+        ax.set_ylabel('Probability (%)', color='black', fontsize=13)
         
         # Extract inverter location and number from ID for the title
         id = row['ID'].split('_')
@@ -121,8 +121,8 @@ def plot_inference_condition_probabilities(df, season_name_file, output_folder, 
         ax.set_ylim(0, 100)
 
         # Configure tick labels
-        plt.xticks(rotation=0, ha='center', color='black', fontsize=8)
-        plt.yticks(color='black', fontsize=8)
+        plt.xticks(rotation=0, ha='center', color='black', fontsize=12)
+        plt.yticks(color='black', fontsize=12)
 
         # Add horizontal grid lines for easier probability comparison
         ax.grid(True, color='gray', linestyle='--', linewidth=0.5, axis='y')
@@ -139,4 +139,4 @@ def plot_inference_condition_probabilities(df, season_name_file, output_folder, 
         plt.close()
         
         # Confirmation message
-        print(f"Saved Inference Probabilities plot for {row['ID']}, {row['date']}\n\tat {save_path}\n")
+        print(f"Saved Inference Probabilities plot for {row['ID']}, {row['date']}\nat {save_path}\n")

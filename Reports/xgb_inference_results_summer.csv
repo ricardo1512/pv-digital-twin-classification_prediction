@@ -1,8 +1,8 @@
 Predicted Condition,Count
-Normal,77
-Soiling,27
+Normal,126
+Soiling,8
 Shading,6
 Cracks,0
-Ground Fault,0
+Ground Fault,2
 Arc Fault,0
-Diode Fault,0
+Diode Fault,22
