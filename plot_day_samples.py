@@ -137,7 +137,7 @@ def plot_currents(df_original, date, condition_title, output_folder, filename, s
     plt.yticks(color='black', fontsize=8)
 
     # Label axes and set tick colors
-    ax1.set_xlabel("Date")
+    ax1.set_xlabel("Time")
     ax1.set_ylabel("Current (A)", color=color_curr)
     ax1.tick_params(axis='x', colors='black', labelsize=8)
     ax1.tick_params(axis='y', labelcolor=color_curr, labelsize=8)
