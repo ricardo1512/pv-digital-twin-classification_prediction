@@ -186,7 +186,6 @@ def ts_predict_days(input_csv_path, output_folder=None, accuracy_threshold=75):
         Prediction CSVs, visualization files, and a Pareto-front summary
         when successful configurations exist.
     """
-
     
     # Parameter grid
     threshold_start_grid = [0.2, 0.3, 0.4, 0.5]
