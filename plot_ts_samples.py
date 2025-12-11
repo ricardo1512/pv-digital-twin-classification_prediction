@@ -45,7 +45,7 @@ def plot_voltage_ts(ts, local, output_folder, filename, condition_title,):
     line2, = ax.plot(ts.index, ts['pv1_u'], label='Effective pv1_u', color=color_volt, linewidth=1)
 
     # Configure Axis Labels and Ticks
-    ax.set_xlabel("Time")
+    ax.set_xlabel("Date")
     ax.set_ylabel("Daily Mean Voltage (V)", color=color_volt)
     plt.xticks(rotation=0, ha='center', color='black', fontsize=8)
     plt.yticks(color='black', fontsize=8)
