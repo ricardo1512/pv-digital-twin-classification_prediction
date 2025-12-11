@@ -26,7 +26,7 @@ def plot_confusion_matrix_combined(set_name, season_name, y_true, y_pred, image_
 
     Notes:
         - Each cell shows both count and percentage (Count\n(Percentage%)).
-        - Heatmap uses a white/grey/black colormap, with values ranging from 0% to 100%.
+        - Heatmap uses a Blues colormap.
         - The plot is saved as a high-resolution PNG in the specified folder.
     """
     
@@ -59,35 +59,36 @@ def plot_confusion_matrix_combined(set_name, season_name, y_true, y_pred, image_
         cm_percentage,          # 2D array or DataFrame to visualize as a heatmap
         annot=annotations,      # Custom text annotations inside each cell (showing Count and Percentage)
         fmt='',                 # Format string for annotations
-        cmap=cmap,              # Custom colormap defining color gradient (black → gray → white)
+        cmap=cmap,              # Custom colormap defining color gradient
         xticklabels=classes,    # Labels for the x-axis (Predicted classes)
         yticklabels=classes,    # Labels for the x-axis (Predicted classes)
         cbar=True,              # Display the grayscale bar showing mapping between intensity and percentage values
-        vmin=0,                 # Minimum value for color scale (0% → black)
-        vmax=100,               # Maximum value for color scale (100% → white)
+        vmin=0,                 # Minimum value for color scale)
+        vmax=100,               # Maximum value for color scale 
         linewidths=0.2,         # Width of the grid lines separating cells
         linecolor='black',      # Color of the grid lines separating cells
-        ax=ax                   # Matplotlib Axes object to draw the heatmap on (ensures full control over styling)
+        ax=ax,                  # Matplotlib Axes object to draw the heatmap on (ensures full control over styling)
+        annot_kws={"size": 12}  # Font size for annotations
     )
 
     # Customize the scale bar appearance
     cbar = ax.collections[0].colorbar
     # Set color of tick marks and numeric labels
-    cbar.ax.yaxis.set_tick_params(color='black', labelcolor='black')
+    cbar.ax.yaxis.set_tick_params(labelsize=12, color='black', labelcolor='black')
     # Set the color and label text of the colorbar border
     cbar.outline.set_edgecolor('black')
     # Add label text to the colorbar 
-    cbar.set_label('Percentage (%)', color='black')  # label da colorbar
+    cbar.set_label('Percentage (%)', color='black', fontsize=13)  # label da colorbar
 
     # Set plot title and axis labels
     # ax.set_title(f'Confusion Matrix, {season_name}, {set_name} Set\n(Values: Count over Percentage)',
-    #              color='white', fontsize=14)
-    ax.set_ylabel('True Label', color='black')
-    ax.set_xlabel('Predicted Label', color='black')
+    #              color='black', fontsize=14)
+    ax.set_ylabel('True Label', color='black', fontsize=13)
+    ax.set_xlabel('Predicted Label', color='black', fontsize=13)
 
     # Tick labels
-    plt.setp(ax.get_xticklabels(), fontsize=8, rotation=0, ha='center')
-    plt.setp(ax.get_yticklabels(), fontsize=8, rotation=90)
+    plt.setp(ax.get_xticklabels(), fontsize=12, rotation=0, ha='center')
+    plt.setp(ax.get_yticklabels(), fontsize=12, rotation=90)
     ax.tick_params(axis='x', colors='black')
     ax.tick_params(axis='y', colors='black')
 
@@ -138,20 +139,20 @@ def plot_class_accuracy(class_acc, classes, title, output_file):
     for bar, acc in zip(bars, class_acc):
         height = bar.get_height()
         ax.text(bar.get_x() + bar.get_width() / 2, height + 1, f"{acc:.1f}%",
-                ha='center', va='bottom', color='black', fontsize=10)
+                ha='center', va='bottom', color='black', fontsize=12)
 
     # Calculate mean accuracy and plot a horizontal dashed line
     mean_acc = np.mean(class_acc)
     ax.axhline(mean_acc, color='red', linestyle='--', linewidth=1.2, label=f"Mean accuracy = {mean_acc:.1f}%")
 
     # Set axis labels and title
-    ax.set_xlabel('Label', color='black')
-    ax.set_ylabel('Accuracy (%)', color='black')
+    ax.set_xlabel('Label', color='black', fontsize=12)
+    ax.set_ylabel('Accuracy (%)', color='black', fontsize=12)
     # ax.set_title(title, color='black')
 
     # Customize tick labels
-    plt.setp(ax.get_xticklabels(), fontsize=8, rotation=0, ha='center')
-    plt.setp(ax.get_yticklabels(), fontsize=8, rotation=0)
+    plt.setp(ax.get_xticklabels(), fontsize=12, rotation=0, ha='center')
+    plt.setp(ax.get_yticklabels(), fontsize=12, rotation=0)
     ax.tick_params(axis='x', colors='black')
     ax.tick_params(axis='y', colors='black')
 
@@ -159,7 +160,7 @@ def plot_class_accuracy(class_acc, classes, title, output_file):
     ax.grid(True, color='gray', linestyle='--', linewidth=0.5, axis='y')
 
     # Add legend with automatic positioning
-    legend = ax.legend(fontsize=10, loc='best')
+    legend = ax.legend(fontsize=12, loc='best')
 
     # Adjust layout to avoid overlapping elements
     plt.tight_layout()
@@ -203,13 +204,13 @@ def plot_feature_importance(top_features, season_name, image_file):
 
     # Set title and axis labels
     # ax.set_title(f"Top {TOP_FEATURES} Most Important Features, {season_name}",
-    #              color='white', fontsize=14)
-    ax.set_xlabel('Importance', color='black', fontsize=12)
-    ax.set_ylabel('Features', color='black', fontsize=12)
+    #              color='black', fontsize=14)
+    ax.set_xlabel('Importance', color='black', fontsize=13)
+    ax.set_ylabel('Features', color='black', fontsize=13)
     
     # Configure tick labels
-    plt.xticks(rotation=0, ha='center', color='black', fontsize=8)
-    plt.yticks(color='white', fontsize=10)
+    plt.xticks(rotation=0, ha='center', color='black', fontsize=12)
+    plt.yticks(color='black', fontsize=11)
 
     # Customize tick colors
     ax.tick_params(axis='x', colors='black')
@@ -266,17 +267,17 @@ def plot_auc_recall_vs_precision(y_true, y_scores, class_names, output_file):
                 label=f"{class_names[i]} (AUC={auc_score:.2f})")
 
     # Set labels, title, limits, grid, and legend
-    ax.set_xlabel('Recall', color='black')
-    ax.set_ylabel('Precision', color='black')
-    # ax.set_title('Recall vs Precision Curve Per Class', color='white', fontsize=14)
+    ax.set_xlabel('Recall', color='black', fontsize=13)
+    ax.set_ylabel('Precision', color='black', fontsize=13)
+    # ax.set_title('Recall vs Precision Curve Per Class', color='black', fontsize=14)
     ax.tick_params(axis='x', colors='black')
     ax.tick_params(axis='y', colors='black')
     ax.set_xlim(1, 0)
     ax.set_ylim(0, 1.005)
-    plt.xticks(rotation=0, ha='center', color='black', fontsize=8)
-    plt.yticks(color='black', fontsize=8)
+    plt.xticks(rotation=0, ha='center', color='black', fontsize=12)
+    plt.yticks(color='black', fontsize=12)
     ax.grid(True, linestyle='--', color='gray', alpha=0.5)
-    ax.legend(fontsize=10, loc='lower right')
+    ax.legend(fontsize=12, loc='lower right')
 
     # Adjust layout and save figure
     plt.tight_layout()
@@ -328,14 +329,14 @@ def plot_fp_tp_curve(y_true, y_scores, class_names, output_file):
     ax.plot([0, 1], [0, 1], 'w--', lw=1, label='Random Guess')
     ax.set_xlim([0.0, 1.0])
     ax.set_ylim([0.0, 1.005])
-    plt.xticks(rotation=0, ha='center', color='black', fontsize=8)
-    plt.yticks(color='black', fontsize=8)
-    ax.set_xlabel('False Positive Rate (FP)', color='black', fontsize=12)
-    ax.set_ylabel('True Positive Rate (TP)', color='black', fontsize=12)
-    # ax.set_title('True Positive vs False Positive Per Class', color='white', fontsize=14)
+    plt.xticks(rotation=0, ha='center', color='black', fontsize=12)
+    plt.yticks(color='black', fontsize=12)
+    ax.set_xlabel('False Positive Rate (FP)', color='black', fontsize=13)
+    ax.set_ylabel('True Positive Rate (TP)', color='black', fontsize=13)
+    # ax.set_title('True Positive vs False Positive Per Class', color='black', fontsize=14)
     ax.tick_params(axis='x', colors='black')
     ax.tick_params(axis='y', colors='black')
-    ax.legend(fontsize=10)
+    ax.legend(fontsize=12, loc='lower right')
     ax.grid(True, linestyle='--', color='gray', alpha=0.5)
 
     # Save and close
@@ -372,14 +373,14 @@ def plot_class_accuracy_ci(class_acc, ci_lower, ci_upper, classes, title, output
     # Compute CI ranges
     ci_diff = np.array(ci_upper) - np.array(ci_lower)
 
-    # Plot bars with white error bars (CI)
+    # Plot bars with error bars (CI)
     bars = ax.bar(
         class_labels,
         class_acc,
         color=colors,
         yerr=[class_acc - ci_lower, ci_upper - class_acc],
         capsize=5,
-        ecolor='black'  # black error bars
+        ecolor='black',
     )
     
     # Add text showing CI width above bars
@@ -392,17 +393,17 @@ def plot_class_accuracy_ci(class_acc, ci_lower, ci_upper, classes, title, output
             diff_text,
             ha='center',
             va='bottom',
-            fontsize=8,
+            fontsize=12,
             color='black',
         )
 
     # Labels, grid, and theme ticks
-    ax.set_xlabel('Label', color='black')
-    ax.set_ylabel('Accuracy (%)', color='black')
+    ax.set_xlabel('Label', color='black', fontsize=13)
+    ax.set_ylabel('Accuracy (%)', color='black', fontsize=13)
     # ax.set_title(title, color='black')
     ax.grid(True, color='gray', linestyle='--', linewidth=0.5, axis='y')
-    plt.setp(ax.get_xticklabels(), fontsize=8, rotation=0, ha='center')
-    plt.setp(ax.get_yticklabels(), fontsize=8, rotation=0)
+    plt.setp(ax.get_xticklabels(), fontsize=12, rotation=0, ha='center')
+    plt.setp(ax.get_yticklabels(), fontsize=12, rotation=0)
     ax.tick_params(axis='x', colors='black')
     ax.tick_params(axis='y', colors='black')
     
