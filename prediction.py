@@ -180,7 +180,7 @@ def ts_predict_days(input_csv_path, output_folder=None, accuracy_threshold=75):
             Minimum accuracy (%) required for exporting a configuration’s results.
 
     Returns:
-        None 
+        None
         
     Outputs:
         Prediction CSVs, visualization files, and a Pareto-front summary
