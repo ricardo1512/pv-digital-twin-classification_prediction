@@ -84,7 +84,7 @@ def plot_inference_condition_probabilities(df, season_name_file, output_folder, 
     """
 
     # Iterate through each row to create an individual plot per inverter entry
-    for _, row in df.iterrows():
+    for _, row in df.iterrows(): 
         # Create figure and axes
         fig, ax = plt.subplots(figsize=(8, 5))
 
