@@ -1,4 +1,4 @@
-import argparse 
+import argparse
 
 # Classification
 from create_day_samples import *
